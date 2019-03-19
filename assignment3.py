@@ -1,5 +1,5 @@
-#   Author:         Brandon Edelman
-#   Major:          Information Technology
+#   Author:         Corey Manship
+#   Major:          IT
 #   Creation Date:  February 17th 2019
 #   Due Date:       February 22nd 2019
 #   Course:         CSC223 020
