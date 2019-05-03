@@ -108,7 +108,13 @@ $(document).ready(function() {
         cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
         newRow.append(cols);
         $("table.order-list").append(newRow);
-		document.getElementById(packageNum.id).focus();
+
+        var empTable = document.getElementById("myTable");
+        var trArray = empTable.rows;
+        var lastTrElem = trArray[trArray.length - 2];
+        var lastTdElem = lastTrElem.firstChild;
+        var inputElem = lastTdElem.firstChild;
+        inputElem.focus();
     });
 
     $("table.order-list").on("click", ".ibtnDel", function (event) {
