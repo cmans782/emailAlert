@@ -2,7 +2,7 @@ from mailalert import app
 
 # testing for Taylor GitKraken
 # more testing
-# sdlkjdslkjsdflkjdsf
+# this works
 
 if __name__ == '__main__':
     app.run(debug=True)
