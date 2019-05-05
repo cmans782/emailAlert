@@ -2,7 +2,6 @@
 {%block content %}
 <!DOCTYPE html>
 <head>
-    <!--Comment-->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
@@ -80,18 +79,18 @@ $(document).ready(function() {
                 cols += '<td><input type="text" class="form-control" name="roomNum"/></td>';
                 cols += '<td><input type="text" class="form-control" name="numberOfPackages"/></td>';
                 cols += '<td><input type="text" class="form-control" name="description id="newDescription"/></td>';
-
+				
                 cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger" id="delete" value="Delete"></td>';
                 newRow.append(cols);
                 $("table.order-list").append(newRow);
-
+				
                 var empTable = document.getElementById("myTable");
                 var trArray = empTable.rows;
                 var lastTrElem = trArray[trArray.length - 2];
                 var lastTdElem = lastTrElem.firstChild;
                 var inputElem = lastTdElem.firstChild;
 				inputElem.focus();
-
+				
             }
     });
 
@@ -109,17 +108,11 @@ $(document).ready(function() {
         cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
         newRow.append(cols);
         $("table.order-list").append(newRow);
-
-        var empTable = document.getElementById("myTable");
-        var trArray = empTable.rows;
-        var lastTrElem = trArray[trArray.length - 2];
-        var lastTdElem = lastTrElem.firstChild;
-        var inputElem = lastTdElem.firstChild;
-        inputElem.focus();
+		document.getElementById(packageNum.id).focus();
     });
 
     $("table.order-list").on("click", ".ibtnDel", function (event) {
-        $(this).closest("tr").remove();
+        $(this).closest("tr").remove();       
         counter -= 1
     });
 
@@ -128,5 +121,18 @@ $(document).ready(function() {
 });
 
 
+
+// function calculateRow(row) {
+//     var price = +row.find('input[name^="price"]').val();
+
+// }
+
+// function calculateGrandTotal() {
+//     var grandTotal = 0;
+//     $("table.order-list").find('input[name^="price"]').each(function () {
+//         grandTotal += +$(this).val();
+//     });
+//     $("#grandtotal").text(grandTotal.toFixed(2));
+// }
 </script>
 {% endblock %}
