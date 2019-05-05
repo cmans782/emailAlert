@@ -26,6 +26,7 @@
 				}
 			});
 		});
+
 	</script>
 </head>
 
@@ -70,7 +71,8 @@
 					<td><span class="custom-checkbox">
 							<input type="checkbox" id="checkbox1" name="users" value="1">
 							<label for="checkbox1"></label>
-						</span></td>
+						</span>
+					</td>
 					<td>{{ employee.username }}</td>
 					<td>{{ employee.fname }}</td>
 					<td>{{ employee.lname }}</td>
@@ -96,42 +98,42 @@
 										{{ form.username.label(class="form-control-label") }}
 
 										{% if form.username.errors %}
-											{{ form.username(class="form-control form-control-md is-invalid") }}
-											<div class="invalid-feedback">
-												{% for error in form.username.errors %}
-													<span>{{ error }}</span>
-												{% endfor %}
-											</div>
+										{{ form.username(class="form-control form-control-md is-invalid") }}
+										<div class="invalid-feedback">
+											{% for error in form.username.errors %}
+											<span>{{ error }}</span>
+											{% endfor %}
+										</div>
 										{% else %}
-											{{ form.username(class="form-control form-control-md") }}
+										{{ form.username(class="form-control form-control-md") }}
 										{% endif %}
 									</div>
 									<div class="form-group">
 										{{ form.firstName.label(class="form-control-label") }}
 
 										{% if form.firstName.errors %}
-											{{ form.firstName(class="form-control form-control-md is-invalid") }}
-											<div class="invalid-feedback">
-												{% for error in form.firstName.errors %}
-													<span>{{ error }}</span>
-												{% endfor %}
-											</div>
+										{{ form.firstName(class="form-control form-control-md is-invalid") }}
+										<div class="invalid-feedback">
+											{% for error in form.firstName.errors %}
+											<span>{{ error }}</span>
+											{% endfor %}
+										</div>
 										{% else %}
-											{{ form.firstName(class="form-control form-control-md") }}
+										{{ form.firstName(class="form-control form-control-md") }}
 										{% endif %}
 									</div>
 									<div class="form-group">
 										{{ form.lastName.label(class="form-control-label") }}
 
 										{% if form.lastName.errors %}
-											{{ form.lastName(class="form-control form-control-md is-invalid") }}
-											<div class="invalid-feedback">
-												{% for error in form.lastName.errors %}
-													<span>{{ error }}</span>
-												{% endfor %}
-											</div>
+										{{ form.lastName(class="form-control form-control-md is-invalid") }}
+										<div class="invalid-feedback">
+											{% for error in form.lastName.errors %}
+											<span>{{ error }}</span>
+											{% endfor %}
+										</div>
 										{% else %}
-											{{ form.lastName(class="form-control form-control-md") }}
+										{{ form.lastName(class="form-control form-control-md") }}
 										{% endif %}
 									</div>
 									<div class="form-group">
@@ -142,28 +144,37 @@
 										{{ form.password.label(class="form-control-label") }}
 
 										{% if form.password.errors %}
-											{{ form.password(class="form-control form-control-md is-invalid") }}
-											<div class="invalid-feedback">
-												{% for error in form.password.errors %}
-													<span>{{ error }}</span>
-												{% endfor %}
-											</div>
+										{{ form.password(class="form-control form-control-md is-invalid") }}
+										<div class="invalid-feedback">
+											{% for error in form.password.errors %}
+											<span>{{ error }}</span>
+											{% endfor %}
+										</div>
 										{% else %}
-											{{ form.password(class="form-control form-control-md") }}
+										{{ form.password(class="form-control form-control-md") }}
 										{% endif %}
 									</div>
 									<div class="form-group">
 										{{ form.confirm_password.label(class="form-control-label") }}
 
 										{% if form.confirm_password.errors %}
-											{{ form.confirm_password(class="form-control form-control-md is-invalid") }}
-											<div class="invalid-feedback">
-												{% for error in form.confirm_password.errors %}
-													<span>{{ error }}</span>
-												{% endfor %}
-											</div>
+										{{ form.confirm_password(class="form-control form-control-md is-invalid") }}
+										<div class="invalid-feedback">
+											{% for error in form.confirm_password.errors %}
+											<span>{{ error }}</span>
+											{% endfor %}
+										</div>
+
+										<!-- if passwords don't match, retry -->
+										<script type="text/javascript">
+											$(window).on('load', function () {
+												$('#addEmployeeModal').modal('show');
+											});
+
+										</script>
+
 										{% else %}
-											{{ form.confirm_password(class="form-control form-control-md") }}
+										{{ form.confirm_password(class="form-control form-control-md") }}
 										{% endif %}
 									</div>
 								</div>
@@ -176,6 +187,8 @@
 				</div>
 			</fieldset>
 		</form>
+
+
 		<!-- Edit Modal HTML -->
 		<div id="editEmployeeModal" class="modal fade">
 			<div class="modal-dialog">
@@ -211,6 +224,8 @@
 				</div>
 			</div>
 		</div>
+
+
 		<!-- Delete Modal HTML -->
 		<div id="deleteEmployeeModal" class="modal fade">
 			<div class="modal-dialog">
@@ -222,7 +237,7 @@
 						</div>
 						<div class="modal-body">
 							<p>Are you sure you want to delete these Records?</p>
-							<p class="text-warning"><small>This action cannot be undone.</small></p>
+							<p class="text-danger"><small>This action cannot be undone.</small></p>
 						</div>
 						<div class="modal-footer">
 							<input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">

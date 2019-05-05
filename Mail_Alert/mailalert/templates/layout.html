@@ -30,9 +30,9 @@
     crossorigin="anonymous"></script>
 
   {% if title %}
-    <title>Mail Alert - {{ title }}</title>
+  <title>Mail Alert - {{ title }}</title>
   {% else %}
-    <title>Mail Alert</title>
+  <title>Mail Alert</title>
   {% endif %}
 </head>
 
@@ -48,7 +48,7 @@
       <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item active">
-            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+            <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
           </li>
 
           <li class="nav-item dropdown">
@@ -80,7 +80,7 @@
               Account
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-              <a class="dropdown-item" href="/employee">Account Settings</a>
+              <a class="dropdown-item" href="/management">Account Settings</a>
               <a class="dropdown-item" href="/logout">Logout</a>
             </div>
           </li>
@@ -92,13 +92,13 @@
     <div class="row">
       <div class="col-md-10">
         {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="alert alert-{{ category }}">
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">
+          {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
         {% block content %}{% endblock %}
       </div>
