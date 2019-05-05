@@ -1,0 +1,130 @@
+{% extends "layout.html" %}
+{%block content %}
+<!DOCTYPE html>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<!------ Include the above in your HEAD tag ---------->
+
+<div class="container" style="text-align:center">
+    <table id="myTable" class=" table order-list">
+    <thead>
+        <tr align="center">
+            <td>Package Number</td>
+            <td>First Name</td>
+            <td>Last Name</td>
+            <td>Room #</td>
+            <td># of Packages</td>
+            <td>Description</td>
+			<td></td><!--Blank for styling-->
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="col-sm-1">
+                <input type="text" name="packageNum" class="form-control" />
+            </td>
+            <td class="col-sm-2">
+                <input type="mail" name="fname" class="form-control"/>
+            </td>
+            <td class="col-sm-2">
+                <input type="text" name="lname" class="form-control"/>
+            </td>
+            <td class="col-sm-1">
+                <input type ="text" name="roomNum" class="form-control"/>
+            </td>
+            <td class="col-sm-1">
+                <input type ="text" name="numberOfPackages" class="form-control"/>
+            </td>
+            <td class="col-sm-4">
+                <input type ="text" name="descrption" id="description" class="form-control"/>
+            </td>
+            <td class="col-sm-2"><a class="deleteRow"></a>
+
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="5" style="text-align: left;">
+                <input type="button" class="btn btn-lg btn-block " id="addrow" value="Add Row" />
+            </td>
+            <td colspan="1">
+            <button class="btn btn-success" type="submit">Submit</button>
+            </td>
+			<td></td><!--Blank for styling-->
+        </tr>
+    </tfoot>
+</table>
+</div>
+
+
+<script>
+
+$(document).ready(function() {
+    var counter = 0;
+
+    $("#addrow").on('keyup', function(e) {
+        if(e.which == 9)
+            {
+                var newRow = $("<tr>");
+                var cols = "";
+
+                cols += '<td><input type="text" class="form-control" name="packageNum" id="packageNum"/></td>';
+                cols += '<td><input type="text" class="form-control" name="fname"/></td>';
+                cols += '<td><input type="text" class="form-control" name="lname"/></td>';
+                cols += '<td><input type="text" class="form-control" name="roomNum"/></td>';
+                cols += '<td><input type="text" class="form-control" name="numberOfPackages"/></td>';
+                cols += '<td><input type="text" class="form-control" name="description id="newDescription"/></td>';
+				
+                cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger" id="delete" value="Delete"></td>';
+                newRow.append(cols);
+                $("table.order-list").append(newRow);
+				
+                var empTable = document.getElementById("myTable");
+                var trArray = empTable.rows;
+                var lastTrElem = trArray[trArray.length - 2];
+                var lastTdElem = lastTrElem.firstChild;
+                var inputElem = lastTdElem.firstChild;
+				inputElem.focus();
+				
+            }
+    });
+
+    $("#addrow").on("click", function () {
+        var newRow = $("<tr>");
+        var cols = "";
+
+        cols += '<td><input type="text" class="form-control" name="packageNum" id="packageNum"/></td>';
+        cols += '<td><input type="text" class="form-control" name="fname"/></td>';
+        cols += '<td><input type="text" class="form-control" name="lname"/></td>';
+        cols += '<td><input type="text" class="form-control" name="roomNum"/></td>';
+        cols += '<td><input type="text" class="form-control" name="numberOfPackages"/></td>';
+        cols += '<td><input type="text" class="form-control" name="description"/></td>';
+
+        cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
+        newRow.append(cols);
+        $("table.order-list").append(newRow);
+		
+        var empTable = document.getElementById("myTable");
+        var trArray = empTable.rows;
+        var lastTrElem = trArray[trArray.length - 2];
+        var lastTdElem = lastTrElem.firstChild;
+        var inputElem = lastTdElem.firstChild;
+        inputElem.focus();
+    });
+
+    $("table.order-list").on("click", ".ibtnDel", function (event) {
+        $(this).closest("tr").remove();       
+        counter -= 1
+    });
+
+
+
+});
+
+</script>
+{% endblock %}
