@@ -1,3 +1,4 @@
+ #!/usr/bin/env python3
 from mailalert import app
 
 # testing for Taylor GitKraken
