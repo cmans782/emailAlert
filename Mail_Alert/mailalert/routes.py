@@ -18,7 +18,7 @@ def newPackage():
 
 
 @app.route("/management", methods=['GET', 'POST'])
-@login_required
+#@login_required
 def management():
     form = ManagementForm()
     employees = Employee.query.all()

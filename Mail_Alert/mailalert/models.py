@@ -5,7 +5,7 @@ from flask_login import UserMixin
 def load_user(id):
     return Employee.query.get(int(id))
 
-
+#TEST
 class Employee(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
