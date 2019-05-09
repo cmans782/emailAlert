@@ -2,6 +2,7 @@
 <html>
 
 <head>
+  
   <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -17,6 +18,8 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+
   <!-- Optional JavaScript -->
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
@@ -56,7 +59,7 @@
               aria-haspopup="true" aria-expanded="false">
               Email
             </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
               <a class="dropdown-item" href="/sentEmails">Sent Emails</a>
               <a class="dropdown-item" href="/composeEmail">Compose Email</a>
             </div>
@@ -67,20 +70,20 @@
               aria-haspopup="true" aria-expanded="false">
               Packages
             </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
               <a class="dropdown-item" href="/newPackage">New Packages</a>
               <a class="dropdown-item" href="/newPerishable">New Perishables</a>
-              <a class="dropdown-item" href="/activePackages">Active Packages</a>
+              <a class="dropdown-item" href="/packages">All Packages</a>
               <a class="dropdown-item" href="/pickedPackages">Picked Up Packages</a>
             </div>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown"
               aria-haspopup="true" aria-expanded="false">
-              Account
+              Management
             </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-              <a class="dropdown-item" href="/management">Account Settings</a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+              <a class="dropdown-item" href="/management">Manage Employees</a>
               <a class="dropdown-item" href="/logout">Logout</a>
             </div>
           </li>
@@ -90,7 +93,7 @@
   </header>
   <main role="main" class="container">
     <div class="row">
-      <div class="col-md-10">
+      <div>
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}

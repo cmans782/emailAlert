@@ -31,6 +31,11 @@ def management():
         return redirect(url_for('management'))
     return render_template('management.html', title='Management', form=form, employees=employees)
 
+@app.route("/packages")
+@login_required
+def packages():
+    return render_template('packages.html', title='Packages')
+
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
