@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, flash, redirect, request
+from flask import Flask, render_template, url_for, flash, redirect, request, abort
 from mailalert import app, db, bcrypt
 from mailalert.models import Employee 
 from mailalert.forms import LoginForm, ManagementForm
@@ -18,23 +18,33 @@ def newPackage():
 
 
 @app.route("/management", methods=['GET', 'POST'])
-@login_required
+# @login_required
 def management():
     form = ManagementForm()
     employees = Employee.query.all()
-    if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+    if form.validate_on_submit():  # this will only be true if there is a form.submit in management.html
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')  # generate a password hash for the user that is being created
         dr = Employee(username=form.username.data, fname=form.firstName.data, lname=form.lastName.data, workinghall=form.hall.data, password=hashed_password) 
-        db.session.add(dr)
+        db.session.add(dr)  # creates a new employee object (can be found in models.py) so that we can insert it into our database
         db.session.commit()
         flash(f'Account created for {form.username.data}!', 'success')
         return redirect(url_for('management'))
     return render_template('management.html', title='Management', form=form, employees=employees)
 
-@app.route("/packages")
-@login_required
-def packages():
-    return render_template('packages.html', title='Packages')
+
+@app.route("/management/delete", methods=['POST'])
+# @login_required
+def delete_employee():
+    employee_id_list = request.form.getlist("del_employees")
+    if employee_id_list:  # make sure the user selected at least one employee
+        for employee_id in employee_id_list:
+            employee = Employee.query.get(employee_id)   # get the employee object using its id
+            flash(f'{employee.username} was successfully deleted!', 'success')
+            db.session.delete(employee)
+        db.session.commit()
+    else:
+        flash('No employees were selected!', 'danger')
+    return redirect(url_for('management'))
 
 
 @app.route("/login", methods=['GET', 'POST'])
