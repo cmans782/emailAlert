@@ -16,6 +16,11 @@ def home():
 def newPackage():
     return render_template('newPackage.html', title='New_Package')
 
+@app.route("/packages")
+@login_required
+def packages():
+    return render_template('packages.html', title="Packages")
+
 
 @app.route("/management", methods=['GET', 'POST'])
 # @login_required
