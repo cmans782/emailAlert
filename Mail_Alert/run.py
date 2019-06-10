@@ -1,10 +1,7 @@
  #!/usr/bin/env python3
-from mailalert import app
+from mailalert import create_app
 
-# testing for Taylor GitKraken
-# more testing
-# this works
-# tesing the mster pull
+app = create_app()
 
 if __name__ == '__main__':
     app.run(debug=True)

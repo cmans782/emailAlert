@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "layout_with_navbar.html" %}
 {%block content %}
 
 {% if form.confirm_password.errors %}
@@ -39,7 +39,7 @@
 
 <body>
 	<div class="container">
-		<form action="{{ url_for('delete_employee') }}" method="POST">
+		<form action="{{ url_for('employees.delete_employee') }}" method="POST">
 			<div class="table-wrapper">
 				<div class="table-title">
 					<div class="row">
@@ -67,7 +67,7 @@
 									<label for="selectAll"></label>
 								</span>
 							</th>
-							<th>Username</th>
+							<th>Email</th>
 							<th>First Name</th>
 							<th>Last Name</th>
 							<th>Working Hall</th>
@@ -79,7 +79,7 @@
 						<td><span class="custom-checkbox">
 								<input type="checkbox" name="del_employees" value="{{ employee.id }}" />
 							</span></td>
-						<td>{{ employee.username }}</td>
+						<td>{{ employee.email }}</td>
 						<td>{{ employee.fname }}</td>
 						<td>{{ employee.lname }}</td>
 						<td>{{ employee.workinghall }}</td>
@@ -126,17 +126,17 @@
 							</div>
 							<div class="modal-body">
 								<div class="form-group">
-									{{ form.username.label(class="form-control-label") }}
+									{{ form.email.label(class="form-control-label") }}
 
-									{% if form.username.errors %}
-									{{ form.username(class="form-control form-control-md is-invalid") }}
+									{% if form.email.errors %}
+									{{ form.email(class="form-control form-control-md is-invalid") }}
 									<div class="invalid-feedback">
-										{% for error in form.username.errors %}
+										{% for error in form.email.errors %}
 										<span>{{ error }}</span>
 										{% endfor %}
 									</div>
 									{% else %}
-									{{ form.username(class="form-control form-control-md") }}
+									{{ form.email(class="form-control form-control-md") }}
 									{% endif %}
 								</div>
 								<div class="form-group">
@@ -223,8 +223,8 @@
 								<input type="text" class="form-control" required>
 							</div>
 							<div class="form-group">
-								<label>Username</label>
-								<input type="username" class="form-control" required>
+								<label>email</label>
+								<input type="email" class="form-control" required>
 							</div>
 							<div class="form-group">
 								<label>Address</label>

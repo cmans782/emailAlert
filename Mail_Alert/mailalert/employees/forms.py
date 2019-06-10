@@ -5,12 +5,12 @@ from mailalert.models import Employee
 
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email ', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
 class ManagementForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email ', validators=[DataRequired(), Email()])
     firstName = StringField('First Name', validators=[DataRequired()])
     lastName = StringField('Last Name', validators=[DataRequired()])
     phone = StringField('Phone Number')
@@ -22,7 +22,21 @@ class ManagementForm(FlaskForm):
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Submit')
 
-    def validate_username(self, username):
-        employee = Employee.query.filter_by(username=username.data).first()
+    def validate_email(self, email):
+        employee = Employee.query.filter_by(email=email.data).first()
         if employee:
-            raise ValidationError('username is already in use')
+            raise ValidationError('email is already in use')
+
+class RequestResetForm(FlaskForm):
+    email = StringField('Email ', validators=[DataRequired(), Email()])
+    submit = SubmitField('Request Password Reset')
+
+    def validate_email(self, email):
+        employee = Employee.query.filter_by(email=email.data).first()
+        if employee is None:
+            raise ValidationError('There is no account with that email. Contact your supervisor about account access.')
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Reset Password')
