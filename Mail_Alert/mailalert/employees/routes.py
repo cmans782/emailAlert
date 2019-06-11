@@ -2,7 +2,7 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint
 from flask_login import login_user, current_user, logout_user, login_required
 from mailalert import db, bcrypt
 from mailalert.models import Employee
-from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm
+from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, EditEmployeeForm
 from mailalert.employees.utils import send_reset_email
 
 employees = Blueprint('employees', __name__)
@@ -12,7 +12,7 @@ employees = Blueprint('employees', __name__)
 def management():
     form = ManagementForm()
     employees = Employee.query.all()
-    if form.validate_on_submit():  # this will only be true if there is a form.submit in management.html
+    if form.validate_on_submit():  # this will only be true if ManagementForm fields are all correct
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')  # generate a password hash for the user that is being created
         employee = Employee(email=form.email.data, fname=form.firstName.data, lname=form.lastName.data, workinghall=form.hall.data, password=hashed_password) 
         db.session.add(employee)  # creates a new employee object (can be found in models.py) so that we can insert it into our database
@@ -23,7 +23,7 @@ def management():
 
 
 @employees.route("/management/delete", methods=['POST'])
-# @login_required
+@login_required
 def delete_employee():
     employee_id_list = request.form.getlist("del_employees")
     if employee_id_list:  # make sure the user selected at least one employee
@@ -35,6 +35,20 @@ def delete_employee():
     else:
         flash('No employees were selected!', 'danger')
     return redirect(url_for('employees.management'))
+
+
+# @employees.route("/management/edit", methods=['POST'])
+# @login_required
+# def edit_employee():
+#     form = EditEmployeeForm()
+#     if form.validate_on_submit():
+#         employee = Employee.query.filter_by(email=form.email.data).first()
+#         employee.email = form.email.data
+#         employee.fname = form.firstName.data
+#         employee.lname = form.lastName.data
+#         employee.workinghall = form.hall.data
+#         db.session.commit()
+#     return redirect(url_for('employees.management'))
 
 
 @employees.route("/login", methods=['GET', 'POST'])

@@ -13,7 +13,6 @@ class ManagementForm(FlaskForm):
     email = StringField('Email ', validators=[DataRequired(), Email()])
     firstName = StringField('First Name', validators=[DataRequired()])
     lastName = StringField('Last Name', validators=[DataRequired()])
-    phone = StringField('Phone Number')
     hall = SelectField('Working Hall', choices=[('Dixon North', 'Dixon North'), ('Dixon South', 'Dixon South'), ('Village South', 'Village South'),
                                                 ('University Place', 'University Place'), ('Bonner', 'Bonner'), ('Johnson', 'Johnson'),
                                                 ('Schuylkill', 'Schuylkill'), ('Lehigh', 'Lehigh'), ('Beck', 'Beck'), 
@@ -26,6 +25,22 @@ class ManagementForm(FlaskForm):
         employee = Employee.query.filter_by(email=email.data).first()
         if employee:
             raise ValidationError('email is already in use')
+
+class EditEmployeeForm(FlaskForm):
+    email = StringField('Email ', validators=[DataRequired(), Email()])
+    firstName = StringField('First Name', validators=[DataRequired()])
+    lastName = StringField('Last Name', validators=[DataRequired()])
+    hall = SelectField('Working Hall', choices=[('Dixon North', 'Dixon North'), ('Dixon South', 'Dixon South'), ('Village South', 'Village South'),
+                                                ('University Place', 'University Place'), ('Bonner', 'Bonner'), ('Johnson', 'Johnson'),
+                                                ('Schuylkill', 'Schuylkill'), ('Lehigh', 'Lehigh'), ('Beck', 'Beck'), 
+                                                ('Berks', 'Berks'), ('Deatrick', 'Deatrick'), ('Rothermel', 'Rothermel'), ('Honors', 'Honors')])
+    submit = SubmitField('Submit')
+
+    def validate_email(self, email):
+        employee = Employee.query.filter_by(email=email.data).first()
+        if employee:
+            raise ValidationError('email is already in use')
+
 
 class RequestResetForm(FlaskForm):
     email = StringField('Email ', validators=[DataRequired(), Email()])

@@ -71,25 +71,24 @@
 							<th>First Name</th>
 							<th>Last Name</th>
 							<th>Working Hall</th>
-							<th>Action</th>
+							<th></th>
 						</tr>
 					</thead>
 					{% for employee in employees %}
-					<tr>
-						<td><span class="custom-checkbox">
-								<input type="checkbox" name="del_employees" value="{{ employee.id }}" />
-							</span></td>
-						<td>{{ employee.email }}</td>
-						<td>{{ employee.fname }}</td>
-						<td>{{ employee.lname }}</td>
-						<td>{{ employee.workinghall }}</td>
-						<td><a align="center" class=" btn edit" title="Edit" id="edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a></td>
-						<!-- <td>
-							<a href="#" class="btn btn-primary a-btn-slide-text">
-								<span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
-								<span><strong>Edit</strong></span>
-						</td> -->
-					</tr>
+						<tr>
+							<td><span class="custom-checkbox">
+									<input type="checkbox" name="del_employees" value="{{ employee.id }}" />
+								</span></td>
+							<td>{{ employee.email }}</td>
+							<td>{{ employee.fname }}</td>
+							<td>{{ employee.lname }}</td>
+							<td>{{ employee.workinghall }}</td>
+							<td>
+								<a href="#editEmployeeModal" align="center" class="btn edit" title="Edit" value="{{ employee.id }}" id="edit" data-toggle="modal">
+									<i class="material-icons">&#xE254;</i>
+								</a>
+							</td>
+						</tr>
 					{% endfor %}
 				</table>
 			</div>
@@ -129,14 +128,14 @@
 									{{ form.email.label(class="form-control-label") }}
 
 									{% if form.email.errors %}
-									{{ form.email(class="form-control form-control-md is-invalid") }}
-									<div class="invalid-feedback">
-										{% for error in form.email.errors %}
-										<span>{{ error }}</span>
-										{% endfor %}
-									</div>
+										{{ form.email(class="form-control form-control-md is-invalid") }}
+										<div class="invalid-feedback">
+											{% for error in form.email.errors %}
+												<span>{{ error }}</span>
+											{% endfor %}
+										</div>
 									{% else %}
-									{{ form.email(class="form-control form-control-md") }}
+										{{ form.email(class="form-control form-control-md") }}
 									{% endif %}
 								</div>
 								<div class="form-group">
@@ -212,32 +211,61 @@
 		<div id="editEmployeeModal" class="modal fade">
 			<div class="modal-dialog">
 				<div class="modal-content">
-					<form>
+					<form action="#" method="POST">
 						<div class="modal-header">
 							<h4 class="modal-title">Edit Employee</h4>
 							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 						</div>
 						<div class="modal-body">
 							<div class="form-group">
-								<label>Name</label>
-								<input type="text" class="form-control" required>
+								{{ form.email.label(class="form-control-label") }}
+
+								{% if form.email.errors %}
+								{{ form.email(class="form-control form-control-md is-invalid") }}
+								<div class="invalid-feedback">
+									{% for error in form.email.errors %}
+									<span>{{ error }}</span>
+									{% endfor %}
+								</div>
+								{% else %}
+								{{ form.email(class="form-control form-control-md") }}
+								{% endif %}
 							</div>
 							<div class="form-group">
-								<label>email</label>
-								<input type="email" class="form-control" required>
+								{{ form.firstName.label(class="form-control-label") }}
+
+								{% if form.firstName.errors %}
+								{{ form.firstName(class="form-control form-control-md is-invalid") }}
+								<div class="invalid-feedback">
+									{% for error in form.firstName.errors %}
+									<span>{{ error }}</span>
+									{% endfor %}
+								</div>
+								{% else %}
+								{{ form.firstName(class="form-control form-control-md") }}
+								{% endif %}
 							</div>
 							<div class="form-group">
-								<label>Address</label>
-								<textarea class="form-control" required></textarea>
+								{{ form.lastName.label(class="form-control-label") }}
+
+								{% if form.lastName.errors %}
+								{{ form.lastName(class="form-control form-control-md is-invalid") }}
+								<div class="invalid-feedback">
+									{% for error in form.lastName.errors %}
+									<span>{{ error }}</span>
+									{% endfor %}
+								</div>
+								{% else %}
+								{{ form.lastName(class="form-control form-control-md") }}
+								{% endif %}
 							</div>
 							<div class="form-group">
-								<label>Phone</label>
-								<input type="text" class="form-control" required>
+								{{ form.hall.label(class="form-control-label") }}
+								{{ form.hall(class="form-control form-control-md") }}
 							</div>
 						</div>
 						<div class="modal-footer">
-							<input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
-							<input type="submit" class="btn btn-info" value="Save">
+							{{ form.submit(class="btn btn-default btn-success") }}
 						</div>
 					</form>
 				</div>
