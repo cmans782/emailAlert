@@ -80,7 +80,7 @@ def reset_request():
     if form.validate_on_submit():
         employee = Employee.query.filter_by(email=form.email.data).first()
         send_reset_email(employee)
-        flash(f'An email has been sent to {employee.email} with instructions to reset your password', 'info')
+        flash(f'An email has been sent to {employee.email} with instructions to reset your password.', 'info')
         return redirect(url_for('employees.login'))
     return render_template('reset_request.html', title='Reset Password', form=form)
 

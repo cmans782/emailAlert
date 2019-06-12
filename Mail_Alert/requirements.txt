@@ -5,3 +5,4 @@ flask-WTF
 WTForms
 flask-bcrypt
 Flask-Login
+flask_mail
