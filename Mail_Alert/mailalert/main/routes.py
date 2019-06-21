@@ -9,3 +9,8 @@ main = Blueprint('main', __name__)
 @login_required
 def home():
     return render_template('home.html')
+
+
+@main.route("/composeEmail")
+def composeEmail():
+    return render_template('composeEmail.html')
