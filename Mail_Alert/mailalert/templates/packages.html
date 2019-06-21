@@ -163,40 +163,27 @@
                     <th>Name</th>
                     <th>Room&nbsp;Number</th>
                     <th>Status</th>
-                    <th>Number&nbsp;Of&nbsp;Packages</th>
                     <th>Description</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-                <tr data-status="active">
-                    <td>1</td>
-                    <td>Corey Manship</td>
-                    <td>302C</td>
-                    <td><span class="label label-success">Active</span></td>
-                    <td id="numberOfPackages" align=center>1</td>
-                    <td>Brown Amazon Box</td>
-                    <td><a href="#" class="btn btn-sm manage">Manage</a></td>
-                </tr>
-                <tr data-status="active">
-                    <td>2</td>
-                    <td>Taylor Lentz</td>
-                    <td>4005D</td>
-                    <td><span class="label label-success">Active</span></td>
-                    <td id="numberOfPackages" align=center>1</td>
-                    <td>Brown Amazon Box</td>
-                    <td><a href="#" class="btn btn-sm manage">Manage</a></td>
-                </tr>
-                <tr data-status="picked-up">
-                    <td>3</td>
-                    <td>Alexis Woodard</td>
-                    <td>509A</td>
-                    <td><span class="label label-danger">Picked Up</span></td>
-                    <td id="numberOfPackages" align="center">3</td>
-                    <td>White FedEx Box</td>
-                    <td><a href="#" class="btn btn-sm manage">Manage</a></td>
-                </tr>
-                <tr data-status="inactive">
+                {% for package in packages %}
+                    <tr data-status="active">
+                        <td>{{ package.id }}</td>
+                        <td>{{ package.fname }} {{ package.lname }}</td>
+                        <td>{{ package.roomNum }}</td>
+                        {% if package.status == "Active" %}
+                            <td><span class="label label-success">{{ package.status }}</span></td>
+                        {% elif package.status == "Picked Up" %}
+                            <td><span class="label label-danger">{{ package.status }}</span></td>
+                        {% endif %}
+                        <td>{{ package.description }}</td>
+                        <td><a href="#" class="btn btn-sm manage">Manage</a></td>
+                    </tr>
+                {% endfor %}
+                
+        <!--     <tr data-status="inactive">
                     <td>4</td>
                     <td>Morganne Bennett</td>
                     <td>101C</td>
@@ -204,7 +191,7 @@
                     <td id="numberOfPackages" align="center">2</td>
                     <td>Orange Chegg Box</td>
                     <td><a href="#" class="btn btn-sm manage">Manage</a></td>
-                </tr>
+                </tr> -->
             </tbody>
         </table>
     </div>

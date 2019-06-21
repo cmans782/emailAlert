@@ -2,6 +2,7 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from mailalert import db, login_manager
 from flask_login import UserMixin
 from flask import current_app
+from datetime import datetime
 
 @login_manager.user_loader
 def load_user(id):
@@ -32,6 +33,15 @@ class Employee(db.Model, UserMixin):
 
     def __repr__(self):
         return f"Employee('{self.email}', '{self.fname}', '{self.lname}', '{self.workinghall}')"
+
+class Package(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    fname = db.Column(db.String(100), nullable=False)
+    lname = db.Column(db.String(100), nullable=False)
+    roomNum = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String(100), nullable=False, default="Active")
+    description = db.Column(db.String(250), nullable=False)
+    delivery_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
 
 # class Student(db.Model):

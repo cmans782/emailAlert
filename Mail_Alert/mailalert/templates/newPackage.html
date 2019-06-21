@@ -1,130 +1,177 @@
 {% extends "layout_with_navbar.html" %}
 {%block content %}
-<!DOCTYPE html>
-<head>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
-</head>
-<!------ Include the above in your HEAD tag ---------->
 
 <div style="text-align:center">
-    <table id="myTable" class=" table order-list">
-    <thead>
-        <tr align="center">
-            <td>Package Number</td>
-            <td>First Name</td>
-            <td>Last Name</td>
-            <td>Room #</td>
-            <td># of Packages</td>
-            <td>Description</td>
-			<td></td><!--Blank for styling-->
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td class="col-sm-1">
-                <input type="text" name="packageNum" class="form-control" />
-            </td>
-            <td class="col-sm-2">
-                <input type="mail" name="fname" class="form-control"/>
-            </td>
-            <td class="col-sm-2">
-                <input type="text" name="lname" class="form-control"/>
-            </td>
-            <td class="col-sm-1">
-                <input type ="text" name="roomNum" class="form-control"/>
-            </td>
-            <td class="col-sm-1">
-                <input type ="text" name="numberOfPackages" class="form-control"/>
-            </td>
-            <td class="col-sm-4">
-                <input type ="text" name="descrption" id="description" class="form-control"/>
-            </td>
-            <td class="col-sm-2"><a class="deleteRow"></a>
-
-            </td>
-        </tr>
-    </tbody>
-    <tfoot>
-        <tr>
-            <td colspan="5" style="text-align: left;">
-                <input type="button" class="btn btn-lg btn-block " id="addrow" value="Add Row" />
-            </td>
-            <td colspan="1">
-            <button class="btn btn-success" type="submit">Submit</button>
-            </td>
-			<td></td><!--Blank for styling-->
-        </tr>
-    </tfoot>
-</table>
+    <form action="" method="POST">
+        <table id="packageTable" class=" table order-list">
+            <thead>
+                <tr align="center">
+                    <td>Package Number</td>
+                    <td>First Name</td>
+                    <td>Last Name</td>
+                    <td>Room #</td>
+                    <td>Description</td>
+                    <td></td><!--Blank for styling-->
+                </tr>
+            </thead>
+            {{ form.hidden_tag() }}
+            <tbody>
+                <tr>
+                    <td class="col-sm-1">
+                    </td>
+                    <td class="col-sm-2">
+                        {% if form.firstName.errors %}
+                            {{ form.firstName(class="form-control form-control-md is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.firstName.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.firstName(class="form-control form-control-md") }}
+                        {% endif %}
+                    </td>
+                    <td class="col-sm-2">
+                        {% if form.lastName.errors %}
+                            {{ form.lastName(class="form-control form-control-md is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.lastName.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.lastName(class="form-control form-control-md") }}
+                        {% endif %}
+                    </td>
+                    <td class="col-sm-1">
+                        {% if form.roomNumber.errors %}
+                            {{ form.roomNumber(class="form-control form-control-md is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.roomNumber.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.roomNumber(class="form-control form-control-md") }}
+                        {% endif %}
+                    </td>
+                    <td class="col-sm-4">
+                        {% if form.description.errors %}
+                            {{ form.description(class="form-control form-control-md is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.description.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.description(class="form-control form-control-md") }}
+                        {% endif %}
+                    </td>
+                    <td class="col-sm-2">
+                        <a class="deleteRow"></a>
+                    </td>
+                </tr> 
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5" style="text-align: left;">
+                        <input type="button" class="btn btn-lg btn-block " id="addrow" value="Add Row" />
+                    </td>
+                    <td colspan="1">
+                        {{form.submit(class="form-control form-control-md btn-success")}}
+                    </td>
+                    <td></td><!--Blank for styling-->
+                </tr>
+            </tfoot>
+        </table>
+    </form>
 </div>
-
-
+            
 <script>
-
 $(document).ready(function() {
     var counter = 0;
+    var cols = "";
+        
+    cols += '<td></td>';
+    cols += '<td> \
+                {% if form.firstName.errors %} \
+                    {{ form.firstName(class="form-control form-control-md is-invalid") }} \
+                    <div class="invalid-feedback"> \
+                        {% for error in form.firstName.errors %} \
+                            <span>{{ error }}</span> \
+                        {% endfor %} \
+                    </div> \
+                {% else %} \
+                    {{ form.firstName(class="form-control form-control-md") }} \
+                {% endif %} \
+            </td>';
+    cols += '<td> \
+                {% if form.lastName.errors %} \
+                    {{ form.lastName(class="form-control form-control-md is-invalid") }} \
+                    <div class="invalid-feedback"> \
+                        {% for error in form.lastName.errors %} \
+                            <span>{{ error }}</span> \
+                        {% endfor %} \
+                    </div> \
+                {% else %} \
+                    {{ form.lastName(class="form-control form-control-md") }} \
+                {% endif %} \
+            </td>';
+    cols += '<td> \
+                {% if form.roomNumber.errors %} \
+                    {{ form.roomNumber(class="form-control form-control-md is-invalid") }} \
+                    <div class="invalid-feedback"> \
+                        {% for error in form.roomNumber.errors %} \
+                            <span>{{ error }}</span> \
+                        {% endfor %} \
+                    </div> \
+                {% else %} \
+                    {{ form.roomNumber(class="form-control form-control-md") }} \
+                {% endif %} \
+            </td>';
+    cols += '<td> \
+                {% if form.description.errors %} \
+                    {{ form.description(class="form-control form-control-md is-invalid") }} \
+                    <div class="invalid-feedback"> \
+                        {% for error in form.description.errors %} \
+                            <span>{{ error }}</span> \
+                        {% endfor %} \
+                    </div> \
+                {% else %} \
+                    {{ form.description(class="form-control form-control-md") }} \
+                {% endif %} \
+            </td>';
 
-    $("#addrow").on('keyup', function(e) {
-        if(e.which == 9)
-            {
-                var newRow = $("<tr>");
-                var cols = "";
+    cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
 
-                cols += '<td><input type="text" class="form-control" name="packageNum" id="packageNum"/></td>';
-                cols += '<td><input type="text" class="form-control" name="fname"/></td>';
-                cols += '<td><input type="text" class="form-control" name="lname"/></td>';
-                cols += '<td><input type="text" class="form-control" name="roomNum"/></td>';
-                cols += '<td><input type="text" class="form-control" name="numberOfPackages"/></td>';
-                cols += '<td><input type="text" class="form-control" name="description id="newDescription"/></td>';
-				
-                cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger" id="delete" value="Delete"></td>';
-                newRow.append(cols);
-                $("table.order-list").append(newRow);
-				
-                var empTable = document.getElementById("myTable");
-                var trArray = empTable.rows;
-                var lastTrElem = trArray[trArray.length - 2];
-                var lastTdElem = lastTrElem.firstChild;
-                var inputElem = lastTdElem.firstChild;
-				inputElem.focus();
-				
-            }
+    $("#addrow").on('keyup', function(event){
+        // if tab key is pressed
+        if(event.which == 9){ 
+            newRow();
+        }
     });
 
     $("#addrow").on("click", function () {
+       newRow();
+    });
+
+    function newRow(){
         var newRow = $("<tr>");
-        var cols = "";
-
-        cols += '<td><input type="text" class="form-control" name="packageNum" id="packageNum"/></td>';
-        cols += '<td><input type="text" class="form-control" name="fname"/></td>';
-        cols += '<td><input type="text" class="form-control" name="lname"/></td>';
-        cols += '<td><input type="text" class="form-control" name="roomNum"/></td>';
-        cols += '<td><input type="text" class="form-control" name="numberOfPackages"/></td>';
-        cols += '<td><input type="text" class="form-control" name="description"/></td>';
-
-        cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
         newRow.append(cols);
         $("table.order-list").append(newRow);
 		
-        var empTable = document.getElementById("myTable");
+        var empTable = document.getElementById("packageTable");
         var trArray = empTable.rows;
         var lastTrElem = trArray[trArray.length - 2];
         var lastTdElem = lastTrElem.firstChild;
         var inputElem = lastTdElem.firstChild;
         inputElem.focus();
-    });
+    };
 
     $("table.order-list").on("click", ".ibtnDel", function (event) {
         $(this).closest("tr").remove();       
         counter -= 1
     });
-
-
-
 });
-
 </script>
 {% endblock %}
