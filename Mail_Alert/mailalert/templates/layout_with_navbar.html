@@ -54,7 +54,7 @@
 
       <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav ml-auto">
-          <li class="nav-item active">
+          <li class="nav-item">
             <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
           </li>
 
@@ -64,8 +64,8 @@
               Email
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-              <a class="dropdown-item" href="#">Sent Emails</a>
               <a class="dropdown-item" href="#">Compose Email</a>
+              <a class="dropdown-item" href="#">Sent Emails</a>
             </div>
           </li>
 
@@ -87,9 +87,18 @@
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
               <a class="dropdown-item" href="{{ url_for('employees.management') }}">Manage Employees</a>
-              <a class="dropdown-item" href="{{ url_for('employees.logout') }}">Logout</a>
             </div>
           </li>
+          <li class="nav-item dropdown">
+              <a class="nav-link active" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
+                {{ current_user.fname }}
+              </a>
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                <a class="dropdown-item" href="{{ url_for('employees.logout') }}">Logout</a>
+                <a class="dropdown-item" href="{{ url_for('employees.reset_password') }}">Reset Password</a>
+              </div>
+            </li>
         </ul>
       </div>
     </nav>

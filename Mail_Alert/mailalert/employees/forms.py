@@ -17,8 +17,6 @@ class ManagementForm(FlaskForm):
                                                 ('University Place', 'University Place'), ('Bonner', 'Bonner'), ('Johnson', 'Johnson'),
                                                 ('Schuylkill', 'Schuylkill'), ('Lehigh', 'Lehigh'), ('Beck', 'Beck'), 
                                                 ('Berks', 'Berks'), ('Deatrick', 'Deatrick'), ('Rothermel', 'Rothermel'), ('Honors', 'Honors')])   
-    password = PasswordField('Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Submit')
 
     def validate_email(self, email):
@@ -54,4 +52,11 @@ class RequestResetForm(FlaskForm):
 class ResetPasswordForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Reset Password')
+
+class NewPasswordForm(FlaskForm):
+    email = StringField('Email ', validators=[DataRequired(), Email()])
+    old_password = PasswordField('Old Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[DataRequired()])
+    confirm_new_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('new_password')])
     submit = SubmitField('Reset Password')

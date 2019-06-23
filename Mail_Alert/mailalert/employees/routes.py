@@ -2,8 +2,8 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint
 from flask_login import login_user, current_user, logout_user, login_required
 from mailalert import db, bcrypt
 from mailalert.models import Employee
-from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, EditEmployeeForm
-from mailalert.employees.utils import send_reset_email
+from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, EditEmployeeForm, NewPasswordForm
+from mailalert.employees.utils import send_reset_email, generate_random_string, send_temp_password_email
 
 employees = Blueprint('employees', __name__)
 
@@ -13,17 +13,19 @@ def management():
     form = ManagementForm()
     employees = Employee.query.all()
     if form.validate_on_submit():  # this will only be true if ManagementForm fields are all correct
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')  # generate a password hash for the user that is being created
+        password = generate_random_string()
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')  # generate a password hash for the user that is being created
         employee = Employee(email=form.email.data, fname=form.firstName.data, lname=form.lastName.data, workinghall=form.hall.data, password=hashed_password) 
         db.session.add(employee)  # creates a new employee object (can be found in models.py) so that we can insert it into our database
         db.session.commit()
-        flash(f'Account created for {form.email.data}!', 'success')
+        send_temp_password_email(employee, password)
+        flash(f'Account created for {employee.email}!', 'success')
         return redirect(url_for('employees.management'))
     return render_template('management.html', title='Management', form=form, employees=employees)
 
 
 @employees.route("/management/delete", methods=['POST'])
-@login_required
+# @login_required
 def delete_employee():
     employee_id_list = request.form.getlist("del_employees")
     if employee_id_list:  # make sure the user selected at least one employee
@@ -72,7 +74,7 @@ def logout():
     return redirect(url_for('employees.login'))
 
 
-@employees.route("/reset_password", methods=['GET', 'POST'])
+@employees.route("/forgot_password", methods=['GET', 'POST'])
 def reset_request():
     if current_user.is_authenticated:
         return redirect(url_for('main.home'))
@@ -84,7 +86,8 @@ def reset_request():
         return redirect(url_for('employees.login'))
     return render_template('reset_request.html', title='Reset Password', form=form)
 
-@employees.route("/reset_password/<token>", methods=['GET', 'POST'])
+
+@employees.route("/forgot_password/<token>", methods=['GET', 'POST'])
 def reset_token(token):
     if current_user.is_authenticated:
         return redirect(url_for('main.home'))
@@ -100,3 +103,19 @@ def reset_token(token):
         flash('Your password has been reset!', 'success')
         return redirect(url_for('employees.login'))
     return render_template('reset_token.html', title='Reset Password', form=form)
+
+@employees.route("/reset_password", methods=['GET', 'POST'])
+def reset_password():
+    form = NewPasswordForm()
+    if form.validate_on_submit():
+        employee = Employee.query.filter_by(email=form.email.data).first()
+        # if the current users password matches the old password field
+        if employee and bcrypt.check_password_hash(employee.password, form.old_password.data):
+            hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
+            employee.password = hashed_password
+            db.session.commit()
+            flash('Your password has been changed!', 'success')
+            return redirect(url_for('employees.login'))
+        else:
+            flash(f'Invalid email or password', 'danger')
+    return render_template('reset_password.html', title='New Password', form=form)
