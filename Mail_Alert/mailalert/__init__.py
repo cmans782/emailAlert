@@ -26,9 +26,11 @@ def create_app(config_class=Config):
 
     from mailalert.employees.routes import employees  #import blueprint instance
     from mailalert.packages.routes import packages  
-    from mailalert.main.routes import main  
+    from mailalert.main.routes import main
+    from mailalert.errors.handlers import errors
     app.register_blueprint(employees)  # register instances with our app
     app.register_blueprint(packages)
     app.register_blueprint(main)
+    app.register_blueprint(errors)
 
     return app

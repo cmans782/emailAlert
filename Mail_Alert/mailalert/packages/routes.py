@@ -12,7 +12,6 @@ packages = Blueprint('packages', __name__)
 @login_required
 def newPackage():
     form = NewPackageForm()
-
     if form.validate_on_submit():
         firstName = request.form.getlist('firstName')
         lastName = request.form.getlist('lastName')
@@ -26,11 +25,17 @@ def newPackage():
 
         flash('Packages sucessfully added!', 'success')
         return redirect(url_for("main.home"))
-
     return render_template('newPackage.html', title='New_Package', form=form)
 
-@packages.route("/packages")
+@packages.route("/packages", methods=['GET'])
 @login_required
 def package():
     packages = Package.query.all()
     return render_template('packages.html', title="Packages", packages=packages)
+
+
+# @packages.route("/packages/<email>", methods=['GET'])
+# @login_required
+# def package(email):
+#     packages = Package.query.all()
+#     return render_template('packages.html', title="Packages", packages=packages)

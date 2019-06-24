@@ -1,19 +1,9 @@
 {% extends "layout_with_navbar.html" %}
 {%block content %}
 
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+   
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <style type="text/css">
         body {
             color: #566787;
@@ -96,107 +86,85 @@
             background: #2e9c81;
         }
     </style>
-
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $(".btn-group .btn").click(function () {
-                var inputValue = $(this).find("input").val();
-                if (inputValue != 'all') {
-                    var target = $('table tr[data-status="' + inputValue + '"]');
-                    $("table tbody tr").not(target).hide();
-                    target.fadeIn();
-                } else {
-                    $("table tbody tr").fadeIn();
-                }
-            });
-            // Changing the class of status label to support Bootstrap 4
-            var bs = $.fn.tooltip.Constructor.VERSION;
-            var str = bs.split(".");
-            if (str[0] == 4) {
-                $(".label").each(function () {
-                    var classStr = $(this).attr("class");
-                    var newClassStr = classStr.replace(/label/g, "badge");
-                    $(this).removeAttr("class").addClass(newClassStr);
-                });
-            }
-        });
-
-        // $(document).ready(function () {
-        //     if (document.getElementById("numberOfPackages") > 1) {
-
-
-        //     }
-        // }
-    </script>
-
 </head>
 
-<body>
-    <div class="table-wrapper">
-        <div class="table-title">
-            <div class="row">
-                <div class="col-sm-6">
-                    <h2>Packages</h2>
-                </div>
-                <div class="col-sm-6">
-                    <div class="btn-group" data-toggle="buttons">
-                        <label class="btn btn-info active">
-                            <input type="radio" name="status" value="all" checked="checked"> All
-                        </label>
-                        <label class="btn btn-success">
-                            <input type="radio" name="status" value="active"> Active
-                        </label>
-                        <label class="btn btn-warning">
-                            <input type="radio" name="status" value="inactive"> Inactive
-                        </label>
-                        <label class="btn btn-danger">
-                            <input type="radio" name="status" value="picked-up"> Picked Up
-                        </label>
-                    </div>
+
+<div class="table-wrapper">
+    <div class="table-title">
+        <div class="row">
+            <div class="col-sm-6">
+                <h2>Packages</h2>
+            </div>
+            <div class="col-sm-6">
+                <div class="btn-group" data-toggle="buttons">
+                    <label class="btn btn-info active">
+                        <input type="radio" name="status" value="all" checked="checked"> All
+                    </label>
+                    <label class="btn btn-success">
+                        <input type="radio" name="status" value="active"> Active
+                    </label>
+                    <label class="btn btn-warning">
+                        <input type="radio" name="status" value="inactive"> Inactive
+                    </label>
+                    <label class="btn btn-danger">
+                        <input type="radio" name="status" value="picked-up"> Picked Up
+                    </label>
                 </div>
             </div>
         </div>
-        <table id="packagesTable" class="table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>Package&nbsp;ID</th>
-                    <th>Name</th>
-                    <th>Room&nbsp;Number</th>
-                    <th>Status</th>
-                    <th>Description</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for package in packages %}
-                    <tr data-status="active">
-                        <td>{{ package.id }}</td>
-                        <td>{{ package.fname }} {{ package.lname }}</td>
-                        <td>{{ package.roomNum }}</td>
-                        {% if package.status == "Active" %}
-                            <td><span class="label label-success">{{ package.status }}</span></td>
-                        {% elif package.status == "Picked Up" %}
-                            <td><span class="label label-danger">{{ package.status }}</span></td>
-                        {% endif %}
-                        <td>{{ package.description }}</td>
-                        <td><a href="#" class="btn btn-sm manage">Manage</a></td>
-                    </tr>
-                {% endfor %}
-                
-        <!--     <tr data-status="inactive">
-                    <td>4</td>
-                    <td>Morganne Bennett</td>
-                    <td>101C</td>
-                    <td><span class="label label-warning">Inactive</span></td>
-                    <td id="numberOfPackages" align="center">2</td>
-                    <td>Orange Chegg Box</td>
-                    <td><a href="#" class="btn btn-sm manage">Manage</a></td>
-                </tr> -->
-            </tbody>
-        </table>
     </div>
-</body>
-
-</html>
+    <table id="packagesTable" class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Package&nbsp;ID</th>
+                <th>Name</th>
+                <th>Room&nbsp;Number</th>
+                <th>Status</th>
+                <th>Description</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for package in packages %}
+                <tr data-status="active">
+                    <td>{{ package.id }}</td>
+                    <td>{{ package.fname }} {{ package.lname }}</td>
+                    <td>{{ package.roomNum }}</td>
+                    {% if package.status == "Active" %}
+                        <td><span class="label label-success">{{ package.status }}</span></td>
+                    {% elif package.status == "Picked Up" %}
+                        <td><span class="label label-danger">{{ package.status }}</span></td>
+                    {% endif %}
+                    <td>{{ package.description }}</td>
+                    <td><a href="#" class="btn btn-sm manage">Manage</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(".btn-group .btn").click(function () {
+            var inputValue = $(this).find("input").val();
+            if (inputValue != 'all') {
+                var target = $('table tr[data-status="' + inputValue + '"]');
+                $("table tbody tr").not(target).hide();
+                target.fadeIn();
+            } else {
+                $("table tbody tr").fadeIn();
+            }
+        });
+        // Changing the class of status label to support Bootstrap 4
+        var bs = $.fn.tooltip.Constructor.VERSION;
+        var str = bs.split(".");
+        if (str[0] == 4) {
+            $(".label").each(function () {
+                var classStr = $(this).attr("class");
+                var newClassStr = classStr.replace(/label/g, "badge");
+                $(this).removeAttr("class").addClass(newClassStr);
+            });
+        }
+    });
+</script>
 
 {% endblock %}
