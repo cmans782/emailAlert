@@ -30,12 +30,6 @@ def newPackage():
 @packages.route("/packages", methods=['GET'])
 @login_required
 def package():
-    packages = Package.query.all()
+    page = request.args.get('page', 1, type=int)
+    packages = Package.query.order_by(Package.delivery_date.desc()).paginate(page=page, per_page=10)
     return render_template('packages.html', title="Packages", packages=packages)
-
-
-# @packages.route("/packages/<email>", methods=['GET'])
-# @login_required
-# def package(email):
-#     packages = Package.query.all()
-#     return render_template('packages.html', title="Packages", packages=packages)
