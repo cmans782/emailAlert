@@ -1,16 +1,17 @@
 {% extends "layout_with_navbar.html" %}
 {%block content %}
 
-<div style="text-align:center">
+<div style="margin-left:auto; margin-right:auto;">
     <form action="" method="POST">
         <table id="packageTable" class=" table order-list">
             <thead>
-                <tr align="center">
+                <tr>
                     <!-- <td>Package Number</td>  -->
                     <td>First Name</td>
                     <td>Last Name</td>
                     <td>Room #</td>
                     <td>Description</td>
+                    <td></td>
                     <td></td>
                 </tr>
             </thead>
@@ -21,7 +22,7 @@
                     <!-- </td> -->
 
                     <!-- <td class="col-sm-6"> -->
-                    <td class="col-sm-2">
+                    <td>
                         {% if form.firstName.errors %}
                         {{ form.firstName(class="form-control form-control-md is-invalid") }}
                         <div class="invalid-feedback">
@@ -34,7 +35,7 @@
                         {% endif %}
                     </td>
                     <!-- <td class="col-sm-2"> -->
-                    <td class="col-sm-2">
+                    <td>
                         {% if form.lastName.errors %}
                         {{ form.lastName(class="form-control form-control-md is-invalid") }}
                         <div class="invalid-feedback">
@@ -47,7 +48,7 @@
                         {% endif %}
                     </td>
                     <!-- <td class="col-sm-1"> -->
-                    <td class="col-sm-2">
+                    <td>
                         {% if form.roomNumber.errors %}
                         {{ form.roomNumber(class="form-control form-control-md is-invalid") }}
                         <div class="invalid-feedback">
@@ -59,7 +60,8 @@
                         {{ form.roomNumber(class="form-control form-control-md") }}
                         {% endif %}
                     </td>
-                    <td class="col-sm-4">
+                    <!-- <td class="col-sm-4"> -->
+                        <td>
                         {% if form.description.errors %}
                         {{ form.description(class="form-control form-control-md is-invalid") }}
                         <div class="invalid-feedback">
@@ -71,17 +73,20 @@
                         {{ form.description(class="form-control form-control-md") }}
                         {% endif %}
                     </td>
-                    <td class="col-sm-2">
+                    <td>
+                    <!-- <td class="col-sm-2"> -->
                         <a class="deleteRow"></a>
                     </td>
+                    <td></td>
                 </tr>
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="5" style="text-align: left;">
+                    <td colspan="4" style="text-align: left;">
                         <input type="button" class="btn btn-lg btn-block " id="addrow" value="Add Row" />
                     </td>
-                    <td colspan="1">
+                    <td>
+                    <!-- <td colspan="1"> -->
                         {{form.submit(class="form-control form-control-md btn-success")}}
                     </td>
                     <td></td>
@@ -148,6 +153,7 @@
             </td>';
 
         cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
+        cols += '<td></td>';
 
         $("#addrow").on('keyup', function (event) {
             // if tab key is pressed
@@ -167,7 +173,7 @@
 
             var empTable = document.getElementById("packageTable");
             var trArray = empTable.rows;
-            var lastTrElem = trArray[trArray.length - 2];
+            var lastTrElem = trArray[trArray.length -2];
             var lastTdElem = lastTrElem.firstChild;
             var inputElem = lastTdElem.firstChild;
             inputElem.focus();
