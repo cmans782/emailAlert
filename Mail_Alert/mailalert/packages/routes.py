@@ -31,7 +31,7 @@ def newPackage():
     return render_template('newPackage.html', title='New_Package', form=form)
 
 @packages.route("/packages", methods=['GET'])
-@login_required
+# @login_required
 def package():
     page = request.args.get('page', 1, type=int)
     packages = Package.query.order_by(Package.delivery_date.desc()).paginate(page=page, per_page=10)

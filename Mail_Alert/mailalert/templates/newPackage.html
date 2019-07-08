@@ -1,71 +1,77 @@
 {% extends "layout_with_navbar.html" %}
 {%block content %}
 
-<div style="text-align:center">
+<div style="margin-left:auto; margin-right:auto;">
     <form action="" method="POST">
         <table id="packageTable" class=" table order-list">
             <thead>
-                <tr align="center">
-                    <td>Package&nbsp;#</td> 
+                <tr>
+                    <!-- <td>Package Number</td>  -->
                     <td>First Name</td>
                     <td>Last Name</td>
                     <td>Room #</td>
                     <td>Description</td>
                     <td>Perishable</td>
                     <td></td>
+                    <td></td>
                 </tr>
             </thead>
             {{ form.hidden_tag() }}
             <tbody>
                 <tr>
-                    <td class="col-sm-1">
-                    </td>
-                    <td class="col-sm-2">
+                    <!-- <td class="col-sm-1"> -->
+                    <!-- </td> -->
+
+                    <!-- <td class="col-sm-6"> -->
+                    <td>
                         {% if form.firstName.errors %}
-                            {{ form.firstName(class="form-control form-control-md is-invalid") }}
-                            <div class="invalid-feedback">
-                                {% for error in form.firstName.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
+                        {{ form.firstName(class="form-control form-control-md is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.firstName.errors %}
+                            <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
                         {% else %}
-                            {{ form.firstName(class="form-control form-control-md") }}
+                        {{ form.firstName(class="form-control form-control-md") }}
                         {% endif %}
                     </td>
-                    <td class="col-sm-2">
+                    <!-- <td class="col-sm-2"> -->
+                    <td>
                         {% if form.lastName.errors %}
-                            {{ form.lastName(class="form-control form-control-md is-invalid") }}
-                            <div class="invalid-feedback">
-                                {% for error in form.lastName.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
+                        {{ form.lastName(class="form-control form-control-md is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.lastName.errors %}
+                            <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
                         {% else %}
-                            {{ form.lastName(class="form-control form-control-md") }}
+                        {{ form.lastName(class="form-control form-control-md") }}
                         {% endif %}
                     </td>
-                    <td class="col-sm-1">
+                    <!-- <td class="col-sm-1"> -->
+                    <td>
                         {% if form.roomNumber.errors %}
-                            {{ form.roomNumber(class="form-control form-control-md is-invalid") }}
-                            <div class="invalid-feedback">
-                                {% for error in form.roomNumber.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
+                        {{ form.roomNumber(class="form-control form-control-md is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.roomNumber.errors %}
+                            <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
                         {% else %}
-                            {{ form.roomNumber(class="form-control form-control-md") }}
+                        {{ form.roomNumber(class="form-control form-control-md") }}
                         {% endif %}
                     </td>
-                    <td class="col-sm-4">
+                    <!-- <td class="col-sm-4"> -->
+                        <td>
                         {% if form.description.errors %}
-                            {{ form.description(class="form-control form-control-md is-invalid") }}
-                            <div class="invalid-feedback">
-                                {% for error in form.description.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
+                        {{ form.description(class="form-control form-control-md is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.description.errors %}
+                            <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
                         {% else %}
-                            {{ form.description(class="form-control form-control-md") }}
+                        {{ form.description(class="form-control form-control-md") }}
                         {% endif %}
                     </td>
                     <td class="col-sm-2">
@@ -80,33 +86,37 @@
                             {{ form.perishable(class="form-control form-control-md") }}
                         {% endif %}
                     </td>
-                    <td class="col-sm-2">
+                    <td>
+                    <!-- <td class="col-sm-2"> -->
                         <a class="deleteRow"></a>
                     </td>
-                </tr> 
+                    <td></td>
+                </tr>
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="5" style="text-align: left;">
+                    <td colspan="4" style="text-align: left;">
                         <input type="button" class="btn btn-lg btn-block " id="addrow" value="Add Row" />
                     </td>
-                    <td colspan="1">
+                    <td>
+                    <!-- <td colspan="1"> -->
                         {{form.submit(class="form-control form-control-md btn-success")}}
                     </td>
-                    <td></td><!--Blank for styling-->
+                    <td></td>
+                    <!--Blank for styling-->
                 </tr>
             </tfoot>
         </table>
     </form>
 </div>
-            
+
 <script>
-$(document).ready(function() {
-    var counter = 0;
-    var cols = "";
-        
-    cols += '<td></td>';
-    cols += '<td> \
+    $(document).ready(function () {
+        var counter = 0;
+        var cols = "";
+
+        // cols += '<td></td>';
+        cols += '<td> \
                 {% if form.firstName.errors %} \
                     {{ form.firstName(class="form-control form-control-md is-invalid") }} \
                     <div class="invalid-feedback"> \
@@ -118,7 +128,7 @@ $(document).ready(function() {
                     {{ form.firstName(class="form-control form-control-md") }} \
                 {% endif %} \
             </td>';
-    cols += '<td> \
+        cols += '<td> \
                 {% if form.lastName.errors %} \
                     {{ form.lastName(class="form-control form-control-md is-invalid") }} \
                     <div class="invalid-feedback"> \
@@ -130,7 +140,7 @@ $(document).ready(function() {
                     {{ form.lastName(class="form-control form-control-md") }} \
                 {% endif %} \
             </td>';
-    cols += '<td> \
+        cols += '<td> \
                 {% if form.roomNumber.errors %} \
                     {{ form.roomNumber(class="form-control form-control-md is-invalid") }} \
                     <div class="invalid-feedback"> \
@@ -142,7 +152,7 @@ $(document).ready(function() {
                     {{ form.roomNumber(class="form-control form-control-md") }} \
                 {% endif %} \
             </td>';
-    cols += '<td> \
+        cols += '<td> \
                 {% if form.description.errors %} \
                     {{ form.description(class="form-control form-control-md is-invalid") }} \
                     <div class="invalid-feedback"> \
@@ -154,7 +164,7 @@ $(document).ready(function() {
                     {{ form.description(class="form-control form-control-md") }} \
                 {% endif %} \
             </td>';
-    cols += '<td class="col-sm-2"> \
+        cols += '<td class="col-sm-2"> \
                 {% if form.perishable.errors %} \
                     {{ form.perishable(class="form-control form-control-md is-invalid") }} \
                     <div class="invalid-feedback"> \
@@ -166,36 +176,38 @@ $(document).ready(function() {
                     {{ form.perishable(class="form-control form-control-md") }} \
                 {% endif %} \
             </td>';          
-    cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
 
-    $("#addrow").on('keyup', function(event){
-        // if tab key is pressed
-        if(event.which == 9){ 
+        cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
+        cols += '<td></td>';
+
+        $("#addrow").on('keyup', function (event) {
+            // if tab key is pressed
+            if (event.which == 9) {
+                newRow();
+            }
+        });
+
+        $("#addrow").on("click", function () {
             newRow();
-        }
-    });
+        });
 
-    $("#addrow").on("click", function () {
-       newRow();
-    });
+        function newRow() {
+            var newRow = $("<tr>");
+            newRow.append(cols);
+            $("table.order-list").append(newRow);
 
-    function newRow(){
-        var newRow = $("<tr>");
-        newRow.append(cols);
-        $("table.order-list").append(newRow);
-		
-        var empTable = document.getElementById("packageTable");
-        var trArray = empTable.rows;
-        var lastTrElem = trArray[trArray.length - 2];
-        var lastTdElem = lastTrElem.firstChild;
-        var inputElem = lastTdElem.firstChild;
-        inputElem.focus();
-    };
+            var empTable = document.getElementById("packageTable");
+            var trArray = empTable.rows;
+            var lastTrElem = trArray[trArray.length -2];
+            var lastTdElem = lastTrElem.firstChild;
+            var inputElem = lastTdElem.firstChild;
+            inputElem.focus();
+        };
 
-    $("table.order-list").on("click", ".ibtnDel", function (event) {
-        $(this).closest("tr").remove();       
-        counter -= 1
+        $("table.order-list").on("click", ".ibtnDel", function (event) {
+            $(this).closest("tr").remove();
+            counter -= 1
+        });
     });
-});
 </script>
 {% endblock %}
