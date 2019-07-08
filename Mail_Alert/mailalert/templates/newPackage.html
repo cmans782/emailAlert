@@ -3,7 +3,7 @@
 
 <div style="margin-left:auto; margin-right:auto;">
     <form action="" method="POST">
-        <table id="packageTable" class=" table order-list">
+        <table id="packageTable" class="table order-list">
             <thead>
                 <tr>
                     <!-- <td>Package Number</td>  -->
@@ -12,8 +12,8 @@
                     <td>Room #</td>
                     <td>Description</td>
                     <td>Perishable</td>
-                    <td></td>
-                    <td></td>
+                    <!-- <td></td> -->
+                    <!-- <td></td> -->
                 </tr>
             </thead>
             {{ form.hidden_tag() }}
@@ -62,7 +62,7 @@
                         {% endif %}
                     </td>
                     <!-- <td class="col-sm-4"> -->
-                        <td>
+                    <td>
                         {% if form.description.errors %}
                         {{ form.description(class="form-control form-control-md is-invalid") }}
                         <div class="invalid-feedback">
@@ -74,20 +74,20 @@
                         {{ form.description(class="form-control form-control-md") }}
                         {% endif %}
                     </td>
-                    <td class="col-sm-2">
+                    <!-- <td class="col-sm-2"> -->
                         {% if form.perishable.errors %}
-                            {{ form.perishable(class="form-control form-control-md is-invalid") }}
-                            <div class="invalid-feedback">
-                                {% for error in form.perishable.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
+                        {{ form.perishable(class="form-control form-control-md is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.perishable.errors %}
+                            <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
                         {% else %}
-                            {{ form.perishable(class="form-control form-control-md") }}
+                        {{ form.perishable(class="form-control form-control-md") }}
                         {% endif %}
                     </td>
                     <td>
-                    <!-- <td class="col-sm-2"> -->
+                        <!-- <td class="col-sm-2"> -->
                         <a class="deleteRow"></a>
                     </td>
                     <td></td>
@@ -99,7 +99,7 @@
                         <input type="button" class="btn btn-lg btn-block " id="addrow" value="Add Row" />
                     </td>
                     <td>
-                    <!-- <td colspan="1"> -->
+                        <!-- <td colspan="1"> -->
                         {{form.submit(class="form-control form-control-md btn-success")}}
                     </td>
                     <td></td>
@@ -175,7 +175,7 @@
                 {% else %} \
                     {{ form.perishable(class="form-control form-control-md") }} \
                 {% endif %} \
-            </td>';          
+            </td>';
 
         cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
         cols += '<td></td>';
@@ -198,7 +198,7 @@
 
             var empTable = document.getElementById("packageTable");
             var trArray = empTable.rows;
-            var lastTrElem = trArray[trArray.length -2];
+            var lastTrElem = trArray[trArray.length - 2];
             var lastTdElem = lastTrElem.firstChild;
             var inputElem = lastTdElem.firstChild;
             inputElem.focus();
