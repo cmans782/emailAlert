@@ -1,10 +1,7 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
   <!-- Required meta tags -->
-
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -19,8 +16,6 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
-  <!-- Optional JavaScript -->
-  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
     integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
     crossorigin="anonymous"></script>
@@ -32,9 +27,9 @@
     crossorigin="anonymous"></script>
 
   <script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
-  <script type=text/javascript>
-    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-  </script>
+
+  <!-- fontawesome icons -->
+  <script src="https://kit.fontawesome.com/a7232715ba.js"></script>
 
   {% if title %}
   <title>Mail Alert - {{ title }}</title>
@@ -64,7 +59,7 @@
               Email
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-              <a class="dropdown-item" href="#">Compose Email</a>
+              <a class="dropdown-item" href="{{ url_for('main.compose_email')}}">Compose Email</a>
               <a class="dropdown-item" href="#">Sent Emails</a>
             </div>
           </li>
@@ -105,7 +100,7 @@
   </header>
   <main role="main" class="container">
     <div class="row">
-      <div>
+      <div class="col-md-12">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}

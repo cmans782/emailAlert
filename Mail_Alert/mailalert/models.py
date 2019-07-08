@@ -42,7 +42,19 @@ class Package(db.Model):
     status = db.Column(db.String(100), nullable=False, default="Active")
     description = db.Column(db.String(250), nullable=False)
     delivery_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    dr = db.Column(db.String(100), nullable=False)
+    perishable = db.Column(db.Boolean, default=False, nullable=False)
 
+
+    def __repr__(self):
+        return f"Package('{self.fname}', '{self.lname}', '{self.roonNum}', \
+                        '{self.status}', '{self.description}', '{self.delivery_date}', \
+                        '{self.dr}', '{self.perishable}')"
+    
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.String(255), unique=True, nullable=False)
 
 # class Student(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)

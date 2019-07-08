@@ -20,7 +20,7 @@ def management():
         db.session.commit()
         send_temp_password_email(employee, password)
         flash(f'Account created for {employee.email}!', 'success')
-        return redirect(url_for('employees.management'))
+        return redirect(url_for('employees.management'))  # might be able to delete this line
     return render_template('management.html', title='Management', form=form, employees=employees)
 
 
