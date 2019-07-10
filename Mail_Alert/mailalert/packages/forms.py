@@ -9,5 +9,5 @@ class NewPackageForm(FlaskForm):
     roomNumber = StringField('Rooom Number', validators=[DataRequired()])
     status = StringField('Package Status', default='Active')
     description = StringField('Description', validators=[DataRequired()])
-    perishable = BooleanField('Perishable', false_values=(False, 'false', 0, '0', ' ', "", " ", ''))
+    perishable = BooleanField('Perishable')
     submit = SubmitField('Submit')

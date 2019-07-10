@@ -1,7 +1,7 @@
 from flask import render_template, Blueprint, request, flash, redirect, url_for
 from flask_login import login_required
 from mailalert.main.forms import ComposeEmailForm, CreateMessageForm
-from mailalert.models import Message
+from mailalert.models import Message, Package
 from mailalert import db
 from mailalert.main.utils import send_package_update_email
 
@@ -12,7 +12,9 @@ main = Blueprint('main', __name__)
 @main.route("/home")
 @login_required
 def home():
-    return render_template('home.html')
+    page = request.args.get('page', 1, type=int)
+    packages = Package.query.filter_by(perishable=True).order_by(Package.delivery_date.desc()).paginate(page=page, per_page=10)
+    return render_template('home.html', packages=packages)
 
 
 @main.route("/composeEmail", methods=['GET', 'POST'])

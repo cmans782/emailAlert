@@ -1,6 +1,7 @@
 from flask import render_template, url_for, flash, redirect, request, Blueprint, jsonify
 from flask_login import login_required, current_user
 from mailalert.packages.forms import NewPackageForm 
+from mailalert.packages.utils import string_to_bool
 from mailalert.models import Package
 from mailalert import db
 import json
@@ -18,11 +19,10 @@ def newPackage():
         roomNumber = request.form.getlist('roomNumber')
         description = request.form.getlist('description')
         perishable = request.form.getlist('perishable')
+
         for i in range(len(firstName)):
-            print(request.form.listvalues())   
-        
-        for i in range(len(firstName)):
-            package = Package(fname=firstName[i], lname=lastName[i], roomNum=roomNumber[i], description=description[i], perishable=True, dr=current_user.fname)                                                         
+            result = string_to_bool(perishable[i])  # convert perishable from string value to boolean
+            package = Package(fname=firstName[i], lname=lastName[i], roomNum=roomNumber[i], description=description[i], perishable=result, dr=current_user.fname)                                                         
             db.session.add(package)
         db.session.commit()
 
@@ -31,10 +31,10 @@ def newPackage():
     return render_template('newPackage.html', title='New_Package', form=form)
 
 @packages.route("/packages", methods=['GET'])
-# @login_required
+@login_required
 def package():
     page = request.args.get('page', 1, type=int)
-    packages = Package.query.order_by(Package.delivery_date.desc()).paginate(page=page, per_page=10)
+    packages = Package.query.filter_by(perishable=False).order_by(Package.delivery_date.desc()).paginate(page=page, per_page=10)
     return render_template('packages.html', title="Packages", packages=packages)
 
 
