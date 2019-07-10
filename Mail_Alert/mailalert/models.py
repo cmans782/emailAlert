@@ -56,6 +56,14 @@ class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(255), unique=True, nullable=False)
 
+class SentMail(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    messageId = db.Column(db.Integer)
+    recipient = db.Column(db.String(250), nullable=False)
+    content = db.Column(db.String(250), nullable=False)
+    sent_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    sender = db.Column(db.String(250), nullable=False)
+
 # class Student(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
 #     username = db.Column(db.String(100), unique=True, nullable=False)
