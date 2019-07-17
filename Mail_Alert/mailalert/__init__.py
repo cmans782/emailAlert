@@ -4,9 +4,14 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_mail import Mail
 from mailalert.config import Config
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 
 
 db = SQLAlchemy()
+
+admin = Admin(name="Mail Alert", template_mode='bootstrap3')
+
 bcrypt = Bcrypt()
 login_manager = LoginManager()
 login_manager.login_view = 'employees.login'
@@ -17,12 +22,18 @@ mail = Mail()
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(Config)
-
     db.init_app(app)
-
+    admin.init_app(app)
     bcrypt.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
+
+    from mailalert.models import Package, Employee, Message, SentMail
+    admin.add_view(ModelView(Package, db.session))
+    admin.add_view(ModelView(Employee, db.session))
+    admin.add_view(ModelView(Message, db.session))
+    # admin.add_view(ModelView(SentMail, db.session))
+
 
     from mailalert.employees.routes import employees  #import blueprint instance
     from mailalert.packages.routes import packages  
