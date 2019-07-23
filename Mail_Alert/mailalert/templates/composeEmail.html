@@ -42,12 +42,14 @@
         {% endfor %}
     </div>
     <div class="row">
-        <a class="btn edit mt-3" data-toggle="modal" data-target="#newMessageModal" href="">
-            <i class="fas fa-plus fa-2x"></i>
-        </a>
-        <a class="btn edit mt-3" name="deleteMessage" data-toggle="modal" data-target="#deleteMessageModal" href="">
-            <i class="fas fa-trash-alt fa-2x"></i>
-        </a>
+        {% if current_user.allowed('Building Director') %}
+            <a class="btn edit mt-3" data-toggle="modal" data-target="#newMessageModal" href="">
+                <i class="fas fa-plus fa-2x"></i>
+            </a>
+            <a class="btn edit mt-3" name="deleteMessage" data-toggle="modal" data-target="#deleteMessageModal" href="">
+                <i class="fas fa-trash-alt fa-2x"></i>
+            </a>
+        {% endif %}
         <div class="mt-3 offset-lg-10 offset-md-8">
             {{ composeEmailForm.compose_submit(class="btn btn-success", style="visibility:hidden;") }}
         </div>

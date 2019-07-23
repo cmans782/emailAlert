@@ -13,6 +13,7 @@ class ManagementForm(FlaskForm):
     email = StringField('Email ', validators=[DataRequired(), Email()])
     firstName = StringField('First Name', validators=[DataRequired()])
     lastName = StringField('Last Name', validators=[DataRequired()])
+    role = SelectField('Role', choices=[('Admin', 'Admin'), ('Building Director', 'Building Director'), ('DR','DR')])
     hall = SelectField('Working Hall', choices=[('Dixon North', 'Dixon North'), ('Dixon South', 'Dixon South'), ('Village South', 'Village South'),
                                                 ('University Place', 'University Place'), ('Bonner', 'Bonner'), ('Johnson', 'Johnson'),
                                                 ('Schuylkill', 'Schuylkill'), ('Lehigh', 'Lehigh'), ('Beck', 'Beck'), 

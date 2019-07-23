@@ -4,6 +4,13 @@ from flask_login import UserMixin
 from flask import current_app
 from datetime import datetime
 
+ACCESS = {
+    'DR': 0,
+    'Building Director': 1, 
+    'Admin': 2
+}
+
+
 @login_manager.user_loader
 def load_user(id):
     return Employee.query.get(int(id))
@@ -11,11 +18,13 @@ def load_user(id):
 
 class Employee(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
+    hired_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
     email = db.Column(db.String(120), unique=True, nullable=False)
     fname = db.Column(db.String(100), nullable=False)
     lname = db.Column(db.String(100), nullable=False)
     workinghall = db.Column(db.String(2), nullable=False)
     password = db.Column(db.String(60), nullable=False)
+    access = db.Column(db.String, nullable=False, default="DR")
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
@@ -30,9 +39,15 @@ class Employee(db.Model, UserMixin):
             return None
         return Employee.query.get(user_id)
 
+    def is_admin(self):
+        return self.access == 'Admin'
+
+    def allowed(self, access_level):
+        return ACCESS[self.access] >= ACCESS[access_level]
+
 
     def __repr__(self):
-        return f"Employee('{self.email}', '{self.fname}', '{self.lname}', '{self.workinghall}')"
+        return f"Employee('{self.hired_date}', '{self.email}', '{self.fname}', '{self.lname}', '{self.workinghall}', '{self.access}')"
 
 class Package(db.Model):
     id = db.Column(db.Integer, primary_key=True)

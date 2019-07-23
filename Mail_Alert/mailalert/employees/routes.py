@@ -4,23 +4,26 @@ from mailalert import db, bcrypt
 from mailalert.models import Employee
 from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, EditEmployeeForm, NewPasswordForm
 from mailalert.employees.utils import send_reset_email, generate_random_string, send_temp_password_email
+from mailalert.main.utils import requires_access_level
 
 employees = Blueprint('employees', __name__)
 
 @employees.route("/management", methods=['GET', 'POST'])
-# @login_required
+@login_required
+@requires_access_level('Building Director')
 def management():
     form = ManagementForm()
-    employees = Employee.query.all()
     if form.validate_on_submit():  # this will only be true if ManagementForm fields are all correct
         password = generate_random_string()
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')  # generate a password hash for the user that is being created
-        employee = Employee(email=form.email.data, fname=form.firstName.data, lname=form.lastName.data, workinghall=form.hall.data, password=hashed_password) 
+        employee = Employee(email=form.email.data, fname=form.firstName.data, 
+                            lname=form.lastName.data, access=form.role.data,    
+                            workinghall=form.hall.data, password=hashed_password) 
         db.session.add(employee)  # creates a new employee object (can be found in models.py) so that we can insert it into our database
         db.session.commit()
         send_temp_password_email(employee, password)
         flash(f'Account created for {employee.email}!', 'success')
-        return redirect(url_for('employees.management'))  # might be able to delete this line
+    employees = Employee.query.all()
     return render_template('management.html', title='Management', form=form, employees=employees)
 
 

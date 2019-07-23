@@ -61,6 +61,7 @@
 							<th>Email</th>
 							<th>First Name</th>
 							<th>Last Name</th>
+							<th>Role</th>
 							<th>Working Hall</th>
 							<th></th>
 						</tr>
@@ -73,6 +74,7 @@
 							<td>{{ employee.email }}</td>
 							<td>{{ employee.fname }}</td>
 							<td>{{ employee.lname }}</td>
+							<td>{{ employee.access }}</td>
 							<td>{{ employee.workinghall }}</td>
 							<td>
 								<a href="#editEmployeeModal" align="center" class="btn edit" title="Edit" value="{{ employee.id }}" id="edit" data-toggle="modal">
@@ -83,7 +85,7 @@
 					{% endfor %}
 				</table>
 			</div>
-			<!-- Delete Modal HTML -->
+			<!-- Delete Employee Modal-->
 			<div id="deleteEmployeeModal" class="modal fade">
 				<div class="modal-dialog">
 					<div class="modal-content">
@@ -102,7 +104,7 @@
 				</div>
 			</div>
 		</form>
-		<!-- Add Employee -->
+		<!-- Add Employee Modal-->
 		<form action="" method="POST">
 			{{ form.hidden_tag() }}
 			<fieldset class="form-group">
@@ -157,6 +159,22 @@
 									{{ form.lastName(class="form-control form-control-md") }}
 									{% endif %}
 								</div>
+								{% if current_user.is_admin() %}
+									<div class="form-group">
+										{{ form.role.label(class="form-control-label") }}
+
+										{% if form.role.errors %}
+											{{ form.role(class="form-control form-control-md is-invalid") }}
+											<div class="invalid-feedback">
+												{% for error in form.role.errors %}
+													<span>{{ error }}</span>
+												{% endfor %}
+											</div>
+										{% else %}
+											{{ form.role(class="form-control form-control-md") }}
+										{% endif %}
+									</div>
+								{% endif %}	
 								<div class="form-group">
 									{{ form.hall.label(class="form-control-label") }}
 									{{ form.hall(class="form-control form-control-md") }}
