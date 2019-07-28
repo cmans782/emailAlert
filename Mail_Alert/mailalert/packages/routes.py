@@ -20,7 +20,7 @@ def home():
         fname, lname = student_name.split()
         student = Student.query.filter_by(fname=fname, lname=lname).first()
         page = request.args.get('page', 1, type=int)
-        packages = Package.query.filter_by(student_id=student.id).order_by(Package.delivery_date.desc()).paginate(page=page, per_page=10)
+        packages = Package.query.filter_by(student_id=student.id).order_by(Package.delivery_date.desc()).paginate(page=page, per_page=7)
 
     return render_template('home.html', packages=packages, student=student, form=form)
 
