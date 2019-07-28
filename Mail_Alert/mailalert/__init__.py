@@ -28,11 +28,12 @@ def create_app(config_class=Config):
     login_manager.init_app(app)
     mail.init_app(app)
 
-    from mailalert.models import Package, Employee, Message, SentMail
+    # Admin Panel
+    from mailalert.models import Package, Employee, Message, SentMail, Student 
     admin.add_view(ModelView(Package, db.session))
     admin.add_view(ModelView(Employee, db.session))
     admin.add_view(ModelView(Message, db.session))
-    # admin.add_view(ModelView(SentMail, db.session))
+    admin.add_view(ModelView(Student, db.session))
 
 
     from mailalert.employees.routes import employees  #import blueprint instance

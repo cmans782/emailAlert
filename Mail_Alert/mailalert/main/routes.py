@@ -8,15 +8,6 @@ from mailalert.main.utils import send_package_update_email
 main = Blueprint('main', __name__)
 
 
-@main.route("/")
-@main.route("/home")
-@login_required
-def home():
-    page = request.args.get('page', 1, type=int)
-    packages = Package.query.filter_by(perishable=True).order_by(Package.delivery_date.desc()).paginate(page=page, per_page=10)
-    return render_template('home.html', packages=packages)
-
-
 @main.route("/composeEmail", methods=['GET', 'POST'])
 @login_required
 def compose_email():
@@ -31,7 +22,7 @@ def compose_email():
         message = Message.query.get(message_id)
         send_package_update_email(message.content, recipient_emails, cc_recipients)
         flash("Email successfully sent!", "success")
-        return redirect(url_for('main.home'))
+        return redirect(url_for('packages.home'))
 
     messages = Message.query.all()
     return render_template('composeEmail.html', title="Compose Email", composeEmailForm=composeEmailForm, \

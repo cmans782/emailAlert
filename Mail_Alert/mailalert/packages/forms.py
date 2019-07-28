@@ -11,3 +11,8 @@ class NewPackageForm(FlaskForm):
     description = StringField('Description', validators=[DataRequired()])
     perishable = BooleanField('Perishable')
     submit = SubmitField('Submit')
+
+class StudentInfoForm (FlaskForm):
+    userID = StringField('Student Identification', validators=[DataRequired()])
+    pick_up = BooleanField('Pick up Package')
+    submit = SubmitField("Search")
