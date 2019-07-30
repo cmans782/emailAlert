@@ -49,8 +49,8 @@
                         <br>
                         <h6><span style="font-weight:bold">ID:</span> {{ student.userID }} </h6>
                         <br>
-                        <!-- <h6>Hall: {{ student.room }}</h6>
-                        <br> -->
+                        <h6><span style="font-weight:bold">Hall:</span> {{ student.hall.name }} </h6>
+                        <br>
                         <h6><span style="font-weight:bold">Room:</span> {{ student.room }}</h6>
                         <br>
                         <h6><span style="font-weight:bold">Email:</span> {{ student.email }}</h6>
@@ -74,32 +74,32 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for package in packages.items %}
-                            {% if package.status == "Active" %}
-                                {% if package.perishable %}
-                                    <tr class="table-danger" data-status="{{ package.status }}">
-                                {% else %}
-                                    <tr data-status="{{ package.status }}">
-                                {% endif %}
-                                    <td>{{ package.id }}</td>
-                                    <td>{{ package.description }}</td>
-                                    <td><span class="badge badge-success">{{ package.status }}</span></td>
-                                    <td>{{ package.delivery_date.strftime('%m-%d-%Y') }}</td>
-                                    <td>{{ form.pick_up(class="form-control form-control-md", value=package.id) }}</td>
-                                </tr>
-                            {% elif package.status == "Picked Up" %} 
-                                {% if package.perishable %}
-                                    <tr class="table-danger" style="display:none;" data-status="{{ package.status }}">
-                                {% else %}
-                                    <tr style="display:none;" data-status="{{ package.status }}">
-                                {% endif %}
-                                    <td>{{ package.id }}</td> 
-                                    <td>{{ package.description }}</td> 
-                                    <td><span class="badge badge-danger">{{ package.status }}</span></td> 
-                                    <td>{{ package.delivery_date.strftime("%m-%d-%Y") }}</td> 
-                                    <td>{{ package.picked_up_date.strftime("%m-%d-%Y") }}</td> 
-                                </tr> 
+                        {% for package in active_packages.items %}
+                            {% if package.perishable %}
+                                <tr class="table-danger" data-status="{{ package.status }}">
+                            {% else %}
+                                <tr data-status="{{ package.status }}">
                             {% endif %}
+                            <td>{{ package.id }}</td>
+                            <td>{{ package.description }}</td>
+                            <td><span class="badge badge-success">{{ package.status }}</span></td>
+                            <td>{{ package.delivery_date.strftime('%m-%d-%Y') }}</td>
+                            <td>{{ form.pick_up(class="form-control form-control-md", value=package.id) }}</td>
+                            </tr>
+                        {% endfor %}
+
+                        {% for package in picked_up_packages.items %}
+                            {% if package.perishable %}
+                                <tr class="table-danger" style="display:none;" data-status="{{ package.status }}">
+                            {% else %}
+                                <tr style="display:none;" data-status="{{ package.status }}">
+                            {% endif %}
+                            <td>{{ package.id }}</td> 
+                            <td>{{ package.description }}</td> 
+                            <td><span class="badge badge-danger">{{ package.status }}</span></td> 
+                            <td>{{ package.delivery_date.strftime("%m-%d-%Y") }}</td> 
+                            <td>{{ package.picked_up_date.strftime("%m-%d-%Y") }}</td> 
+                            </tr> 
                         {% endfor %}
                     </tbody>
                 </table>
@@ -115,6 +115,7 @@
                                 </div>
                                 <div class="modal-body">
                                     <p>Please enter student ID to confirm pickup</p>
+                                    <input type="text" class="form-control form-control-md" name="ID_confirm" placeholder="Student ID" required>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -127,10 +128,11 @@
             </form>
 
             <div class="row">
-                <div class="col">
-                    {% for page_num in packages.iter_pages(left_edge=1, right_edge=1, left_current=3, right_current=3) %}
+                <!-- page selection for active packages -->
+                <div class="col" id="active_page_selection">
+                    {% for page_num in active_packages.iter_pages(left_edge=1, right_edge=1, left_current=3, right_current=3) %}
                         {% if page_num %}
-                            {% if packages.page == page_num %}
+                            {% if active_packages.page == page_num %}
                                 <a class="btn btn-secondary mb-4" href="{{ url_for('packages.home', page=page_num) }}">{{ page_num }}</a>
                             {% else %}
                                 <a class="btn btn-light mb-4" href="{{ url_for('packages.home', page=page_num) }}">{{ page_num }}</a>
@@ -140,8 +142,22 @@
                         {% endif %}
                     {% endfor %}    
                 </div>
+                <!-- page selection for picked up packages packages -->
+                <div id="picked_up_page_selection" class="col" style="display:none">
+                    {% for page_num in picked_up_packages.iter_pages(left_edge=1, right_edge=1, left_current=3, right_current=3) %}
+                        {% if page_num %}
+                            {% if picked_up_packages.page == page_num %}
+                                <a class="btn btn-secondary mb-4" href="{{ url_for('packages.home', page=page_num) }}">{{ page_num }}</a>
+                            {% else %}
+                                <a class="btn btn-light mb-4" href="{{ url_for('packages.home', page=page_num) }}">{{ page_num }}</a>
+                            {% endif %}
+                        {% else %}
+                        ....
+                        {% endif %}
+                    {% endfor %}    
+                </div>
+                <!-- Pick up button -->
                 <div class="col">
-                    <!-- Pick up button -->
                     <div class="float-right">
                         <a id="pickupBtn" href="#pickupPackageModal" class="btn btn-success" data-toggle="modal"><span>Pick Up</span></a>
                     </div>
@@ -183,10 +199,14 @@ $(document).ready(function () {
         var inputValue = $(this).find("input").val();
         if (inputValue == 'Picked Up') {
             $("#pickUpLabel").text("Picked up");
+            $("#active_page_selection").hide()
+            $("#picked_up_page_selection").show()
             $("#pickupBtn").hide();
             $('input[name="pick_up"]').prop("checked", false)
         } else {
             $("#pickUpLabel").text("Pick Up");
+            $("#picked_up_page_selection").hide()
+            $("#active_page_selection").show()
         }
     });
    
@@ -195,6 +215,8 @@ $(document).ready(function () {
     $cbs = $('input[name="pick_up"]').click(function(){
         $pickUp.toggle( $cbs.is(":checked") );
     });
+
+    // $("#userID").val("");
 </script>
 
 {% endblock %}

@@ -29,12 +29,12 @@ def create_app(config_class=Config):
     mail.init_app(app)
 
     # Admin Panel
-    from mailalert.models import Package, Employee, Message, SentMail, Student 
+    from mailalert.models import Package, Employee, Message, SentMail, Student, Hall 
     admin.add_view(ModelView(Package, db.session))
     admin.add_view(ModelView(Employee, db.session))
     admin.add_view(ModelView(Message, db.session))
     admin.add_view(ModelView(Student, db.session))
-
+    admin.add_view(ModelView(Hall, db.session))
 
     from mailalert.employees.routes import employees  #import blueprint instance
     from mailalert.packages.routes import packages  

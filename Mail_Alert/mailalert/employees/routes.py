@@ -1,8 +1,8 @@
 from flask import render_template, url_for, flash, redirect, request, Blueprint
 from flask_login import login_user, current_user, logout_user, login_required
 from mailalert import db, bcrypt
-from mailalert.models import Employee
-from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, EditEmployeeForm, NewPasswordForm
+from mailalert.models import Employee, Hall
+from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, NewPasswordForm
 from mailalert.employees.utils import send_reset_email, generate_random_string, send_temp_password_email
 from mailalert.main.utils import requires_access_level
 
@@ -13,12 +13,16 @@ employees = Blueprint('employees', __name__)
 @requires_access_level('Building Director')
 def management():
     form = ManagementForm()
+    hall_list = Hall.query.all()
+    hall_list = [(hall.id, hall.name) for hall in hall_list]
+    form.hall.choices = hall_list
     if form.validate_on_submit():  # this will only be true if ManagementForm fields are all correct
         password = generate_random_string()
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')  # generate a password hash for the user that is being created
+        hall = Hall.query.get(form.hall.data)
         employee = Employee(email=form.email.data, fname=form.firstName.data, 
                             lname=form.lastName.data, access=form.role.data,    
-                            workinghall=form.hall.data, password=hashed_password) 
+                            hall=hall, password=hashed_password) 
         db.session.add(employee)  # creates a new employee object (can be found in models.py) so that we can insert it into our database
         db.session.commit()
         send_temp_password_email(employee, password)

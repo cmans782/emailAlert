@@ -13,32 +13,45 @@ packages = Blueprint('packages', __name__)
 @packages.route("/home", methods=['GET', 'POST'])
 @login_required
 def home():
-    packages, student = [], []
+    active_packages, picked_up_packages, student = [], [], []
     form = StudentInfoForm()
     if form.validate_on_submit():
-        student_name = form.userID.data
-        fname, lname = student_name.split()
-        student = Student.query.filter_by(fname=fname, lname=lname).first()
-        page = request.args.get('page', 1, type=int)
-        packages = Package.query.filter_by(student_id=student.id).order_by(Package.delivery_date.desc()).paginate(page=page, per_page=7)
-
-    return render_template('home.html', packages=packages, student=student, form=form)
+        student_id = form.userID.data
+        form.userID.data = '' # reset userID to an empty string 
+        student = Student.query.filter_by(userID=student_id).first()
+        if student:
+            page = request.args.get('page', 1, type=int)
+            active_packages = Package.query.filter_by(student_id=student.id, status='Active').order_by(Package.delivery_date.desc()).paginate(page=page, per_page=7)
+            picked_up_packages = Package.query.filter_by(student_id=student.id, status="Picked Up").order_by(Package.delivery_date.desc()).paginate(page=page, per_page=7)
+        else:
+            flash('We could not find that student', 'danger')
+    
+    return render_template('home.html', active_packages=active_packages, picked_up_packages=picked_up_packages,student=student, form=form)
 
 
 @packages.route("/pickup_package", methods=['POST'])
 @login_required
 def _pickup_package():
-    
-    package_id_list = request.form.getlist("pick_up")
-    if package_id_list:  # make sure the user selected at least one package
-        for package_id in package_id_list:
-            package = Package.query.get(package_id)   # get the package object using its id
-            package.status = 'Picked Up'
-            package.picked_up_date = datetime.now()
-            flash('Packages were successfully picked up!', 'success')
-        db.session.commit()
+    student_id = request.form["ID_confirm"]
+    student = Student.query.filter_by(userID=student_id).first()
+    if student:
+        package_id_list = request.form.getlist("pick_up")
+        if package_id_list:  # make sure the user selected at least one package
+            for package_id in package_id_list:
+                package = Package.query.get(package_id) # get the package object using its id
+                if package.owner is student:
+                    package.status = 'Picked Up'
+                    package.picked_up_date = datetime.now()
+                    flash('Packages were successfully picked up!', 'success')
+                else:
+                    flash('This package does not belong to this student', 'danger')
+                    break
+            db.session.commit()
+        else:
+            flash('No packages were selected!', 'danger')
     else:
-        flash('No packages were selected!', 'danger')
+        flash('No student found with that ID', 'danger')
+    
     return redirect(url_for('packages.home'))
 
 

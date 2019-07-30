@@ -22,9 +22,9 @@ class Employee(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     fname = db.Column(db.String(100), nullable=False)
     lname = db.Column(db.String(100), nullable=False)
-    workinghall = db.Column(db.String(2), nullable=False)
     password = db.Column(db.String(60), nullable=False)
     access = db.Column(db.String, nullable=False, default="DR")
+    hall_id = db.Column(db.Integer, db.ForeignKey('hall.id'))
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
@@ -47,7 +47,7 @@ class Employee(db.Model, UserMixin):
 
 
     def __repr__(self):
-        return f"Employee('{self.hired_date}', '{self.email}', '{self.fname}', '{self.lname}', '{self.workinghall}', '{self.access}')"
+        return f"Employee('{self.hired_date}', '{self.email}', '{self.fname}', '{self.lname}', '{self.hall}', '{self.access}')"
 
 
 class Student(db.Model):
@@ -58,10 +58,21 @@ class Student(db.Model):
     lname = db.Column(db.String(100), nullable=False)
     room = db.Column(db.String(6), nullable=False)
     phoneNumber = db.Column(db.String(15))
+    hall_id = db.Column(db.Integer, db.ForeignKey('hall.id'))
     package = db.relationship('Package', backref='owner')
 
     def __repr__(self):
         return f"Student('{self.email}','{self.userID}','{self.fname}', '{self.lname}', '{self.room}', '{self.phoneNumber}')"
+
+
+class Hall(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False) 
+    students = db.relationship('Student', backref='hall')
+    employees = db.relationship('Employee', backref='hall')
+
+    def __repr__(self):
+        return f"Hall('{self.name}')"
 
 
 class Package(db.Model):
