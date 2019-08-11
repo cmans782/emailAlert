@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, IntegerField, FieldList, BooleanField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from wtforms import StringField, SubmitField, IntegerField, FieldList, BooleanField, HiddenField
+from wtforms.validators import DataRequired, Length, Email, ValidationError, NumberRange
+from mailalert.models import Student
 
 
 class NewPackageForm(FlaskForm):
@@ -12,7 +13,15 @@ class NewPackageForm(FlaskForm):
     perishable = BooleanField('Perishable')
     submit = SubmitField('Submit')
 
-class StudentInfoForm (FlaskForm):
-    userID = StringField('Student Identification', validators=[DataRequired()])
+
+class PackagePickUpForm(FlaskForm):
     pick_up = BooleanField('Pick up Package')
-    submit = SubmitField("Search")
+    student_id = HiddenField('Student ID')
+    ID_confirm = IntegerField('ID Confirm', validators=[
+                              DataRequired(message='Please enter a student ID')])
+    confirm = SubmitField('Confirm')
+
+    def validate_ID_confirm(self, field):
+        student = Student.query.filter_by(userID=field.data).first()
+        if not student:
+            raise ValidationError('That student does not exist')

@@ -1,11 +1,21 @@
 from flask import render_template, Blueprint, request, flash, redirect, url_for
 from flask_login import login_required
-from mailalert.main.forms import ComposeEmailForm, CreateMessageForm
+from mailalert.main.forms import ComposeEmailForm, CreateMessageForm, StudentSearchForm
 from mailalert.models import Message, Package
 from mailalert import db
 from mailalert.main.utils import send_package_update_email
 
 main = Blueprint('main', __name__)
+
+
+@main.route("/", methods=['GET', 'POST'])
+@main.route("/home", methods=['GET', 'POST'])
+@login_required
+def home():
+    form = StudentSearchForm()
+    if form.validate_on_submit():
+        return redirect(url_for('packages.student_packages', student_id=form.userID.data))
+    return render_template('home.html', form=form)
 
 
 @main.route("/composeEmail", methods=['GET', 'POST'])
@@ -14,19 +24,20 @@ def compose_email():
     cc_recipients = ""
     composeEmailForm = ComposeEmailForm()
     createMessageForm = CreateMessageForm()
-    if composeEmailForm.validate_on_submit(): 
+    if composeEmailForm.validate_on_submit():
         recipient_emails = composeEmailForm.recipient_email.data
         if composeEmailForm.cc_recipient.data:
             cc_recipients = composeEmailForm.cc_recipient.data
         message_id = request.form['options']
         message = Message.query.get(message_id)
-        send_package_update_email(message.content, recipient_emails, cc_recipients)
+        send_package_update_email(
+            message.content, recipient_emails, cc_recipients)
         flash("Email successfully sent!", "success")
-        return redirect(url_for('packages.home'))
+        return redirect(url_for('main.home'))
 
     messages = Message.query.all()
-    return render_template('composeEmail.html', title="Compose Email", composeEmailForm=composeEmailForm, \
-                            createMessageForm=createMessageForm, messages=messages)
+    return render_template('composeEmail.html', title="Compose Email", composeEmailForm=composeEmailForm,
+                           createMessageForm=createMessageForm, messages=messages)
 
 
 @main.route("/_create_message", methods=['POST'])

@@ -1,0 +1,253 @@
+{% extends "layout_with_navbar.html" %}
+{%block content %}
+<form action="" method="POST">
+    {{ student_search_form.hidden_tag() }}
+    <div class="card" style="width:500px; margin:0 auto;">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-9">
+                    {% if student_search_form.userID.errors %}
+                        {{ student_search_form.userID(class="form-control form-control-md is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in student_search_form.userID.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ student_search_form.userID(class="form-control form-control-md", placeholder='Search for Student') }}
+                    {% endif %}
+                </div>
+                <div class="col-3">
+                    {{ student_search_form.submit(class="btn btn-success") }}
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Filter buttons -->
+<h2> 
+    <div class="btn-group btn-group-toggle pull-right" data-toggle="buttons"> 
+        <label class="btn btn-success active">
+            <input style="visibility:hidden" type="radio" name="status" value="Active"> Active
+        </label>
+        <label class="btn btn-danger">
+            <input style="visibility:hidden" type="radio" name="status" value="Picked Up"> Picked Up
+        </label>
+    </div>
+</h2> 
+<!-- End Filter buttons -->
+
+<div class="row" style="margin-top:50px;">
+    <!-- studnt information card -->
+    <div class="col-4">
+        <div class="card">
+            <div class="card-body">
+                <div class='form-label-group'>
+                    <h5 style="font-weight:bold; text-align:center;">{{ student.fname }} {{ student.lname }}</h5>
+                    <br>
+                    <h6><span style="font-weight:bold">ID:</span> {{ student.userID }} </h6>
+                    <br>
+                    <h6><span style="font-weight:bold">Hall:</span> {{ student.hall.name }} </h6>
+                    <br>
+                    <h6><span style="font-weight:bold">Room:</span> {{ student.room }}</h6>
+                    <br>
+                    <h6><span style="font-weight:bold">Email:</span> {{ student.email }}</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end student information card -->
+
+    <div class="col-8">
+        <form  id=pickup_form>
+            <!-- packages table -->
+            <table id="packagesTable" class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Package&nbsp;#</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th id="deliveryDateLabel">Delivered</th>
+                        <th id="pickUpLabel">Pick&nbsp;Up</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for package in active_packages.items %}
+                        {% if package.perishable %}
+                            <tr class="table-danger" data-status="{{ package.status }}">
+                        {% else %}
+                            <tr data-status="{{ package.status }}">
+                        {% endif %}
+                        <td>{{ package.id }}</td>
+                        <td>{{ package.description }}</td>
+                        <td><span class="badge badge-success">{{ package.status }}</span></td>
+                        <td>{{ package.delivery_date.strftime('%m-%d-%Y') }}</td>
+                        <td>{{ package_pickup_form.pick_up(class="form-control form-control-md", value=package.id) }}</td>
+                        </tr>
+                    {% endfor %}
+
+                    {% for package in picked_up_packages.items %}
+                        {% if package.perishable %}
+                            <tr class="table-danger" style="display:none;" data-status="{{ package.status }}">
+                        {% else %}
+                            <tr style="display:none;" data-status="{{ package.status }}">
+                        {% endif %}
+                        <td>{{ package.id }}</td> 
+                        <td>{{ package.description }}</td> 
+                        <td><span class="badge badge-danger">{{ package.status }}</span></td> 
+                        <td>{{ package.delivery_date.strftime("%m-%d-%Y") }}</td> 
+                        <td>{{ package.picked_up_date.strftime("%m-%d-%Y") }}</td> 
+                        </tr> 
+                    {% endfor %}
+                </tbody>
+            </table>
+            <!-- end packages table -->
+
+            <!-- Pickup Package Modal -->
+            <div id="pickupPackageModal" class="modal fade">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Pickup Package</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                              <p>Please enter student ID to confirm pickup</p>
+                              {{ package_pickup_form.ID_confirm(class="form-control form-control-md", placeholder="Student ID") }}
+                              <div id='errorDiv' class="invalid-feedback" style='display:none;'>
+                                <span id='errorAlert'></span>
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                              {{ package_pickup_form.confirm(class="btn btn-success") }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <!-- End Pickup Package Modal -->
+
+            <!-- pass the students ID in the form as a hidden field -->
+            {{ package_pickup_form.student_id(value=student.userID) }}
+        </form>
+
+        <div class="row">
+            <!-- page selection for active packages -->
+            <div class="col" id="active_page_selection">
+                {% for page_num in active_packages.iter_pages(left_edge=1, right_edge=1, left_current=3, right_current=3) %}
+                    {% if page_num %}
+                        {% if active_packages.page == page_num %}
+                            <a class="btn btn-secondary mb-4" href="{{ url_for('main.home', page=page_num) }}">{{ page_num }}</a>
+                        {% else %}
+                            <a class="btn btn-light mb-4" href="{{ url_for('main.home', page=page_num) }}">{{ page_num }}</a>
+                        {% endif %}
+                    {% else %}
+                    ....
+                    {% endif %}
+                {% endfor %}    
+            </div>
+            <!-- page selection for picked up packages packages -->
+            <div id="picked_up_page_selection" class="col" style="display:none">
+                {% for page_num in picked_up_packages.iter_pages(left_edge=1, right_edge=1, left_current=3, right_current=3) %}
+                    {% if page_num %}
+                        {% if picked_up_packages.page == page_num %}
+                            <a class="btn btn-secondary mb-4" href="{{ url_for('main.home', page=page_num) }}">{{ page_num }}</a>
+                        {% else %}
+                            <a class="btn btn-light mb-4" href="{{ url_for('main.home', page=page_num) }}">{{ page_num }}</a>
+                        {% endif %}
+                    {% else %}
+                    ....
+                    {% endif %}
+                {% endfor %}    
+            </div>
+            <!-- Pick up button -->
+            <div class="col">
+                <div class="float-right">
+                    <a id="pickupBtn" href="#pickupPackageModal" class="btn btn-success" data-toggle="modal"><span>Pick Up</span></a>
+                </div>
+            </div>
+        </div>
+    </div>  
+</div>
+
+<script type="text/javascript">
+$(document).ready(function () {
+    // Filter buttons based on radio button selected
+    $(".btn-group .btn").click(function () {
+        var inputValue = $(this).find("input").val();
+        if (inputValue != 'all') {
+            var target = $('table tr[data-status="' + inputValue + '"]');
+            $("table tbody tr").not(target).hide();
+            target.fadeIn();
+        } else {
+            $("table tbody tr").fadeIn();
+        }
+        // Changing the class of status label to support Bootstrap 4
+        var bs = $.fn.tooltip.Constructor.VERSION;
+        var str = bs.split(".");
+        if (str[0] == 4) {
+            $(".label").each(function () {
+                var classStr = $(this).attr("class");
+                var newClassStr = classStr.replace(/label/g, "badge");
+                $(this).removeAttr("class").addClass(newClassStr);
+            });
+        }
+    });
+});
+    // change table label from pick up to picked up based on active or picked up package
+    $(".btn-group .btn").click(function () {
+        var inputValue = $(this).find("input").val();
+        if (inputValue == 'Picked Up') {
+            $("#pickUpLabel").text("Picked up");
+            $("#active_page_selection").hide()
+            $("#picked_up_page_selection").show()
+            $("#pickupBtn").hide();
+            $('input[name="pick_up"]').prop("checked", false)
+        } else {
+            $("#pickUpLabel").text("Pick Up");
+            $("#picked_up_page_selection").hide()
+            $("#active_page_selection").show()
+        }
+    });
+   
+    // toggle "pick up" button on based on if a package is checked
+    var $pickUp = $("#pickupBtn").hide();
+    $cbs = $('input[name="pick_up"]').click(function(){
+        $pickUp.toggle( $cbs.is(":checked") );
+    });
+
+    // post package pickup through ajax
+    $('#pickup_form').submit(function (e) {
+        var student_id = $('#ID_confirm').val()
+        var url = "{{ url_for('packages._pickup_package') }}"; // send the form data here.
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: $('#pickup_form').serialize(), // serializes the form's elements.
+        })
+        .done(function(data){
+          if (data.error) {
+            $('#ID_confirm').addClass('is-invalid');
+            $('#errorDiv').show();
+            $('#errorAlert').text(data.error);
+          } else {
+            window.location.href = '/';
+          }
+        });
+        e.preventDefault(); // block the traditional submission of the form.
+    });
+
+    // Inject our CSRF token into our AJAX request.
+    var csrf_token = "{{ csrf_token() }}";
+
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrf_token);
+            }
+        }
+    });
+</script>
+
+{% endblock %}
