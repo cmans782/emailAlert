@@ -79,4 +79,14 @@ body {
     font-size: 2.5rem;
   }
 
+  .fixed-header{
+    max-height: 450px;
+    overflow-y: auto;
+  }
+
+  .fixed-header thead th {
+    position: sticky;
+    top: 0;
+    background: #fafafa;
+  }
   

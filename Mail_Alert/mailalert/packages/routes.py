@@ -18,16 +18,13 @@ def student_packages(student_id):
     student_search_form = StudentSearchForm()
 
     student = Student.query.filter_by(userID=student_id).first_or_404()
-
-    page = request.args.get('page', 1, type=int)
-    active_packages = Package.query.filter_by(student_id=student.id, status='Active').order_by(
-        Package.delivery_date.desc()).paginate(page=page, per_page=7)
-    picked_up_packages = Package.query.filter_by(student_id=student.id, status="Picked Up").order_by(
-        Package.delivery_date.desc()).paginate(page=page, per_page=7)
-
+    
+    active_packages = Package.query.filter_by(student_id=student.id, status='Active').order_by(Package.delivery_date.desc())
+    picked_up_packages = Package.query.filter_by(student_id=student.id, status="Picked Up").order_by(Package.delivery_date.desc())
+    
     if student_search_form.submit.data and student_search_form.validate_on_submit():
         return redirect(url_for('packages.student_packages', student_id=student_search_form.userID.data))
-
+    
     return render_template('student_packages.html', student=student,
                            package_pickup_form=package_pickup_form,
                            student_search_form=student_search_form,
