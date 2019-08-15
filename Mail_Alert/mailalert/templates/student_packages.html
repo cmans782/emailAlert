@@ -44,7 +44,7 @@
         <div class="card">
             <div class="card-body">
                 <div class='form-label-group'>
-                    <h5 style="font-weight:bold; text-align:center;">{{ student.fname }} {{ student.lname }}</h5>
+                    <h5 style="font-weight:bold; text-align:center;">{{ student.fname }} {{ student.lname }} </h5>
                     <br>
                     <h6><span style="font-weight:bold">ID:</span> {{ student.userID }} </h6>
                     <br>
@@ -164,59 +164,59 @@ $(document).ready(function () {
     });
 });
 
-    // change table label from pick up to picked up based on active or picked up package
-    $(".btn-group .btn").click(function () {
-        var inputValue = $(this).find("input").val();
-        if (inputValue == 'Picked Up') {
-            $("#pickUpLabel").text("Picked up");
-            $("#active_page_selection").hide()
-            $("#picked_up_page_selection").show()
-            $("#pickupBtn").hide();
-            $('input[name="pick_up"]').prop("checked", false)
+// change table label from pick up to picked up based on active or picked up package
+$(".btn-group .btn").click(function () {
+    var inputValue = $(this).find("input").val();
+    if (inputValue == 'Picked Up') {
+        $("#pickUpLabel").text("Picked up");
+        $("#active_page_selection").hide()
+        $("#picked_up_page_selection").show()
+        $("#pickupBtn").hide();
+        $('input[name="pick_up"]').prop("checked", false)
+    } else {
+        $("#pickUpLabel").text("Pick Up");
+        $("#picked_up_page_selection").hide()
+        $("#active_page_selection").show()
+    }
+});
+
+// toggle "pick up" button on based on if a package is checked
+var $pickUp = $("#pickupBtn").hide();
+$cbs = $('input[name="pick_up"]').click(function(){
+    $pickUp.toggle( $cbs.is(":checked") );
+});
+
+// post package pickup through ajax
+$('#pickup_form').submit(function (e) {
+    var student_id = $('#ID_confirm').val()
+    var url = "{{ url_for('packages._pickup_package') }}"; // send the form data here.
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: $('#pickup_form').serialize(), // serializes the form's elements.
+    })
+    .done(function(data){
+        if (data.error) {
+        $('#ID_confirm').addClass('is-invalid');
+        $('#errorDiv').show();
+        $('#errorAlert').text(data.error);
         } else {
-            $("#pickUpLabel").text("Pick Up");
-            $("#picked_up_page_selection").hide()
-            $("#active_page_selection").show()
+        window.location.href = '/';
         }
     });
-   
-    // toggle "pick up" button on based on if a package is checked
-    var $pickUp = $("#pickupBtn").hide();
-    $cbs = $('input[name="pick_up"]').click(function(){
-        $pickUp.toggle( $cbs.is(":checked") );
-    });
+    e.preventDefault(); // block the traditional submission of the form.
+});
 
-    // post package pickup through ajax
-    $('#pickup_form').submit(function (e) {
-        var student_id = $('#ID_confirm').val()
-        var url = "{{ url_for('packages._pickup_package') }}"; // send the form data here.
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: $('#pickup_form').serialize(), // serializes the form's elements.
-        })
-        .done(function(data){
-          if (data.error) {
-            $('#ID_confirm').addClass('is-invalid');
-            $('#errorDiv').show();
-            $('#errorAlert').text(data.error);
-          } else {
-            window.location.href = '/';
-          }
-        });
-        e.preventDefault(); // block the traditional submission of the form.
-    });
+// Inject our CSRF token into our AJAX request.
+var csrf_token = "{{ csrf_token() }}";
 
-    // Inject our CSRF token into our AJAX request.
-    var csrf_token = "{{ csrf_token() }}";
-
-    $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
-            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", csrf_token);
-            }
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrf_token);
         }
-    });
+    }
+});
 </script>
 
 {% endblock %}

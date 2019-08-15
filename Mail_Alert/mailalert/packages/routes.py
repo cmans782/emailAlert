@@ -18,13 +18,15 @@ def student_packages(student_id):
     student_search_form = StudentSearchForm()
 
     student = Student.query.filter_by(userID=student_id).first_or_404()
-    
-    active_packages = Package.query.filter_by(student_id=student.id, status='Active').order_by(Package.delivery_date.desc())
-    picked_up_packages = Package.query.filter_by(student_id=student.id, status="Picked Up").order_by(Package.delivery_date.desc())
-    
+
+    active_packages = Package.query.filter_by(
+        student_id=student.id, status='Active').order_by(Package.delivery_date.desc())
+    picked_up_packages = Package.query.filter_by(
+        student_id=student.id, status="Picked Up").order_by(Package.delivery_date.desc())
+
     if student_search_form.submit.data and student_search_form.validate_on_submit():
         return redirect(url_for('packages.student_packages', student_id=student_search_form.userID.data))
-    
+
     return render_template('student_packages.html', student=student,
                            package_pickup_form=package_pickup_form,
                            student_search_form=student_search_form,
@@ -57,18 +59,20 @@ def _pickup_package():
 def newPackage():
     form = NewPackageForm()
     if form.validate_on_submit():
-        firstName = request.form.getlist('firstName')
-        lastName = request.form.getlist('lastName')
+        name = request.form.getlist('name')
         roomNumber = request.form.getlist('roomNumber')
         description = request.form.getlist('description')
         perishable = request.form.getlist('perishable')
 
-        for i in range(len(firstName)):
+        for i in range(len(name)):
+            fname, lname = name[i].split()
+            fname = fname.capitalize()
+            lname = lname.capitalize()
             # convert perishable from string value to boolean
             result = string_to_bool(perishable[i])
             # get the student with the name and room number entered
             student = Student.query.filter_by(
-                fname=firstName[i], lname=lastName[i], room=roomNumber[i]).first()
+                fname=fname, lname=lname, room=roomNumber[i]).first()
             # create a new package from user input and make the package a child of the student object
             package = Package(
                 description=description[i], perishable=result, dr=current_user.fname, owner=student)
@@ -78,6 +82,33 @@ def newPackage():
         flash('Packages sucessfully added!', 'success')
         return redirect(url_for("main.home"))
     return render_template('newPackage.html', title='New_Package', form=form)
+
+
+@packages.route("/newPackage/validate", methods=['POST'])
+@login_required
+def _validate():
+    name = request.form['name']
+    roomNumber = request.form['roomNumber']
+
+    if len(name.split()) <= 1:
+        return jsonify({'name_error': 'Enter first and last name of student'})
+
+    fname, lname = name.split()
+    fname = fname.capitalize()
+    lname = lname.capitalize()
+
+    student = Student.query.filter_by(fname=fname, lname=lname).first()
+    if not student:
+        return jsonify({'name_error': 'Student does not exist'})
+
+    if roomNumber:
+        if student.room != roomNumber:
+            return jsonify({'room_error': 'Student does not live in this room',
+                            'roomNumber': student.room,
+                            'name': fname + ' ' + lname})
+
+    return jsonify({'roomNumber': student.room,
+                    'name': fname + ' ' + lname})
 
 
 @packages.route("/packages", methods=['GET'])

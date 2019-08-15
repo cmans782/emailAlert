@@ -5,8 +5,7 @@ from mailalert.models import Student
 
 
 class NewPackageForm(FlaskForm):
-    firstName = StringField('First Name', validators=[DataRequired()])
-    lastName = StringField('Last Name', validators=[DataRequired()])
+    name = StringField('Name', validators=[DataRequired()])
     roomNumber = StringField('Rooom Number', validators=[DataRequired()])
     status = StringField('Package Status', default='Active')
     description = StringField('Description', validators=[DataRequired()])
@@ -24,4 +23,4 @@ class PackagePickUpForm(FlaskForm):
     def validate_ID_confirm(self, field):
         student = Student.query.filter_by(userID=field.data).first()
         if not student:
-            raise ValidationError('That student does not exist')
+            raise ValidationError('Student does not exist')

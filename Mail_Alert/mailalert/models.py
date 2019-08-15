@@ -61,7 +61,7 @@ class Student(db.Model):
     package = db.relationship('Package', backref='owner')
 
     def __repr__(self):
-        return f"Student('{self.email}','{self.userID}','{self.fname}', '{self.lname}', '{self.room}', '{self.phoneNumber}')"
+        return f"Student('{self.email}','{self.userID}', '{self.fname}', '{self.lname}', '{self.room}', '{self.phoneNumber}')"
 
 
 class Hall(db.Model):

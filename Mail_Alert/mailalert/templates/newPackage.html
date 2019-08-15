@@ -2,66 +2,31 @@
 {%block content %}
 
 <div style="margin-left:auto; margin-right:auto;">
-    <form action="" method="POST">
+    <form action="" method="POST" id='newpackageform'>
+        {{ form.hidden_tag() }}
         <table id="packageTable" class="table order-list">
             <thead>
                 <tr>
-                    <!-- <td>Package Number</td>  -->
-                    <td>First Name</td>
-                    <td>Last Name</td>
+                    <td>Name</td>
                     <td>Room #</td>
                     <td>Description</td>
                     <td>Perishable</td>
-                    <!-- <td></td> -->
-                    <!-- <td></td> -->
                 </tr>
             </thead>
-            {{ form.hidden_tag() }}
             <tbody>
                 <tr>
-                    <!-- <td class="col-sm-1"> -->
-                    <!-- </td> -->
-
-                    <!-- <td class="col-sm-6"> -->
                     <td>
-                        {% if form.firstName.errors %}
-                        {{ form.firstName(class="form-control form-control-md is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.firstName.errors %}
-                            <span>{{ error }}</span>
-                            {% endfor %}
+                        {{ form.name(class="form-control form-control-md") }}
+                        <div name='name-error' class="invalid-feedback" style='display:none;'>
+                            <span name='name-error'></span>
                         </div>
-                        {% else %}
-                        {{ form.firstName(class="form-control form-control-md") }}
-                        {% endif %}
                     </td>
-                    <!-- <td class="col-sm-2"> -->
                     <td>
-                        {% if form.lastName.errors %}
-                        {{ form.lastName(class="form-control form-control-md is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.lastName.errors %}
-                            <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        {{ form.lastName(class="form-control form-control-md") }}
-                        {% endif %}
-                    </td>
-                    <!-- <td class="col-sm-1"> -->
-                    <td>
-                        {% if form.roomNumber.errors %}
-                        {{ form.roomNumber(class="form-control form-control-md is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.roomNumber.errors %}
-                            <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                        {% else %}
                         {{ form.roomNumber(class="form-control form-control-md") }}
-                        {% endif %}
+                        <div name='room-error' class="invalid-feedback" style='display:none;'>
+                            <span name='room-error'></span>
+                        </div>
                     </td>
-                    <!-- <td class="col-sm-4"> -->
                     <td>
                         {% if form.description.errors %}
                         {{ form.description(class="form-control form-control-md is-invalid") }}
@@ -78,10 +43,7 @@
                         <input type="checkbox" name="perishable" value="True">
                         <input type="hidden" name="perishable" value="False">
                     </td>
-                    <td>
-                        <!-- <td class="col-sm-2"> -->
-                        <a class="deleteRow"></a>
-                    </td>
+                    <td><a class="deleteRow"></a></td>
                     <td></td>
                 </tr>
             </tbody>
@@ -91,7 +53,6 @@
                         <input type="button" class="btn btn-lg btn-block " id="addrow" value="Add Row" />
                     </td>
                     <td>
-                        <!-- <td colspan="1"> -->
                         {{form.submit(class="form-control form-control-md btn-success")}}
                     </td>
                     <td></td>
@@ -103,48 +64,29 @@
 </div>
 
 <script>
-    $(document).ready(function () {
-        var counter = 0;
-        var cols = "";
+$(document).ready(function() {
+    var name_error;
+    var room_error;
+    var counter = 0;
+    var cols = '';
 
-        // cols += '<td></td>';
-        cols += '<td> \
-                {% if form.firstName.errors %} \
-                    {{ form.firstName(class="form-control form-control-md is-invalid") }} \
-                    <div class="invalid-feedback"> \
-                        {% for error in form.firstName.errors %} \
-                            <span>{{ error }}</span> \
-                        {% endfor %} \
-                    </div> \
-                {% else %} \
-                    {{ form.firstName(class="form-control form-control-md") }} \
-                {% endif %} \
-            </td>';
-        cols += '<td> \
-                {% if form.lastName.errors %} \
-                    {{ form.lastName(class="form-control form-control-md is-invalid") }} \
-                    <div class="invalid-feedback"> \
-                        {% for error in form.lastName.errors %} \
-                            <span>{{ error }}</span> \
-                        {% endfor %} \
-                    </div> \
-                {% else %} \
-                    {{ form.lastName(class="form-control form-control-md") }} \
-                {% endif %} \
-            </td>';
-        cols += '<td> \
-                {% if form.roomNumber.errors %} \
-                    {{ form.roomNumber(class="form-control form-control-md is-invalid") }} \
-                    <div class="invalid-feedback"> \
-                        {% for error in form.roomNumber.errors %} \
-                            <span>{{ error }}</span> \
-                        {% endfor %} \
-                    </div> \
-                {% else %} \
-                    {{ form.roomNumber(class="form-control form-control-md") }} \
-                {% endif %} \
-            </td>';
-        cols += '<td> \
+    // cols += '<td></td>';
+    cols +=
+        '<td> \
+            {{ form.name(class="form-control form-control-md") }} \
+            <div name="name-error" class="invalid-feedback" style="display:none;"> \
+                <span name="name-error"></span> \
+            </div> \
+        </td>';
+    cols +=
+        '<td> \
+            {{ form.roomNumber(class="form-control form-control-md") }} \
+            <div name="room-error" class="invalid-feedback" style="display:none;"> \
+                <span name="room-error"></span> \
+            </div> \
+        </td>';
+    cols +=
+        '<td> \
                 {% if form.description.errors %} \
                     {{ form.description(class="form-control form-control-md is-invalid") }} \
                     <div class="invalid-feedback"> \
@@ -156,50 +98,135 @@
                     {{ form.description(class="form-control form-control-md") }} \
                 {% endif %} \
             </td>';
-        cols += '<td class="col-sm-2"> \
+    cols +=
+        '<td class="col-sm-2"> \
                     <input type="checkbox" name="perishable" value="True"> \
                     <input type="hidden" name="perishable" value="False"> \
-                </td>';          
+                </td>';
 
-        cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
-        cols += '<td></td>';
+    cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
+    cols += '<td></td>';
 
-        $("#addrow").on('keyup', function (event) {
-            // if tab key is pressed
-            if (event.which == 9) {
-                newRow();
-            }
-        });
-
-        $("#addrow").on("click", function () {
+    $('#addrow').on('keyup', function(event) {
+        // if tab key is pressed
+        if (event.which == 9) {
             newRow();
-        });
+        }
+    });
 
-        function newRow() {
-            var newRow = $("<tr>");
-            newRow.append(cols);
-            $("table.order-list").append(newRow);
+    $('#addrow').on('click', function() {
+        newRow();
+    });
 
-            var empTable = document.getElementById("packageTable");
-            var trArray = empTable.rows;
-            var lastTrElem = trArray[trArray.length - 2];
-            var lastTdElem = lastTrElem.firstChild;
-            var inputElem = lastTdElem.firstChild;
-            inputElem.focus();
-        };
+    function newRow() {
+        var newRow = $('<tr>');
+        newRow.append(cols);
+        $('table.order-list').append(newRow);
 
-        $("table.order-list").on("click", ".ibtnDel", function (event) {
-            $(this).closest("tr").remove();
-            counter -= 1
-        });
+        var empTable = document.getElementById('packageTable');
+        var trArray = empTable.rows;
+        var lastTrElem = trArray[trArray.length - 2];
+        var lastTdElem = lastTrElem.firstChild;
+        var inputElem = lastTdElem.firstChild;
+        inputElem.focus();
+    }
 
-        $(document).on('click', ':checkbox', function() {
-            if ($(this).is(':checked')) {
-                $(this).next("input").remove();
-            } else {
-                $("<input type='hidden' name='perishable' value='False'>").insertAfter(this);
+    $('table.order-list').on('click', '.ibtnDel', function(event) {
+        $(this).closest('tr').remove();
+        counter -= 1;
+    });
+
+    $(document).on('click', ':checkbox', function() {
+        if ($(this).is(':checked')) {
+            $(this).next('input').remove();
+        }
+        else {
+            $("<input type='hidden' name='perishable' value='False'>").insertAfter(this);
+        }
+    });
+
+
+    // validate that student name entered exists
+    $(document).on('focusout','[name="name"]', function(e) {
+        var url = "{{ url_for('packages._validate') }}"; // send the form data here. 
+        name = $(this).val()
+        $.ajax({
+            type: 'POST',
+            url: url,
+            context: this,
+            data: {
+                name: $(this).val(),
+                roomNumber: $(this).parent().next().children('input').val()
+                }
+        }).done(function(data) {
+            if (data.name_error) {
+                name_error = data.name_error
+                $(this).addClass('is-invalid');
+                $(this).next().show()
+                $(this).next().children().text(data.name_error);
+                $(this).parent().next().children('div').hide();
+            }
+            else {
+                name_error = '';
+                $(this).removeClass('is-invalid');
+                $(this).next().hide();
+                $(this).val(data.name);
+                $(this).parent().next().children('input').val(data.roomNumber);
+                $(this).parent().next().children('input').removeClass('is-invalid');
+                $(this).parent().next().children('div').hide();
             }
         });
+        e.preventDefault(); // block the traditional submission of the form.
     });
+
+    // validate room number entered
+    $(document).on('focusout','[name="roomNumber"]', function(e) {
+        var url = "{{ url_for('packages._validate') }}"; // send the form data here.
+        $.ajax({
+            type: 'POST',
+            url: url,
+            context: this,
+            data: {
+                name: $(this).parent().prev().children('input').val(),
+                roomNumber: $(this).val()
+                }
+        }).done(function(data) {
+            if (data.name_error) {
+                return;
+            }
+            else if (data.room_error) {
+                room_error = data.room_error; // assign error to global variable
+                $(this).addClass('is-invalid');
+                $(this).next().show();
+                $(this).next().children().text(data.room_error);
+            }
+            else {
+                room_error = '';
+                $(this).removeClass('is-invalid');
+                $(this).next().hide();
+                $(this).val(data.roomNumber);
+            }
+        });
+        e.preventDefault(); // block the traditional submission of the form.
+    });
+
+    // validate name and room number on submit
+    $('#submit').on('click', function(e) {
+        if (name_error || room_error) {
+            alert("fix errors before submitting")
+            e.preventDefault(e);
+        }
+    });
+
+    // Inject our CSRF token into our AJAX request.
+    var csrf_token = '{{ csrf_token() }}';
+    $.ajaxSetup({
+        beforeSend : function(xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader('X-CSRFToken', csrf_token);
+            }
+        }
+    });
+});
 </script>
 {% endblock %}
