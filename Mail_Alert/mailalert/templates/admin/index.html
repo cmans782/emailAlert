@@ -1,5 +1,11 @@
 {% extends 'admin/master.html' %}
 
+{% block head_css %}
+<!-- use super to include all the css from the default -->
+{{ super() }} 
+
+{% endblock head_css %}
+
 {% block body %}
   <h1>Hello World!</h1>
 {% endblock %}

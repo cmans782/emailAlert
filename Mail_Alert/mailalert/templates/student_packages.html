@@ -6,15 +6,15 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-9">
-                    {% if student_search_form.userID.errors %}
-                        {{ student_search_form.userID(class="form-control form-control-md is-invalid") }}
+                    {% if student_search_form.student_id.errors %}
+                        {{ student_search_form.student_id(class="form-control form-control-md is-invalid") }}
                         <div class="invalid-feedback">
-                            {% for error in student_search_form.userID.errors %}
+                            {% for error in student_search_form.student_id.errors %}
                                 <span>{{ error }}</span>
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ student_search_form.userID(class="form-control form-control-md", placeholder='Search for Student') }}
+                        {{ student_search_form.student_id(class="form-control form-control-md", placeholder='Search for Student') }}
                     {% endif %}
                 </div>
                 <div class="col-3">
@@ -46,11 +46,11 @@
                 <div class='form-label-group'>
                     <h5 style="font-weight:bold; text-align:center;">{{ student.fname }} {{ student.lname }} </h5>
                     <br>
-                    <h6><span style="font-weight:bold">ID:</span> {{ student.userID }} </h6>
+                    <h6><span style="font-weight:bold">ID:</span> {{ student.student_id }} </h6>
                     <br>
                     <h6><span style="font-weight:bold">Hall:</span> {{ student.hall.name }} </h6>
                     <br>
-                    <h6><span style="font-weight:bold">Room:</span> {{ student.room }}</h6>
+                    <h6><span style="font-weight:bold">Room:</span> {{ student.room_number }}</h6>
                     <br>
                     <h6><span style="font-weight:bold">Email:</span> {{ student.email }}</h6>
                 </div>
@@ -116,7 +116,7 @@
                         </div>
                         <div class="modal-body">
                             <p>Please enter student ID to confirm pickup</p>
-                            {{ package_pickup_form.ID_confirm(class="form-control form-control-md", placeholder="Student ID") }}
+                            {{ package_pickup_form.student_id_confirm(class="form-control form-control-md", placeholder="Student ID") }}
                             <div id='errorDiv' class="invalid-feedback" style='display:none;'>
                             <span id='errorAlert'></span>
                             </div>
@@ -131,7 +131,7 @@
             <!-- End Pickup Package Modal -->
 
             <!-- pass the students ID in the form as a hidden field -->
-            {{ package_pickup_form.student_id(value=student.userID) }}
+            {{ package_pickup_form.student_id(value=student.student_id) }}
         </form>
 
         <!-- Pick up button -->
@@ -188,7 +188,7 @@ $cbs = $('input[name="pick_up"]').click(function(){
 
 // post package pickup through ajax
 $('#pickup_form').submit(function (e) {
-    var student_id = $('#ID_confirm').val()
+    // var student_id = $('#student_id_confirm').val()
     var url = "{{ url_for('packages._pickup_package') }}"; // send the form data here.
     $.ajax({
         type: "POST",
@@ -197,7 +197,7 @@ $('#pickup_form').submit(function (e) {
     })
     .done(function(data){
         if (data.error) {
-        $('#ID_confirm').addClass('is-invalid');
+        $('#student_id_confirm').addClass('is-invalid');
         $('#errorDiv').show();
         $('#errorAlert').text(data.error);
         } else {

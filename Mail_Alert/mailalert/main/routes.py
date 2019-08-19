@@ -1,7 +1,7 @@
 from flask import render_template, Blueprint, request, flash, redirect, url_for
-from flask_login import login_required
+from flask_login import login_required, current_user
 from mailalert.main.forms import ComposeEmailForm, CreateMessageForm, StudentSearchForm
-from mailalert.models import Message, Package
+from mailalert.models import Message, Package, SentMail
 from mailalert import db
 from mailalert.main.utils import send_package_update_email
 
@@ -14,7 +14,7 @@ main = Blueprint('main', __name__)
 def home():
     form = StudentSearchForm()
     if form.validate_on_submit():
-        return redirect(url_for('packages.student_packages', student_id=form.userID.data))
+        return redirect(url_for('packages.student_packages', student_id=form.student_id.data))
     return render_template('home.html', form=form)
 
 
@@ -30,6 +30,10 @@ def compose_email():
             cc_recipients = composeEmailForm.cc_recipient.data
         message_id = request.form['options']
         message = Message.query.get(message_id)
+        # log the email sent
+        email = SentMail(employee=current_user, message=message)
+        db.session.add(email)
+        db.session.commit()
         send_package_update_email(
             message.content, recipient_emails, cc_recipients)
         flash("Email successfully sent!", "success")

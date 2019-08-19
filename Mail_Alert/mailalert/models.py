@@ -19,12 +19,19 @@ def load_user(id):
 class Employee(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     hired_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    end_date = db.Column(db.DateTime)
     email = db.Column(db.String(120), unique=True, nullable=False)
     fname = db.Column(db.String(100), nullable=False)
     lname = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(60), nullable=False)
     access = db.Column(db.String, nullable=False, default="DR")
     hall_id = db.Column(db.Integer, db.ForeignKey('hall.id'))
+    logins = db.relationship('Login', backref='employee')
+    sent_mail = db.relationship('SentMail', backref='employee')
+    inputted_packages = db.relationship(
+        'Package', foreign_keys='[Package.employee_input_id]', backref='inputted')
+    removed_packages = db.relationship(
+        'Package', foreign_keys='[Package.employee_remove_id]', backref='removed')
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
@@ -46,29 +53,30 @@ class Employee(db.Model, UserMixin):
         return ACCESS[self.access] >= ACCESS[access_level]
 
     def __repr__(self):
-        return f"Employee('{self.hired_date}', '{self.email}', '{self.fname}', '{self.lname}', '{self.hall}', '{self.access}')"
+        return f"Employee('{self.fname + ' ' + self.lname}', '{self.email}', '{self.hall}', '{self.access}')"
 
 
 class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    userID = db.Column(db.String(9), unique=True, nullable=False)
+    student_id = db.Column(db.String(9), unique=True, nullable=False)
     fname = db.Column(db.String(100), nullable=False)
     lname = db.Column(db.String(100), nullable=False)
-    room = db.Column(db.String(6), nullable=False)
-    phoneNumber = db.Column(db.String(15))
+    room_number = db.Column(db.String(6), nullable=False)
+    phone_number = db.Column(db.String(15), unique=True)
     hall_id = db.Column(db.Integer, db.ForeignKey('hall.id'))
-    package = db.relationship('Package', backref='owner')
+    packages = db.relationship('Package', backref='owner')
 
     def __repr__(self):
-        return f"Student('{self.email}','{self.userID}', '{self.fname}', '{self.lname}', '{self.room}', '{self.phoneNumber}')"
+        return f"Student('{self.fname + ' ' + self.lname}', '{self.email}','{self.student_id}', '{self.room_number}', '{self.phone_number}')"
 
 
 class Hall(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), unique=True, nullable=False)
     students = db.relationship('Student', backref='hall')
     employees = db.relationship('Employee', backref='hall')
+    packages = db.relationship('Package', backref='hall')
 
     def __repr__(self):
         return f"Hall('{self.name}')"
@@ -81,24 +89,47 @@ class Package(db.Model):
     delivery_date = db.Column(
         db.DateTime, nullable=False, default=datetime.now)
     picked_up_date = db.Column(db.DateTime)
-    dr = db.Column(db.String(100), nullable=False)
     perishable = db.Column(db.Boolean, default=False, nullable=False)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
+    hall_id = db.Column(db.Integer, db.ForeignKey('hall.id'))
+    employee_input_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
+    employee_remove_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
 
     def __repr__(self):
         return f"Package('{self.status}', '{self.description}', '{self.delivery_date}', \
-                        '{self.picked_up_date}', '{self.dr}', '{self.perishable}', '{self.student_id}')"
+                        '{self.picked_up_date}', '{self.perishable}')"
 
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(255), unique=True, nullable=False)
+    sent_mail = db.relationship('SentMail', backref='message')
+
+    def __repr__(self):
+        return f"Message('{self.content}')"
 
 
 class SentMail(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    messageId = db.Column(db.Integer)
-    recipient = db.Column(db.String(250), nullable=False)
-    content = db.Column(db.String(250), nullable=False)
     sent_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
-    sender = db.Column(db.String(250), nullable=False)
+    cc_recipients = db.Column(db.String(250))
+    employee_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
+    message_id = db.Column(db.Integer, db.ForeignKey('message.id'))
+
+    def __repr__(self):
+        return f"SentMail({self.sent_date}', '{self.cc_recipients}')"
+
+
+class Login(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    login_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    logout_date = db.Column(db.DateTime)
+    employee_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
+
+    def __repr__(self):
+        return f"Login('{self.login_date}', '{self.logout_date}')"
+
+
+# class Receives(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     student_

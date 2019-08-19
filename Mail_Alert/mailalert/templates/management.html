@@ -31,6 +31,7 @@
 <body>
 	<div class="container">
 		<form action="{{ url_for('employees.delete_employee') }}" method="POST">
+			{{ form.hidden_tag() }}
 			<div class="table-wrapper">
 				<div class="table-title">
 					<div class="row">
@@ -59,8 +60,7 @@
 								</span>
 							</th>
 							<th>Email</th>
-							<th>First Name</th>
-							<th>Last Name</th>
+							<th>Name</th>
 							<th>Role</th>
 							<th>Working Hall</th>
 							<th></th>
@@ -72,8 +72,7 @@
 									<input type="checkbox" name="del_employees" value="{{ employee.id }}" />
 								</span></td>
 							<td>{{ employee.email }}</td>
-							<td>{{ employee.fname }}</td>
-							<td>{{ employee.lname }}</td>
+							<td>{{ employee.fname }} {{ employee.lname }}</td>
 							<td>{{ employee.access }}</td>
 							<td>{{ employee.hall.name }}</td>
 							<td>

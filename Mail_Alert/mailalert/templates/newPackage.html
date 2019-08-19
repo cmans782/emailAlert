@@ -22,7 +22,7 @@
                         </div>
                     </td>
                     <td>
-                        {{ form.roomNumber(class="form-control form-control-md") }}
+                        {{ form.room_number(class="form-control form-control-md") }}
                         <div name='room-error' class="invalid-feedback" style='display:none;'>
                             <span name='room-error'></span>
                         </div>
@@ -80,7 +80,7 @@ $(document).ready(function() {
         </td>';
     cols +=
         '<td> \
-            {{ form.roomNumber(class="form-control form-control-md") }} \
+            {{ form.room_number(class="form-control form-control-md") }} \
             <div name="room-error" class="invalid-feedback" style="display:none;"> \
                 <span name="room-error"></span> \
             </div> \
@@ -156,7 +156,7 @@ $(document).ready(function() {
             context: this,
             data: {
                 name: $(this).val(),
-                roomNumber: $(this).parent().next().children('input').val()
+                room_number: $(this).parent().next().children('input').val()
                 }
         }).done(function(data) {
             if (data.name_error) {
@@ -171,7 +171,7 @@ $(document).ready(function() {
                 $(this).removeClass('is-invalid');
                 $(this).next().hide();
                 $(this).val(data.name);
-                $(this).parent().next().children('input').val(data.roomNumber);
+                $(this).parent().next().children('input').val(data.room_number);
                 $(this).parent().next().children('input').removeClass('is-invalid');
                 $(this).parent().next().children('div').hide();
             }
@@ -180,7 +180,7 @@ $(document).ready(function() {
     });
 
     // validate room number entered
-    $(document).on('focusout','[name="roomNumber"]', function(e) {
+    $(document).on('focusout','[name="room_number"]', function(e) {
         var url = "{{ url_for('packages._validate') }}"; // send the form data here.
         $.ajax({
             type: 'POST',
@@ -188,7 +188,7 @@ $(document).ready(function() {
             context: this,
             data: {
                 name: $(this).parent().prev().children('input').val(),
-                roomNumber: $(this).val()
+                room_number: $(this).val()
                 }
         }).done(function(data) {
             if (data.name_error) {
@@ -204,7 +204,7 @@ $(document).ready(function() {
                 room_error = '';
                 $(this).removeClass('is-invalid');
                 $(this).next().hide();
-                $(this).val(data.roomNumber);
+                $(this).val(data.room_number);
             }
         });
         e.preventDefault(); // block the traditional submission of the form.

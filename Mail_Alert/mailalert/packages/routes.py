@@ -17,7 +17,7 @@ def student_packages(student_id):
     package_pickup_form = PackagePickUpForm()
     student_search_form = StudentSearchForm()
 
-    student = Student.query.filter_by(userID=student_id).first_or_404()
+    student = Student.query.filter_by(student_id=student_id).first_or_404()
 
     active_packages = Package.query.filter_by(
         student_id=student.id, status='Active').order_by(Package.delivery_date.desc())
@@ -25,7 +25,7 @@ def student_packages(student_id):
         student_id=student.id, status="Picked Up").order_by(Package.delivery_date.desc())
 
     if student_search_form.submit.data and student_search_form.validate_on_submit():
-        return redirect(url_for('packages.student_packages', student_id=student_search_form.userID.data))
+        return redirect(url_for('packages.student_packages', student_id=student_search_form.student_id.data))
 
     return render_template('student_packages.html', student=student,
                            package_pickup_form=package_pickup_form,
@@ -40,7 +40,7 @@ def _pickup_package():
     form = PackagePickUpForm()
     if form.validate_on_submit():
         student_id = int(form.student_id.data)
-        confirm_student_id = form.ID_confirm.data
+        confirm_student_id = form.student_id_confirm.data
         if confirm_student_id != student_id:
             return jsonify({'error': 'The ID entered does not match this student'})
         package_id_list = request.form.getlist("pick_up")
@@ -48,10 +48,11 @@ def _pickup_package():
             package = Package.query.get(package_id)
             package.status = 'Picked Up'
             package.picked_up_date = datetime.now()
+            package.removed = current_user  # record the user that removed the package
         db.session.commit()
         flash('Package was successfully picked up', 'success')
         return jsonify({'success': 'success'})
-    return jsonify({'error': form.ID_confirm.errors})
+    return jsonify({'error': form.student_id_confirm.errors})
 
 
 @packages.route("/newPackage", methods=['GET', 'POST'])
@@ -60,7 +61,7 @@ def newPackage():
     form = NewPackageForm()
     if form.validate_on_submit():
         name = request.form.getlist('name')
-        roomNumber = request.form.getlist('roomNumber')
+        room_number = request.form.getlist('room_number')
         description = request.form.getlist('description')
         perishable = request.form.getlist('perishable')
 
@@ -72,10 +73,10 @@ def newPackage():
             result = string_to_bool(perishable[i])
             # get the student with the name and room number entered
             student = Student.query.filter_by(
-                fname=fname, lname=lname, room=roomNumber[i]).first()
+                fname=fname, lname=lname, room_number=room_number[i]).first()
             # create a new package from user input and make the package a child of the student object
             package = Package(
-                description=description[i], perishable=result, dr=current_user.fname, owner=student)
+                description=description[i], perishable=result, inputted=current_user, owner=student)
             db.session.add(package)
         db.session.commit()
 
@@ -88,7 +89,7 @@ def newPackage():
 @login_required
 def _validate():
     name = request.form['name']
-    roomNumber = request.form['roomNumber']
+    room_number = request.form['room_number']
 
     if len(name.split()) <= 1:
         return jsonify({'name_error': 'Enter first and last name of student'})
@@ -101,20 +102,20 @@ def _validate():
     if not student:
         return jsonify({'name_error': 'Student does not exist'})
 
-    if roomNumber:
-        if student.room != roomNumber:
+    if room_number:
+        if student.room_number != room_number:
             return jsonify({'room_error': 'Student does not live in this room',
-                            'roomNumber': student.room,
+                            'room_number': student.room_number,
                             'name': fname + ' ' + lname})
 
-    return jsonify({'roomNumber': student.room,
+    return jsonify({'room_number': student.room_number,
                     'name': fname + ' ' + lname})
 
 
-@packages.route("/packages", methods=['GET'])
-@login_required
-def package():
-    page = request.args.get('page', 1, type=int)
-    packages = Package.query.filter_by(perishable=False).order_by(
-        Package.delivery_date.desc()).paginate(page=page, per_page=10)
-    return render_template('packages.html', title="Packages", packages=packages)
+# @packages.route("/packages", methods=['GET'])
+# @login_required
+# def package():
+#     page = request.args.get('page', 1, type=int)
+#     packages = Package.query.filter_by(perishable=False).order_by(
+#         Package.delivery_date.desc()).paginate(page=page, per_page=10)
+#     return render_template('packages.html', title="Packages", packages=packages)

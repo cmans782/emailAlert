@@ -18,11 +18,11 @@ class CreateMessageForm(FlaskForm):
 
 
 class StudentSearchForm(FlaskForm):
-    userID = IntegerField('Student Identification', validators=[
+    student_id = IntegerField('Student Identification', validators=[
         DataRequired(message="Please enter a student ID")])
     submit = SubmitField("Search")
 
-    def validate_userID(self, field):
-        student = Student.query.filter_by(userID=field.data).first()
+    def validate_student_id(self, field):
+        student = Student.query.filter_by(student_id=field.data).first()
         if not student:
             raise ValidationError('We could not find that student')
