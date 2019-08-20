@@ -2,7 +2,7 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint,
 from flask_login import login_required, current_user
 from mailalert.packages.forms import NewPackageForm, PackagePickUpForm
 from mailalert.main.forms import StudentSearchForm
-from mailalert.packages.utils import string_to_bool
+from mailalert.packages.utils import send_new_package_email, string_to_bool
 from mailalert.models import Package, Student
 from mailalert import db
 from datetime import datetime
@@ -60,6 +60,7 @@ def _pickup_package():
 def newPackage():
     form = NewPackageForm()
     if form.validate_on_submit():
+        student_dict = {}
         name = request.form.getlist('name')
         room_number = request.form.getlist('room_number')
         description = request.form.getlist('description')
@@ -77,8 +78,18 @@ def newPackage():
             # create a new package from user input and make the package a child of the student object
             package = Package(
                 description=description[i], perishable=result, inputted=current_user, owner=student)
+            if student.email in student_dict:  # check if the student is already in the dictionary
+                num_packages = student_dict[student.email]
+                num_packages += 1  # if student is in dict increment their number of packages
+                student_dict[student.email] = num_packages
+            else:
+                student_dict[student.email] = 1
             db.session.add(package)
         db.session.commit()
+
+        ######### uncomment before releasing #########
+        # for email, num_packages in student_dict.items():
+        # send_new_package_email(email, num_packages)
 
         flash('Packages sucessfully added!', 'success')
         return redirect(url_for("main.home"))
