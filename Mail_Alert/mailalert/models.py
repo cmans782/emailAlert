@@ -20,9 +20,10 @@ class Employee(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     hired_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
     end_date = db.Column(db.DateTime)
+    active = db.Column(db.Boolean)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    fname = db.Column(db.String(100), nullable=False)
-    lname = db.Column(db.String(100), nullable=False)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(60), nullable=False)
     access = db.Column(db.String, nullable=False, default="DR")
     hall_id = db.Column(db.Integer, db.ForeignKey('hall.id'))
@@ -53,22 +54,22 @@ class Employee(db.Model, UserMixin):
         return ACCESS[self.access] >= ACCESS[access_level]
 
     def __repr__(self):
-        return f"Employee('{self.fname + ' ' + self.lname}', '{self.email}', '{self.hall}', '{self.access}')"
+        return f"Employee('{self.first_name + ' ' + self.last_name}', '{self.email}', '{self.hall}', '{self.access}')"
 
 
 class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
     student_id = db.Column(db.String(9), unique=True, nullable=False)
-    fname = db.Column(db.String(100), nullable=False)
-    lname = db.Column(db.String(100), nullable=False)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
     room_number = db.Column(db.String(6), nullable=False)
     phone_number = db.Column(db.String(15), unique=True)
     hall_id = db.Column(db.Integer, db.ForeignKey('hall.id'))
     packages = db.relationship('Package', backref='owner')
 
     def __repr__(self):
-        return f"Student('{self.fname + ' ' + self.lname}', '{self.email}','{self.student_id}', '{self.room_number}', '{self.phone_number}')"
+        return f"Student('{self.first_name + ' ' + self.last_name}', '{self.email}','{self.student_id}', '{self.room_number}', '{self.phone_number}')"
 
 
 class Hall(db.Model):

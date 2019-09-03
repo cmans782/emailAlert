@@ -3,7 +3,8 @@ from flask_mail import Message
 from mailalert import mail
 from mailalert.models import Employee
 from flask_login import current_user
-from functools import wraps 
+from functools import wraps
+from mailalert.config import Config
 
 
 def send_package_update_email(message, recipients, cc_recipients):
@@ -16,6 +17,7 @@ def send_package_update_email(message, recipients, cc_recipients):
 
     mail.send(msg)
 
+
 def requires_access_level(access_level):
     def decorator(f):
         @wraps(f)
@@ -25,3 +27,7 @@ def requires_access_level(access_level):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS

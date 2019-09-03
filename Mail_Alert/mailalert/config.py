@@ -3,8 +3,11 @@ class Config:
     SQLALCHEMY_DATABASE_URI = 'sqlite:///site.db'
 
     # theme for admin panel. can find other themes at http://bootswatch.com/3/
-    FLASK_ADMIN_SWATCH = 'lumen' 
-    
+    FLASK_ADMIN_SWATCH = 'lumen'
+
+    ALLOWED_EXTENSIONS = {'csv'}
+    UPLOAD_FOLDER = '/home/taylor/Projects/emailAlert/Mail_Alert/mailalert/static/student_files'
+
     MAIL_SERVER = 'smtp.googlemail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True

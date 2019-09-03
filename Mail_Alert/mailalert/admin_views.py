@@ -2,12 +2,20 @@ from flask_admin.contrib.sqla import ModelView
 
 
 class EmployeeView(ModelView):
-    form_columns = ['hired_date', 'end_date', 'email',
-                    'fname', 'lname', 'password', 'access', 'hall']
+    form_columns = ['hired_date', 'active', 'end_date', 'email',
+                    'first_name', 'last_name', 'password', 'access', 'hall']
+
+    form_choices = {
+        'access': [
+            ('DR', 'DR'),
+            ('Building Director', 'Building Director'),
+            ('Admin', 'Admin'),
+        ]
+    }
 
 
 class StudentView(ModelView):
-    form_columns = ['student_id', 'fname', 'lname',
+    form_columns = ['student_id', 'first_name', 'last_name',
                     'email', 'room_number', 'phone_number', 'hall']
 
 

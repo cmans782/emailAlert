@@ -1,5 +1,29 @@
 {% extends "layout_with_navbar.html" %}
 {%block content %}
+
+<!-- Setup Modal -->
+<form action="{{ url_for('main.setup') }}" method="POST" enctype="multipart/form-data">
+	{{ form.hidden_tag() }}
+	<div id="setupModal" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Mail Alert Setup</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">
+					<p>Upload students csv file</p>
+					<input name="file" type="file">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<input type="submit" class="btn btn-success" value="Save">
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
 <form action="" method="POST">
     {{ form.hidden_tag() }}
     <div class="card" style="width:500px; margin:0 auto;">
@@ -24,4 +48,13 @@
         </div>
     </div>
 </form>
+
+{% if setup %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#setupModal").modal('show');
+        });
+    </script>
+{% endif %}
+
 {% endblock %}

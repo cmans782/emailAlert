@@ -9,18 +9,15 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
+
 class ManagementForm(FlaskForm):
     email = StringField('Email ', validators=[DataRequired(), Email()])
     firstName = StringField('First Name', validators=[DataRequired()])
     lastName = StringField('Last Name', validators=[DataRequired()])
-    role = SelectField('Role', choices=[('Admin', 'Admin'), ('Building Director', 'Building Director'), ('DR','DR')])
-    hall = SelectField('Working Hall', coerce=int, validators=[DataRequired()])   
+    role = SelectField('Role', choices=[
+                       ('Admin', 'Admin'), ('Building Director', 'Building Director'), ('DR', 'DR')])
+    hall = SelectField('Working Hall', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Submit')
-
-    def validate_email(self, email):
-        employee = Employee.query.filter_by(email=email.data).first()
-        if employee:
-            raise ValidationError('email is already in use')
 
 
 class RequestResetForm(FlaskForm):
@@ -30,16 +27,21 @@ class RequestResetForm(FlaskForm):
     def validate_email(self, email):
         employee = Employee.query.filter_by(email=email.data).first()
         if employee is None:
-            raise ValidationError('There is no account with that email. Contact your supervisor about account access.')
+            raise ValidationError(
+                'There is no account with that email. Contact your supervisor about account access.')
+
 
 class ResetPasswordForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    confirm_password = PasswordField('Confirm Password', validators=[
+                                     DataRequired(), EqualTo('password')])
     submit = SubmitField('Reset Password')
+
 
 class NewPasswordForm(FlaskForm):
     email = StringField('Email ', validators=[DataRequired(), Email()])
     old_password = PasswordField('Old Password', validators=[DataRequired()])
     new_password = PasswordField('New Password', validators=[DataRequired()])
-    confirm_new_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('new_password')])
+    confirm_new_password = PasswordField('Confirm New Password', validators=[
+                                         DataRequired(), EqualTo('new_password')])
     submit = SubmitField('Reset Password')

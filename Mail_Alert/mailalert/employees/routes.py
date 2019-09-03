@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, redirect, request, Blueprint
+from flask import render_template, url_for, flash, redirect, request, Blueprint, jsonify
 from flask_login import login_user, current_user, logout_user, login_required
 from mailalert import db, bcrypt
 from mailalert.models import Employee, Hall, Login
@@ -19,33 +19,55 @@ def management():
     hall_list = Hall.query.all()
     hall_list = [(hall.id, hall.name) for hall in hall_list]
     form.hall.choices = hall_list
-    if form.validate_on_submit():  # this will only be true if ManagementForm fields are all correct
-        password = generate_random_string()
-        hashed_password = bcrypt.generate_password_hash(password).decode(
-            'utf-8')  # generate a password hash for the user that is being created
-        hall = Hall.query.get(form.hall.data)
-        employee = Employee(email=form.email.data, fname=form.firstName.data,
-                            lname=form.lastName.data, access=form.role.data,
-                            hall=hall, password=hashed_password)
-        # creates a new employee object (can be found in models.py) so that we can insert it into our database
-        db.session.add(employee)
+    if form.validate_on_submit():
+        existing_employee = Employee.query.filter_by(
+            email=form.email.data).first()
+        # check if employee already exists. if so update information and make active again
+        if existing_employee:
+            existing_employee.hall = Hall.query.get(form.hall.data)
+            existing_employee.first_name = form.firstName.data.capitalize()
+            existing_employee.last_name = form.lastName.data.capitalize()
+            existing_employee.access = form.role.data
+            existing_employee.active = True
+            flash(
+                f'{existing_employee.first_name}\'s account has been reactivated!', 'success')
+        else:
+            password = generate_random_string()
+            hashed_password = bcrypt.generate_password_hash(password).decode(
+                'utf-8')  # generate a password hash for the user that is being created
+            hall = Hall.query.get(form.hall.data)  # get hall object
+            employee = Employee(email=form.email.data, first_name=form.firstName.data.capitalize(),
+                                last_name=form.lastName.data.capitalize(), access=form.role.data,
+                                hall=hall, password=hashed_password)
+            flash(f'Account created for {employee.email}!', 'success')
+            send_temp_password_email(employee, password)
+            db.session.add(employee)
         db.session.commit()
-        send_temp_password_email(employee, password)
-        flash(f'Account created for {employee.email}!', 'success')
-    employees = Employee.query.filter(Employee.end_date == None).all()
+    employees = Employee.query.filter(Employee.active == True).all()
     return render_template('management.html', title='Management', form=form, employees=employees)
 
 
+@employees.route("/management/validate", methods=['POST'])
+@login_required
+def _validate():
+    email = request.form['email']
+    email_exists = Employee.query.filter_by(email=email).first()
+    if email_exists and email_exists.active == True:
+        return jsonify({'error': 'This email is already in use'})
+    return jsonify({'success': 'success'})
+
+
 @employees.route("/management/delete", methods=['POST'])
-# @login_required
+@login_required
 def delete_employee():
     employee_id_list = request.form.getlist("del_employees")
     if employee_id_list:  # make sure the user selected at least one employee
         for employee_id in employee_id_list:
             # get the employee object using its id
             employee = Employee.query.get(employee_id)
-            employee.end_date = datetime.now()  # dont actually delete employee
-            flash(f'{employee.fname} was successfully deleted!', 'success')
+            employee.end_date = datetime.now()  # record employees end date
+            employee.active = False
+            flash(f'{employee.first_name} was successfully deactivated!', 'success')
         db.session.commit()
     else:
         flash('No employees were selected!', 'danger')
@@ -73,15 +95,21 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         employee = Employee.query.filter_by(email=form.email.data).first()
-        if employee.end_date:
+        if not employee.active:
             flash(
                 'Login Unsuccessful. Management has removed you from the list of active employees', 'danger')
             return render_template('login.html', title='Login', form=form)
         if employee and bcrypt.check_password_hash(employee.password, form.password.data):
             login_user(employee)
+            logins = Login.query.first()
+            # check if there has ever been a login
+            first_login = False if logins else True
+            # log when user logs in
             login = Login(login_date=datetime.now(), employee=current_user)
             db.session.add(login)
             db.session.commit()
+            if first_login is True:
+                return redirect(url_for('main.home', setup=first_login))
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('main.home'))
         else:
@@ -91,10 +119,8 @@ def login():
 
 @employees.route("/logout")
 def logout():
-    # log employee logout date and time
-    employee = Employee.query.filter_by(id=current_user.id).first()
-    # get the last login date by the current user
-    employee.logins[-1].logout_date = datetime.now()
+    # get the last login date by the current user and log logout date and time
+    current_user.logins[-1].logout_date = datetime.now()
     db.session.commit()
     logout_user()
     return redirect(url_for('employees.login'))

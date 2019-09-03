@@ -74,7 +74,7 @@ def newPackage():
             result = string_to_bool(perishable[i])
             # get the student with the name and room number entered
             student = Student.query.filter_by(
-                fname=fname, lname=lname, room_number=room_number[i]).first()
+                first_name=fname, last_name=lname, room_number=room_number[i]).first()
             # create a new package from user input and make the package a child of the student object
             package = Package(
                 description=description[i], perishable=result, inputted=current_user, owner=student)
@@ -109,7 +109,8 @@ def _validate():
     fname = fname.capitalize()
     lname = lname.capitalize()
 
-    student = Student.query.filter_by(fname=fname, lname=lname).first()
+    student = Student.query.filter_by(
+        first_name=fname, last_name=lname).first()
     if not student:
         return jsonify({'name_error': 'Student does not exist'})
 
@@ -121,12 +122,3 @@ def _validate():
 
     return jsonify({'room_number': student.room_number,
                     'name': fname + ' ' + lname})
-
-
-# @packages.route("/packages", methods=['GET'])
-# @login_required
-# def package():
-#     page = request.args.get('page', 1, type=int)
-#     packages = Package.query.filter_by(perishable=False).order_by(
-#         Package.delivery_date.desc()).paginate(page=page, per_page=10)
-#     return render_template('packages.html', title="Packages", packages=packages)
