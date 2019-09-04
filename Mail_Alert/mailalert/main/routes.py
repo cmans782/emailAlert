@@ -72,10 +72,11 @@ def setup():
 @login_required
 def home():
     setup = request.args.get('setup')
+    packages = Package.query.filter_by(perishable=True, status="Active").all()
     form = StudentSearchForm()
     if form.validate_on_submit():
         return redirect(url_for('packages.student_packages', student_id=form.student_id.data))
-    return render_template('home.html', form=form, setup=setup)
+    return render_template('home.html', form=form, setup=setup, packages=packages)
 
 
 @main.route("/composeEmail", methods=['GET', 'POST'])
