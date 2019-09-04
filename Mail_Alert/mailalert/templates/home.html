@@ -54,6 +54,7 @@
         <thead>
             <tr>
                 <th>Package&nbsp;#</th>
+				<th>Name</th>
                 <th>Description</th>
                 <th>Status</th>
                 <th id="deliveryDateLabel">Delivered</th>
@@ -64,6 +65,7 @@
 			{% for package in packages %}
 				<tr class="table-danger" data-status="{{ package.status }}">
 					<td>{{ package.id }}</td>
+					<td>{{ package.owner.first_name }} {{ package.owner.last_name }}</td>
 					<td>{{ package.description }}</td>
 					<td>{{ package.status }}</td>
 					<td>{{ package.delivery_date.strftime('%m-%d-%Y') }}</td>
