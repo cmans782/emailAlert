@@ -11,6 +11,21 @@ import json
 packages = Blueprint('packages', __name__)
 
 
+@packages.route("/", methods=['GET', 'POST'])
+@packages.route("/home", methods=['GET', 'POST'])
+@login_required
+def home():
+    package_pickup_form = PackagePickUpForm()
+    student_search_form = StudentSearchForm()
+    setup = request.args.get('setup')
+    packages = Package.query.filter_by(perishable=True, status="Active").all()
+    if student_search_form.validate_on_submit():
+        return redirect(url_for('packages.student_packages', student_id=student_search_form.student_id.data))
+    return render_template('home.html', student_search_form=student_search_form,
+                           package_pickup_form=package_pickup_form,
+                           setup=setup, packages=packages)
+
+
 @packages.route("/home/<int:student_id>", methods=['GET', 'POST'])
 @login_required
 def student_packages(student_id):
@@ -37,6 +52,7 @@ def student_packages(student_id):
 @packages.route("/home/pickup_package", methods=['POST'])
 @login_required
 def _pickup_package():
+    print('here')
     form = PackagePickUpForm()
     if form.validate_on_submit():
         student_id = int(form.student_id.data)
@@ -92,7 +108,7 @@ def newPackage():
         # send_new_package_email(email, num_packages)
 
         flash('Packages sucessfully added!', 'success')
-        return redirect(url_for("main.home"))
+        return redirect(url_for("packages.home"))
     return render_template('newPackage.html', title='New_Package', form=form)
 
 

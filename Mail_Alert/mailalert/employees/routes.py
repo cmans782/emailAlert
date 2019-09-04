@@ -91,7 +91,7 @@ def delete_employee():
 @employees.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('main.home'))
+        return redirect(url_for('packages.home'))
     form = LoginForm()
     if form.validate_on_submit():
         employee = Employee.query.filter_by(email=form.email.data).first()
@@ -109,9 +109,9 @@ def login():
             db.session.add(login)
             db.session.commit()
             if first_login is True:
-                return redirect(url_for('main.home', setup=first_login))
+                return redirect(url_for('packages.home', setup=first_login))
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('main.home'))
+            return redirect(next_page) if next_page else redirect(url_for('packages.home'))
         else:
             flash('Login Unsuccessful. Check email and Password', 'danger')
     return render_template('login.html', title='Login', form=form)
@@ -129,7 +129,7 @@ def logout():
 @employees.route("/forgot_password", methods=['GET', 'POST'])
 def reset_request():
     if current_user.is_authenticated:
-        return redirect(url_for('main.home'))
+        return redirect(url_for('packages.home'))
     form = RequestResetForm()
     if form.validate_on_submit():
         employee = Employee.query.filter_by(email=form.email.data).first()
@@ -143,7 +143,7 @@ def reset_request():
 @employees.route("/forgot_password/<token>", methods=['GET', 'POST'])
 def reset_token(token):
     if current_user.is_authenticated:
-        return redirect(url_for('main.home'))
+        return redirect(url_for('packages.home'))
     employee = Employee.verify_reset_token(token)
     if employee is None:
         flash('That is an invalid or expired token', 'warning')
