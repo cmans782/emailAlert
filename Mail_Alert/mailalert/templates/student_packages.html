@@ -60,7 +60,7 @@
     <!-- end student information card -->
 
     <div class="col-8">
-        <form  id=pickup_form>
+        <form id=pickup_form onsubmit="processCardReader()">
             <!-- packages table -->
             <div class='fixed-header'>
                 <table id="packagesTable" class="table table-striped table-hover">
@@ -222,12 +222,14 @@ $.ajaxSetup({
 
 <script>
     // function to parse card data swipe information
-    function processCardReader() {
+    function cardReader()
+    {
         var card_data = document.getElementById("student_id").value;
         var details = card_data.split("^");
         var card_number = details[0];
-        card_number = card_number.substring(2);
-        document.getElementById("student_id").value = card_number;
+        var regular = /[0-9]{9}/g;
+        var found = card_number.match(regular);
+        document.getElementById("student_id").value = found;
     }
 </script>
 
