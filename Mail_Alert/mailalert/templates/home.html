@@ -167,7 +167,8 @@ function cardReader()
     var card_data = document.getElementById("student_id").value;
     var details = card_data.split("^");
     var card_number = details[0];
-    var regular = /[0-9]{9}/g;
+    // var regular = /[0-9]{9}/g;
+    var regular = /[0-9]{9}|([a-zA-Z]+){3,}/g;
     var found = card_number.match(regular);
     document.getElementById("student_id").value = found;
 }
