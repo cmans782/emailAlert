@@ -1,6 +1,10 @@
 {% extends "layout_with_navbar.html" %}
 {%block content %}
 
+<head>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+</head>
+
 <div style="margin-left:auto; margin-right:auto;">
     <form action="" method="POST" id='newpackageform'>
         {{ form.hidden_tag() }}
@@ -62,14 +66,12 @@
         </table>
     </form>
 </div>
-
 <script>
 $(document).ready(function() {
     var name_error;
     var room_error;
     var counter = 0;
     var cols = '';
-
     // cols += '<td></td>';
     cols +=
         '<td> \
@@ -103,39 +105,35 @@ $(document).ready(function() {
                     <input type="checkbox" name="perishable" value="True"> \
                     <input type="hidden" name="perishable" value="False"> \
                 </td>';
-
     cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
     cols += '<td></td>';
-
     $('#addrow').on('keyup', function(event) {
         // if tab key is pressed
         if (event.which == 9) {
             newRow();
         }
     });
-
     $('#addrow').on('click', function() {
         newRow();
     });
-
     function newRow() {
-        var newRow = $('<tr>');
+        var newRow = $("<tr>");
         newRow.append(cols);
-        $('table.order-list').append(newRow);
-
-        var empTable = document.getElementById('packageTable');
+        $("table.order-list").append(newRow);
+        
+        var empTable = document.getElementById("packageTable");
         var trArray = empTable.rows;
-        var lastTrElem = trArray[trArray.length - 2];
+        var lastTrElem = trArray[trArray.length - 1];
         var lastTdElem = lastTrElem.firstChild;
         var inputElem = lastTdElem.firstChild;
-        inputElem.focus();
-    }
+        console.log(lastTdElem)
+        // inputElem.focus;
 
+    }
     $('table.order-list').on('click', '.ibtnDel', function(event) {
         $(this).closest('tr').remove();
         counter -= 1;
     });
-
     $(document).on('click', ':checkbox', function() {
         if ($(this).is(':checked')) {
             $(this).next('input').remove();
@@ -144,8 +142,6 @@ $(document).ready(function() {
             $("<input type='hidden' name='perishable' value='False'>").insertAfter(this);
         }
     });
-
-
     // validate that student name entered exists
     $(document).on('focusout','[name="name"]', function(e) {
         var url = "{{ url_for('packages._validate') }}"; // send the form data here. 
@@ -178,7 +174,6 @@ $(document).ready(function() {
         });
         e.preventDefault(); // block the traditional submission of the form.
     });
-
     // validate room number entered
     $(document).on('focusout','[name="room_number"]', function(e) {
         var url = "{{ url_for('packages._validate') }}"; // send the form data here.
@@ -209,7 +204,6 @@ $(document).ready(function() {
         });
         e.preventDefault(); // block the traditional submission of the form.
     });
-
     // validate name and room number on submit
     $('#submit').on('click', function(e) {
         if (name_error || room_error) {
@@ -217,7 +211,6 @@ $(document).ready(function() {
             e.preventDefault(e);
         }
     });
-
     // Inject our CSRF token into our AJAX request.
     var csrf_token = '{{ csrf_token() }}';
     $.ajaxSetup({

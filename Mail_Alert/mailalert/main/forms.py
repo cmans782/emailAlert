@@ -18,7 +18,8 @@ class CreateMessageForm(FlaskForm):
 
 
 class StudentSearchForm(FlaskForm):
-    student_id = IntegerField('Student Identification', validators=[
+    # student_id = IntegerField('Student Identification', validators=[
+    student_id = StringField('Student Identification', validators=[
         DataRequired(message="Please enter a student ID")])
     submit = SubmitField("Search")
 

@@ -120,3 +120,15 @@
 </body>
 
 </html>
+
+<script>
+function cardReader()
+{
+    var card_data = document.getElementById("student_id").value;
+    var details = card_data.split("^");
+    var card_number = details[0];
+    card_number = card_number.substring(2);
+    document.getElementById("student_id").value = card_number;
+}
+
+</script>

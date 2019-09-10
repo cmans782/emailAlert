@@ -24,7 +24,7 @@
 	</div>
 </form>
 
-<form action="" method="POST">
+<form action="" method="POST" onsubmit="cardReader()">
     {{ student_search_form.hidden_tag() }}
     <div class="card" style="width:500px; margin:0 auto;">
         <div class="card-body">
@@ -161,6 +161,15 @@ $.ajaxSetup({
         }
     }
 });
+
+function cardReader()
+{
+    var card_data = document.getElementById("student_id").value;
+    var details = card_data.split("^");
+    var card_number = details[0];
+    card_number = card_number.substring(2);
+    document.getElementById("student_id").value = card_number;
+}
 </script>
 
 {% endblock %}
