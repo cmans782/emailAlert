@@ -28,7 +28,8 @@ def home():
                            setup=setup, perishables=perishables)
 
 
-@packages.route("/home/<int:student_id>", methods=['GET', 'POST'])
+# @packages.route("/home/<int:student_id>", methods=['GET', 'POST'])
+@packages.route("/home/<student_id>", methods=['GET', 'POST'])
 @login_required
 def student_packages(student_id):
     package_pickup_form = PackagePickUpForm()

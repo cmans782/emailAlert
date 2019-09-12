@@ -103,7 +103,6 @@ $(document).ready(function() {
     var name;
     var counter = 0;
     var cols = '';
-
     cols +=
         '<td style="width: 250px;"> \
             {{ form.name(class="form-control form-control-md") }} \
@@ -156,29 +155,27 @@ $(document).ready(function() {
             newRow();
         }
     });
-
     $('#addrow').on('click', function() {
         newRow();
     });
-
     function newRow() {
-        var newRow = $('<tr>');
+        var newRow = $("<tr>");
         newRow.append(cols);
-        $('table.order-list').append(newRow);
-
-        var empTable = document.getElementById('packageTable');
+        $("table.order-list").append(newRow);
+        
+        var empTable = document.getElementById("packageTable");
         var trArray = empTable.rows;
-        var lastTrElem = trArray[trArray.length - 2];
+        var lastTrElem = trArray[trArray.length - 1];
         var lastTdElem = lastTrElem.firstChild;
         var inputElem = lastTdElem.firstChild;
-        inputElem.focus();
-    }
+        console.log(lastTdElem)
+        // inputElem.focus;
 
+    }
     $('table.order-list').on('click', '.ibtnDel', function(event) {
         $(this).closest('tr').remove();
         counter -= 1;
     });
-
     $(document).on('click', ':checkbox', function() {
         if ($(this).is(':checked')) {
             $(this).next('input').remove();
@@ -234,7 +231,6 @@ $(document).ready(function() {
         });
         e.preventDefault(); // block the traditional submission of the form.
     });
-
     // validate room number entered
     $(document).on('focusout','[name="room_number"]', function(e) {
         var url = "{{ url_for('packages._validate') }}"; // send the form data here.
@@ -337,7 +333,6 @@ $(document).ready(function() {
             e.preventDefault(e);
         }
     });
-
     // Inject our CSRF token into our AJAX request.
     var csrf_token = '{{ csrf_token() }}';
     $.ajaxSetup({
