@@ -27,6 +27,9 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
     crossorigin="anonymous"></script>
+    
+  <!-- formatting phone numbers include -->
+  <script src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/jquery.inputmask.bundle.js"></script>
 
   <!-- fontawesome icons -->
   <script src="https://kit.fontawesome.com/a7232715ba.js"></script>
@@ -87,16 +90,24 @@
           </li>
 
           <li class="nav-item dropdown">
-              <a class="nav-link active" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown"
-                aria-haspopup="true" aria-expanded="false">
-                {{ current_user.first_name }}
-              </a>
-              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-                <p class="dropdown-item"><strong>Role:</strong> {{current_user.access}}</p>
-                <a class="dropdown-item" href="{{ url_for('employees.logout') }}">Logout</a>
-                <a class="dropdown-item" href="{{ url_for('employees.reset_password') }}">Reset Password</a>
-              </div>
-            </li>
+            <a class="nav-link active" href="#" id="currentUserDropDown" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+              {{ current_user.first_name }}
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="currentUserDropDown">
+              <p class="dropdown-item"><strong>Role:</strong> {{current_user.access}}</p>
+              <div class="dropdown-item">
+                <div class="form-group">
+                  <label>Working Hall</label>
+                  <select class="form-control" id="change-working-hall">
+                    <option class="active">{{current_user.hall.name}}</option>
+                  </select>
+                </div>
+              </div>  
+              <a class="dropdown-item" href="{{ url_for('employees.logout') }}">Logout</a>
+              <a class="dropdown-item" href="{{ url_for('employees.reset_password') }}">Reset Password</a>
+            </div>
+          </li>
         </ul>
       </div>
     </nav>
@@ -114,9 +125,49 @@
         {% endif %}
         {% endwith %}
         {% block content %}{% endblock %}
-      <!-- </div> -->
+      </div>
     </div>
   </main>
 </body>
+
+<script>
+$("document").ready(function() {
+  // prevent dropdown for current user from closing on click
+  $('.dropdown-menu').on('click', function(event){
+      event.stopPropagation();
+  });
+
+  // populate hall options in current user dropdown 
+  $('#currentUserDropDown').one('click', function(e) {
+    var url = "{{ url_for('main.get_halls') }}"; // send the form data here.
+    $.ajax({
+      type: 'POST',
+      url: url
+    }).done(function(data) {
+      var i;
+      for (i = 0; i < data.halls.length; i++){
+        $('#change-working-hall').append("<option>" + data.halls[i] + "</option>");
+      }
+    });
+    e.preventDefault(); // block the traditional submission of the form.
+  });
+
+  // if user selects new working hall 
+  $('#change-working-hall').change(function(){
+    var url = "{{ url_for('main.change_working_hall') }}"; // send the form data here.
+    $.ajax({
+      type: 'POST',
+      url: url,
+      data: { new_hall: $(this).val() }
+    }).done(function(data) {
+      location.reload();
+      if (data.error) {
+        alert(data.error);
+      }
+    });
+  });
+
+});
+</script>
 
 </html>

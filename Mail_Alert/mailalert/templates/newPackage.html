@@ -1,112 +1,155 @@
 {% extends "layout_with_navbar.html" %}
 {%block content %}
-
-<div style="margin-left:auto; margin-right:auto;">
-    <form action="" method="POST" id='newpackageform'>
-        {{ form.hidden_tag() }}
-        <table id="packageTable" class="table order-list">
-            <thead>
-                <tr>
-                    <td>Name</td>
-                    <td>Room #</td>
-                    <td>Description</td>
-                    <td>Perishable</td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>
-                        {{ form.name(class="form-control form-control-md") }}
-                        <div name='name-error' class="invalid-feedback" style='display:none;'>
-                            <span name='name-error'></span>
-                        </div>
-                    </td>
-                    <td>
-                        {{ form.room_number(class="form-control form-control-md") }}
-                        <div name='room-error' class="invalid-feedback" style='display:none;'>
-                            <span name='room-error'></span>
-                        </div>
-                    </td>
-                    <td>
-                        {% if form.description.errors %}
-                        {{ form.description(class="form-control form-control-md is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.description.errors %}
-                            <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        {{ form.description(class="form-control form-control-md") }}
-                        {% endif %}
-                    </td>
-                    <td class="col-sm-2">
+<form action="" method="POST" id='newpackageform'>
+    {{ form.hidden_tag() }}
+    <table id="packageTable" class="table order-list table-borderless">
+        <thead>
+            <tr>
+                <td>Name</td>
+                <td>Room</td>
+                <td>Description</td>
+                <td>Perishable</td>
+                <td name="phone-label" style='display:none'>Phone</td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="width: 250px;">
+                    {{ form.name(class="form-control form-control-md col-12") }}
+                    <div name='name-error' class="invalid-feedback" style='display:none'>
+                        <span name='name-error'></span>
+                    </div>
+                </td>
+                <td style="width: 150px">
+                    {{ form.room_number(class="form-control form-control-md") }}
+                    <div name='room-error' class="invalid-feedback" style='display:none;'>
+                        <span name='room-error'></span>
+                    </div>
+                </td>
+                <td style="width: 300px">
+                    {% if form.description.errors %}
+                    {{ form.description(class="form-control form-control-md is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.description.errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    {{ form.description(class="form-control form-control-md") }}
+                    {% endif %}
+                </td>
+                <td>
+                    <label class="checkbox-container">
                         <input type="checkbox" name="perishable" value="True">
                         <input type="hidden" name="perishable" value="False">
-                    </td>
-                    <td><a class="deleteRow"></a></td>
-                    <td></td>
-                </tr>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="4" style="text-align: left;">
-                        <input type="button" class="btn btn-lg btn-block " id="addrow" value="Add Row" />
-                    </td>
-                    <td>
-                        {{form.submit(class="form-control form-control-md btn-success")}}
-                    </td>
-                    <td></td>
-                    <!--Blank for styling-->
-                </tr>
-            </tfoot>
-        </table>
-    </form>
-</div>
+                        <span class="checkmark"></span>
+                    </label>
+                </td>
+                <td style="width: 200px">
+                    {{ form.phone_number(class="form-control form-control-md", style="display:none") }}
+                    <div name='phone-error' class="invalid-feedback" style='display:none;'>
+                        <span name='phone-error'></span>
+                    </div>
+                    <input type="hidden" name="current-number">
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4" style="text-align: left;">
+                    <input type="button" class="btn btn-lg btn-block " id="addrow" value="Add Row" />
+                </td>
+                <td>
+                    {{form.submit(class="form-control form-control-md btn-success")}}
+                    <div name='fix-error' class="invalid-feedback" style='display:none;'>
+                        <span>Fix errors before submitting</span>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+</form>
+
+<fieldset class="form-group">
+    <div id="error-modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Conflicting Phone Numbers</h4>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>The phone number entered does not match the number in our system for this student.</p>
+                    <p><strong>Do you want to use this number instead?</strong></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button name="confirm" type="button" class="btn btn-success" data-dismiss="modal">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
 
 <script>
 $(document).ready(function() {
     var name_error;
     var room_error;
+    var hall_error;
+    var phone_error; 
+    var phone_number;
+    var name;
     var counter = 0;
     var cols = '';
 
-    // cols += '<td></td>';
     cols +=
-        '<td> \
+        '<td style="width: 250px;"> \
             {{ form.name(class="form-control form-control-md") }} \
             <div name="name-error" class="invalid-feedback" style="display:none;"> \
                 <span name="name-error"></span> \
             </div> \
         </td>';
     cols +=
-        '<td> \
+        '<td style="width: 150px;"> \
             {{ form.room_number(class="form-control form-control-md") }} \
             <div name="room-error" class="invalid-feedback" style="display:none;"> \
                 <span name="room-error"></span> \
             </div> \
         </td>';
     cols +=
-        '<td> \
-                {% if form.description.errors %} \
-                    {{ form.description(class="form-control form-control-md is-invalid") }} \
-                    <div class="invalid-feedback"> \
-                        {% for error in form.description.errors %} \
-                            <span>{{ error }}</span> \
-                        {% endfor %} \
-                    </div> \
-                {% else %} \
-                    {{ form.description(class="form-control form-control-md") }} \
-                {% endif %} \
-            </td>';
+        '<td style="width: 300px;"> \
+            {% if form.description.errors %} \
+                {{ form.description(class="form-control form-control-md is-invalid") }} \
+                <div class="invalid-feedback"> \
+                    {% for error in form.description.errors %} \
+                        <span>{{ error }}</span> \
+                    {% endfor %} \
+                </div> \
+            {% else %} \
+                {{ form.description(class="form-control form-control-md") }} \
+            {% endif %} \
+        </td>';
     cols +=
-        '<td class="col-sm-2"> \
-                    <input type="checkbox" name="perishable" value="True"> \
-                    <input type="hidden" name="perishable" value="False"> \
-                </td>';
+        '<td style="width: 20px; text-align: center"> \
+            <label class="checkbox-container"> \
+                <input type="checkbox" name="perishable" value="True"> \
+                <input type="hidden" name="perishable" value="False"> \
+                <span class="checkmark"></span> \
+            </label> \
+        </td>'; 
+    cols += 
+        '<td style="width: 200px"> \
+            {{ form.phone_number(class="form-control form-control-md", style="display:none") }} \
+            <div name="phone-error" class="invalid-feedback" style="display:none;"> \
+                <span name="phone-error"></span> \
+            </div> \
+            <input type="hidden" name="current-number"> \
+        </td>'; 
 
     cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
     cols += '<td></td>';
-
     $('#addrow').on('keyup', function(event) {
         // if tab key is pressed
         if (event.which == 9) {
@@ -139,32 +182,44 @@ $(document).ready(function() {
     $(document).on('click', ':checkbox', function() {
         if ($(this).is(':checked')) {
             $(this).next('input').remove();
+            $(this).parent().parent().next().children('input').show()
+            $('[name="phone-label"]').show();
+            $("[name='phone_number']").inputmask({"mask": "(999) 999-9999"});
         }
         else {
             $("<input type='hidden' name='perishable' value='False'>").insertAfter(this);
+            $(this).parent().parent().next().children('input').hide()
+            checkChecked();
         }
     });
 
+    function checkChecked() {
+        var anyBoxesChecked = false;
+        $('input[type="checkbox"]').each(function() {
+            if ($(this).is(":checked")) {
+                anyBoxesChecked = true;
+            }
+        });
+        if (anyBoxesChecked == false) {
+            $('[name="phone-label"]').hide();
+        } 
+    };
 
     // validate that student name entered exists
     $(document).on('focusout','[name="name"]', function(e) {
         var url = "{{ url_for('packages._validate') }}"; // send the form data here. 
-        name = $(this).val()
         $.ajax({
             type: 'POST',
             url: url,
             context: this,
-            data: {
-                name: $(this).val(),
-                room_number: $(this).parent().next().children('input').val()
-                }
+            data: { name: $(this).val() }
         }).done(function(data) {
             if (data.name_error) {
                 name_error = data.name_error
                 $(this).addClass('is-invalid');
                 $(this).next().show()
                 $(this).next().children().text(data.name_error);
-                $(this).parent().next().children('div').hide();
+                $(this).parent().next().children('div').hide(); // hide room_error
             }
             else {
                 name_error = '';
@@ -174,6 +229,7 @@ $(document).ready(function() {
                 $(this).parent().next().children('input').val(data.room_number);
                 $(this).parent().next().children('input').removeClass('is-invalid');
                 $(this).parent().next().children('div').hide();
+                $(this).parent().next().next().next().next().children('input').val(data.phone_number);
             }
         });
         e.preventDefault(); // block the traditional submission of the form.
@@ -186,10 +242,9 @@ $(document).ready(function() {
             type: 'POST',
             url: url,
             context: this,
-            data: {
-                name: $(this).parent().prev().children('input').val(),
-                room_number: $(this).val()
-                }
+            data: { name: $(this).parent().prev().children('input').val(),
+                    room_number: $(this).val()
+            }
         }).done(function(data) {
             if (data.name_error) {
                 return;
@@ -204,16 +259,81 @@ $(document).ready(function() {
                 room_error = '';
                 $(this).removeClass('is-invalid');
                 $(this).next().hide();
-                $(this).val(data.room_number);
             }
         });
         e.preventDefault(); // block the traditional submission of the form.
     });
 
+    // validate phone number entered
+    $(document).on('focusout','[name="phone_number"]', function(e) {
+        var url = "{{ url_for('packages._validate') }}"; // send the form data here.
+        $.ajax({
+            type: 'POST',
+            url: url,
+            context: this,
+            data: { name: $(this).parent().prev().prev().prev().prev().children('input').val(), 
+                    phone_number: $(this).val() 
+                }
+        }).done(function(data) {
+            if (data.phone_error) {
+                phone_error = data.phone_error; // assign error to global variable
+                $(this).addClass('is-invalid');
+                $(this).next().show();
+                $(this).next().children().text(data.phone_error);
+            }
+            // if the phone number entered does not match number in database
+            // show modal and assign the current phone number to a hidden field 
+            else if (data.conflicting_numbers){
+                phone_error = '';
+                $('#error-modal').modal('show');
+                phone_number = $(this).val()
+                name = $(this).parent().prev().prev().prev().prev().children('input').val()
+                // store the original number incase the student cancels
+                $(this).next().next().val(data.current_number)
+                $(this).removeClass('is-invalid');
+                $(this).next().hide();
+            }
+            else {
+                phone_error = '';
+                $(this).removeClass('is-invalid');
+                $(this).next().hide();
+            }
+        });
+        e.preventDefault(); // block the traditional submission of the form.
+    });
+
+    // if conflicting number is confirmed, send the new number to be saved 
+    $('[name="confirm"]').on('click', function(e){
+        var new_number = $('#phone_number').val();
+        $('[name="current-number"]').val(new_number);
+        
+        var url = "{{ url_for('packages._validate') }}"; // send the form data here.
+        $.ajax({
+            type: 'POST',
+            url: url,
+            context: this,
+            data: { name: name, 
+                    phone_number: phone_number,
+                    update_number: 'True'
+                }
+        }).done(function(data) {
+            
+        });
+        e.preventDefault(); // block the traditional submission of the form.
+    });
+
+
+    // if conflicting phone number modal is closed, replace the number entered
+    // with the number saved in the database
+    $('#error-modal').on('hide.bs.modal', function (e) {
+        var current_number = $('[name="current-number"]').val();
+        $('#phone_number').val(current_number);
+    })
+
     // validate name and room number on submit
     $('#submit').on('click', function(e) {
-        if (name_error || room_error) {
-            alert("fix errors before submitting")
+        if (name_error || room_error || phone_error) {
+            $('[name="fix-error"]').show();
             e.preventDefault(e);
         }
     });
