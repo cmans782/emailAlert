@@ -3,10 +3,11 @@ from flask_login import login_required, current_user
 from mailalert.packages.forms import NewPackageForm, PackagePickUpForm
 from mailalert.main.forms import StudentSearchForm
 from mailalert.packages.utils import send_new_package_email, string_to_bool
-from mailalert.models import Package, Student
+from mailalert.models import Package, Student, Hall
 from mailalert import db
 from datetime import datetime
 import json
+import re
 
 packages = Blueprint('packages', __name__)
 
@@ -18,12 +19,13 @@ def home():
     package_pickup_form = PackagePickUpForm()
     student_search_form = StudentSearchForm()
     setup = request.args.get('setup')
-    packages = Package.query.filter_by(perishable=True, status="Active").all()
+    perishables = Package.query.filter_by(
+        perishable=True, status="Active", hall=current_user.hall).all()
     if student_search_form.validate_on_submit():
         return redirect(url_for('packages.student_packages', student_id=student_search_form.student_id.data))
     return render_template('home.html', student_search_form=student_search_form,
                            package_pickup_form=package_pickup_form,
-                           setup=setup, packages=packages)
+                           setup=setup, perishables=perishables)
 
 
 # @packages.route("/home/<int:student_id>", methods=['GET', 'POST'])
@@ -33,7 +35,8 @@ def student_packages(student_id):
     package_pickup_form = PackagePickUpForm()
     student_search_form = StudentSearchForm()
 
-    student = Student.query.filter_by(student_id=student_id).first_or_404()
+    student = Student.query.filter_by(
+        student_id=student_id, hall=current_user.hall).first_or_404()
 
     active_packages = Package.query.filter_by(
         student_id=student.id, status='Active').order_by(Package.delivery_date.desc())
@@ -53,7 +56,6 @@ def student_packages(student_id):
 @packages.route("/home/pickup_package", methods=['POST'])
 @login_required
 def _pickup_package():
-    print('here')
     form = PackagePickUpForm()
     if form.validate_on_submit():
         student_id = int(form.student_id.data)
@@ -83,18 +85,26 @@ def newPackage():
         description = request.form.getlist('description')
         perishable = request.form.getlist('perishable')
 
+        # convert perishables from string values to boolean
+        perishable = [string_to_bool(x) for x in perishable]
+
         for i in range(len(name)):
             fname, lname = name[i].split()
-            fname = fname.capitalize()
-            lname = lname.capitalize()
-            # convert perishable from string value to boolean
-            result = string_to_bool(perishable[i])
             # get the student with the name and room number entered
             student = Student.query.filter_by(
-                first_name=fname, last_name=lname, room_number=room_number[i]).first()
+                first_name=fname.capitalize(), last_name=lname.capitalize(), hall=current_user.hall, room_number=room_number[i]).first()
+            if not student:
+                flash('An error occurred', 'danger')
+                return redirect(url_for('packages.newPackage'))
+
             # create a new package from user input and make the package a child of the student object
             package = Package(
-                description=description[i], perishable=result, inputted=current_user, owner=student)
+                description=description[i], perishable=perishable[i], inputted=current_user, owner=student, hall=current_user.hall)
+
+            if not package:
+                flash('An error occurred', 'danger')
+                return redirect(url_for('packages.newPackage'))
+
             if student.email in student_dict:  # check if the student is already in the dictionary
                 num_packages = student_dict[student.email]
                 num_packages += 1  # if student is in dict increment their number of packages
@@ -116,10 +126,13 @@ def newPackage():
 @packages.route("/newPackage/validate", methods=['POST'])
 @login_required
 def _validate():
-    name = request.form['name']
-    room_number = request.form['room_number']
+    name = request.form.get('name', None)
+    room_number = request.form.get('room_number', None)
+    phone_number = request.form.get('phone_number', None)
+    # check if student phone number needs updating
+    update_number = request.form.get('update_number', None)
 
-    if len(name.split()) <= 1:
+    if name == None or len(name.split()) <= 1:
         return jsonify({'name_error': 'Enter first and last name of student'})
 
     fname, lname = name.split()
@@ -127,15 +140,30 @@ def _validate():
     lname = lname.capitalize()
 
     student = Student.query.filter_by(
-        first_name=fname, last_name=lname).first()
+        first_name=fname, last_name=lname, hall=current_user.hall).first()
+
     if not student:
-        return jsonify({'name_error': 'Student does not exist'})
+        return jsonify({'name_error': f'This student does not live in {current_user.hall.name} hall'})
 
-    if room_number:
-        if student.room_number != room_number:
-            return jsonify({'room_error': 'Student does not live in this room',
-                            'room_number': student.room_number,
-                            'name': fname + ' ' + lname})
+    if room_number and student.room_number != room_number:
+        return jsonify({'room_error': 'Student does not live in this room'})
 
+    # make sure phone number is a valid number
+    if phone_number and '_' in phone_number:
+        return jsonify({'phone_error': 'Invalid phone number'})
+
+    # check if phone number is different than number in database
+    if phone_number and student.phone_number:
+        # parse out formatting
+        phone_number = re.sub('[()-]', '', phone_number)
+        # remove white space
+        phone_number = phone_number.replace(' ', '')
+        if update_number:
+            student.phone_number = phone_number
+        elif phone_number != student.phone_number:
+            return jsonify({'conflicting_numbers': 'True',
+                            'current_number': student.phone_number})
+    db.session.commit()
     return jsonify({'room_number': student.room_number,
-                    'name': fname + ' ' + lname})
+                    'name': fname + ' ' + lname,
+                    'phone_number': student.phone_number})

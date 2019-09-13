@@ -1,7 +1,7 @@
 import os
 import csv
 from werkzeug.utils import secure_filename
-from flask import render_template, Blueprint, request, flash, redirect, url_for
+from flask import render_template, Blueprint, request, flash, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from mailalert.main.forms import ComposeEmailForm, CreateMessageForm, StudentSearchForm
 from mailalert.models import Message, Package, SentMail, Student, Hall
@@ -10,6 +10,28 @@ from mailalert.config import Config
 from mailalert.main.utils import send_package_update_email, allowed_file
 
 main = Blueprint('main', __name__)
+
+
+@main.route("/get_halls", methods=['POST'])
+@login_required
+def get_halls():
+    hall_list = Hall.query.all()
+    hall_list = [hall.name for hall in hall_list]
+    # remove the current users hall because it is already being displayed
+    hall_list.remove(current_user.hall.name)
+    return jsonify({'halls': hall_list})
+
+
+@main.route("/change_working_hall", methods=['POST'])
+@login_required
+def change_working_hall():
+    new_hall = request.form.get('new_hall', None)
+    hall = Hall.query.filter_by(name=new_hall).first()
+    if not hall:
+        return jsonify({'error', 'could not find that hall'})
+    current_user.hall = hall
+    db.session.commit()
+    return jsonify({'success': 'success'})
 
 
 @main.route("/setup", methods=['POST'])
@@ -58,7 +80,7 @@ def setup():
                 flash('Error: Student phone numbers cannot be duplicated', 'danger')
                 return redirect(url_for('packages.home'))
             else:
-                new_student = Student(student_id=student[0], first_name=student[1], last_name=student[2],
+                new_student = Student(student_id=student[0], first_name=student[1].capitalize(), last_name=student[2].capitalize(),
                                       email=student[3], room_number=student[4], phone_number=student[5], hall=student_hall)
                 db.session.add(new_student)
         flash('Students successfully added!', 'success')
