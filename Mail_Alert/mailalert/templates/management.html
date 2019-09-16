@@ -36,6 +36,19 @@
 				<div class="table-title">
 					<div class="row">
 						<div class="col-sm-6">
+							<h2>Add Students<h2>
+								<table>	
+									<thead>
+										<tr>
+											<div class="btn-toolbar float-right">
+												<td colspan="7">
+													<a href="#setupModal" class="btn btn-success" data-toggle="modal"><i
+													class="material-icons">&#xE147;</i> <span>Add New Roster</span></a>
+												</td>
+											</div>
+										</tr>
+									</thead>
+								</table>
 							<h2>Manage Employees</h2>
 						</div>
 					</div>
@@ -66,6 +79,7 @@
 							<th></th>
 						</tr>
 					</thead>
+	
 					{% for employee in employees %}
 						<tr>
 							<td><span class="custom-checkbox">
@@ -153,6 +167,29 @@
 				</div>
 			</fieldset>
 		</form>
+		<!-- setup Modal -->
+		<form action="{{ url_for('main.setup') }}" method="POST" enctype="multipart/form-data">
+			{{ form.hidden_tag() }}
+			<div id="setupModal" class="modal fade">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h4 class="modal-title">Mail Alert Setup</h4>
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						</div>
+						<div class="modal-body">
+							<p>Upload students csv file</p>
+							<input name="file" type="file">
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+							<input type="submit" class="btn btn-success" value="Save">
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+		
 		<!-- Edit Modal HTML -->
 		<!-- <div id="editEmployeeModal" class="modal fade">
 			<div class="modal-dialog">
