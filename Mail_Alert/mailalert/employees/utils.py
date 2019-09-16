@@ -40,3 +40,7 @@ To reset your password, visit the following link:
 if you did not make this request then please ignore this email.
 """
     mail.send(msg)
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS

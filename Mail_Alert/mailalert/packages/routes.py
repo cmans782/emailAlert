@@ -58,8 +58,8 @@ def student_packages(student_id):
 def _pickup_package():
     form = PackagePickUpForm()
     if form.validate_on_submit():
-        student_id = int(form.student_id.data)
-        confirm_student_id = int(form.student_id_confirm.data)
+        student_id = form.student_id.data
+        confirm_student_id = form.student_id_confirm.data
         if confirm_student_id != student_id:
             return jsonify({'error': 'The ID entered does not match this student'})
         package_id_list = request.form.getlist("pick_up")

@@ -1,10 +1,10 @@
 from flask import render_template, url_for, flash, redirect, request, Blueprint, jsonify
 from flask_login import login_user, current_user, logout_user, login_required
 from mailalert import db, bcrypt
-from mailalert.models import Employee, Hall, Login
-from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, NewPasswordForm
+from mailalert.models import Employee, Hall, Login, Student
+from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, NewPasswordForm, NewHallForm
 from mailalert.employees.utils import send_reset_email, generate_random_string, send_temp_password_email
-from mailalert.main.utils import requires_access_level
+from mailalert.main.utils import requires_access_level, allowed_file
 from datetime import datetime
 
 employees = Blueprint('employees', __name__)
@@ -15,6 +15,7 @@ employees = Blueprint('employees', __name__)
 @requires_access_level('Building Director')
 def management():
     form = ManagementForm()
+    new_hall_form = NewHallForm()
     # query database for all halls and add them to the list of choices for the halls dropdown
     hall_list = Hall.query.all()
     hall_list = [(hall.id, hall.name) for hall in hall_list]
@@ -43,18 +44,44 @@ def management():
             send_temp_password_email(employee, password)
             db.session.add(employee)
         db.session.commit()
+    if new_hall_form.validate_on_submit():
+        hall = new_hall_form.hall.data
+        hall = Hall(name=hall.capitalize())
+        db.session.add(hall)
+        db.session.commit()
     employees = Employee.query.filter(Employee.active == True).all()
-    return render_template('management.html', title='Management', form=form, employees=employees)
+    halls = Hall.query.all()
+    return render_template('management.html', title='Management', form=form, employees=employees, halls=halls, new_hall_form=new_hall_form)
+
+
+@employees.route("/_delete_hall", methods=['POST'])
+@login_required
+def _delete_hall():
+    hall_id = request.form.get('hall_id', None)
+    hall = Hall.query.get(hall_id)
+    if hall:
+        db.session.delete(hall)
+        db.session.commit()
+        return jsonify({'success': 'success'})
+    else:
+        return jsonify({'error': 'Could not find that hall'})
 
 
 @employees.route("/management/validate", methods=['POST'])
 @login_required
 def _validate():
-    email = request.form['email']
-    email_exists = Employee.query.filter_by(email=email).first()
-    if email_exists and email_exists.active == True:
-        return jsonify({'error': 'This email is already in use'})
-    return jsonify({'success': 'success'})
+    email = request.form.get('email', None)
+    hall = request.form.get('hall', None)
+    if email:
+        email_exists = Employee.query.filter_by(email=email).first()
+        if email_exists and email_exists.active == True:
+            return jsonify({'error': 'This email is already in use'})
+        return jsonify({'success': 'success'})
+    if hall:
+        hall = Hall.query.filter_by(name=hall.capitalize()).first()
+        if hall:
+            return jsonify({'hall_error': 'This hall already exists'})
+        return jsonify({'success': 'success'})
 
 
 @employees.route("/management/delete", methods=['POST'])
@@ -74,18 +101,59 @@ def delete_employee():
     return redirect(url_for('employees.management'))
 
 
-# @employees.route("/management/edit", methods=['POST'])
-# @login_required
-# def edit_employee():
-#     form = EditEmployeeForm()
-#     if form.validate_on_submit():
-#         employee = Employee.query.filter_by(email=form.email.data).first()
-#         employee.email = form.email.data
-#         employee.fname = form.firstName.data
-#         employee.lname = form.lastName.data
-#         employee.workinghall = form.hall.data
-#         db.session.commit()
-#     return redirect(url_for('employees.management'))
+@employees.route("/upload_csv", methods=['POST'])
+@login_required
+def upload_csv():
+    # check if the post request has the file part
+    if 'file' not in request.files:
+        flash('No selected file')
+        return redirect('packages.home')
+    file = request.files['file']
+    # if user does not select file, browser also
+    # submit an empty part without filename
+    if file.filename == '':
+        flash('No selected file')
+        return redirect('packages.home')
+    if file and allowed_file(file.filename):
+        data = file.read().decode('utf-8')
+        data = data.split('\r\n')
+
+        # for student in data:
+        # data = [None if value is '' else value for value in student]
+
+        # drop Student model
+        db.session.query(Student).delete()
+        db.session.commit()
+
+        for student in data:
+            student = student.split(',')
+            student_hall = Hall.query.filter_by(name=student[6]).first()
+            student_id_exists = Student.query.filter_by(
+                student_id=student[0]).first()
+            student_email_exists = Student.query.filter_by(
+                email=student[3]).first()
+            if student[5] == '':
+                student[5] = None
+            else:
+                student_phone_exists = Student.query.filter_by(
+                    phone_number=student[5]).first()
+            if student_id_exists:
+                flash('Error: Student ID\'s cannot be duplicated', 'danger')
+                return redirect(url_for('packages.home'))
+            if student_email_exists:
+                flash('Error: Student email addresses cannot be duplicated', 'danger')
+                return redirect(url_for('packages.home'))
+            if student_phone_exists:
+                flash('Error: Student phone numbers cannot be duplicated', 'danger')
+                return redirect(url_for('packages.home'))
+            else:
+                new_student = Student(student_id=student[0], first_name=student[1].capitalize(), last_name=student[2].capitalize(),
+                                      email=student[3], room_number=student[4], phone_number=student[5], hall=student_hall)
+                db.session.add(new_student)
+        flash('Students successfully added!', 'success')
+        db.session.commit()
+
+    return redirect(url_for('packages.home'))
 
 
 @employees.route("/login", methods=['GET', 'POST'])

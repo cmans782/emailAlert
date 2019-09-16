@@ -99,6 +99,29 @@ a.article-title:hover {
 	padding-top: 50px;
 }
 
+.card.management {
+	margin: 20px;
+	padding: 30px;
+}
+
+.halls {
+	padding: 30px;
+}
+
+.halls p {
+	margin: 8px;
+}
+
+.trash {
+	color: #c82333;
+	padding-bottom: 20px;
+	padding-left: 20px;
+}
+
+.dropAreaHover {
+	color: rgb(251, 8, 8);
+}
+
 /* custom checkbox */
 
 /* Customize the label */
