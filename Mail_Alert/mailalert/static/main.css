@@ -85,7 +85,7 @@ a.article-title:hover {
 }
 
 .fixed-header {
-	max-height: 450px;
+	max-height: 385px;
 	overflow-y: auto;
 }
 
