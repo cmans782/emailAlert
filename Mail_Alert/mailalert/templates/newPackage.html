@@ -255,6 +255,7 @@ $(document).ready(function() {
                 room_error = '';
                 $(this).removeClass('is-invalid');
                 $(this).next().hide();
+                $(this).parent().next().next().next().children('input').val(data.phone_number)
             }
         });
         e.preventDefault(); // block the traditional submission of the form.
@@ -267,7 +268,8 @@ $(document).ready(function() {
             type: 'POST',
             url: url,
             context: this,
-            data: { name: $(this).parent().prev().prev().prev().prev().children('input').val(), 
+            data: { name: $(this).parent().prev().prev().prev().prev().children('input').val(),
+                    room_number: $(this).parent().prev().prev().prev().children('input').val(),
                     phone_number: $(this).val() 
                 }
         }).done(function(data) {
