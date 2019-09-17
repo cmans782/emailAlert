@@ -96,14 +96,6 @@
 <!-- End Pick up button -->
 {% endif %}
 
-{% if setup %}
-    <script type="text/javascript">
-        $(document).ready(function(){
-            $("#setupModal").modal('show');
-        });
-    </script>
-{% endif %}
-
 <script>
 // toggle "pick up" button on based on if a package is checked
 var $pickUp = $("#pickupBtn").hide();

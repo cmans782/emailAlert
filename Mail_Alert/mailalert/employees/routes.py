@@ -169,15 +169,10 @@ def login():
             return render_template('login.html', title='Login', form=form)
         if employee and bcrypt.check_password_hash(employee.password, form.password.data):
             login_user(employee)
-            logins = Login.query.first()
-            # check if there has ever been a login
-            first_login = False if logins else True
             # log when user logs in
             login = Login(login_date=datetime.now(), employee=current_user)
             db.session.add(login)
             db.session.commit()
-            if first_login is True:
-                return redirect(url_for('packages.home', setup=first_login))
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('packages.home'))
         else:

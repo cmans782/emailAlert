@@ -18,14 +18,12 @@ packages = Blueprint('packages', __name__)
 def home():
     package_pickup_form = PackagePickUpForm()
     student_search_form = StudentSearchForm()
-    setup = request.args.get('setup')
     perishables = Package.query.filter_by(
         perishable=True, status="Active", hall=current_user.hall).all()
     if student_search_form.validate_on_submit():
         return redirect(url_for('packages.student_packages', student_id=student_search_form.student_id.data))
     return render_template('home.html', student_search_form=student_search_form,
-                           package_pickup_form=package_pickup_form,
-                           setup=setup, perishables=perishables)
+                           package_pickup_form=package_pickup_form, perishables=perishables)
 
 
 @packages.route("/home/<student_id>", methods=['GET', 'POST'])
