@@ -85,7 +85,7 @@ def newPackage():
         room_number = request.form.getlist('room_number')
         description = request.form.getlist('description')
         perishable = request.form.getlist('perishable')
-        phone_number = request.form.getlist('phone_number')
+        phone_number_list = request.form.getlist('phone_number')
 
         # convert perishables from string values to boolean
         perishable = [string_to_bool(x) for x in perishable]
@@ -99,12 +99,11 @@ def newPackage():
                 flash('An error occurred', 'danger')
                 return redirect(url_for('packages.newPackage'))
 
-            if phone_number[i]:
+            if phone_number_list[i] and student.phone_number == None:
                 # parse out formatting of phone number
-                phone_number = re.sub('[()-]', '', phone_number[i])
+                phone_number = re.sub('[()-]', '', phone_number_list[i])
                 # remove white space
                 phone_number = phone_number.replace(' ', '')
-
                 student.phone_number = phone_number
 
             # create a new package from user input and make the package a child of the student object
@@ -155,10 +154,7 @@ def _validate():
     if not student:
         return jsonify({'name_error': f'This student does not live in {current_user.hall.name} hall'})
 
-    print(student)
-    print(room_number)
     if room_number and student.room_number != room_number:
-        print('here')
         student = Student.query.filter_by(
             first_name=fname, last_name=lname, room_number=room_number, hall=current_user.hall).first()
         if not student:
@@ -177,8 +173,14 @@ def _validate():
         if update_number:
             student.phone_number = phone_number
         elif phone_number != student.phone_number:
-            return jsonify({'conflicting_numbers': 'True',
-                            'current_number': student.phone_number})
+            # check if a student already has this number
+            existing_student = Student.query.filter_by(
+                phone_number=phone_number).first()
+            if existing_student:
+                return jsonify({'phone_error': 'This phone number already exists'})
+            else:
+                return jsonify({'conflicting_numbers': 'True',
+                                'current_number': student.phone_number})
     db.session.commit()
     return jsonify({'room_number': student.room_number,
                     'name': fname + ' ' + lname,

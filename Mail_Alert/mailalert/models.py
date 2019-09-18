@@ -21,6 +21,7 @@ class Employee(db.Model, UserMixin):
     hired_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
     end_date = db.Column(db.DateTime)
     active = db.Column(db.Boolean, default=True)
+    reset_password = db.Column(db.Boolean, default=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     first_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String(100), nullable=False)

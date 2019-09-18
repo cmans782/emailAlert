@@ -57,6 +57,7 @@
 	</div>
 	<div class="card management">
 		<form action="{{ url_for('employees.delete_employee') }}" method="POST">
+			{{ form.hidden_tag() }}
 			<h2>Manage Employees</h2>
 			<table class="table table-striped table-hover">
 				<thead>
@@ -314,7 +315,7 @@ $(document).ready(function() {
     	hoverClass: 'dropAreaHover',
 		drop: function(event, p) {
 			// if hall is dropped in trashcan send the halls id to the server and delete it 
-			var url = "{{ url_for('employees._delete_hall') }}"; // send the form data here.
+			var url = "{{ url_for('employees.remove_hall') }}"; // send the form data here.
 			$.ajax({
 				type: 'POST',
 				url: url,

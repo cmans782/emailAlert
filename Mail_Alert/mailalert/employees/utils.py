@@ -27,13 +27,15 @@ def generate_random_string():
     return password
 
 
-def send_temp_password_email(employee, password):
+def send_reset_password_email(employee, password):
     msg = Message('Temporary Password', sender='noreply@demo.com',
                   recipients=[employee.email])
     msg.body = f"""You have just been added to the Kutztown Mail Alert team! 
-
 Your temporary password is:
+
 {password}
+
+In order to login, you must first reset your password
 To reset your password, visit the following link:
 {url_for('employees.reset_password', _external=True)}
 

@@ -3,7 +3,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 from mailalert import db, bcrypt
 from mailalert.models import Employee, Hall, Login, Student
 from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, NewPasswordForm, NewHallForm
-from mailalert.employees.utils import send_reset_email, generate_random_string, send_temp_password_email
+from mailalert.employees.utils import send_reset_email, send_reset_password_email, generate_random_string
 from mailalert.main.utils import requires_access_level, allowed_file
 from datetime import datetime
 
@@ -41,10 +41,10 @@ def management():
                                 last_name=form.lastName.data.capitalize(), access=form.role.data,
                                 hall=hall, password=hashed_password)
             flash(f'Account created for {employee.email}!', 'success')
-            send_temp_password_email(employee, password)
+            send_reset_password_email(employee, password)
             db.session.add(employee)
         db.session.commit()
-    if new_hall_form.validate_on_submit():
+    elif new_hall_form.submit.data and new_hall_form.validate_on_submit():
         hall = new_hall_form.hall.data
         hall = Hall(name=hall.capitalize())
         db.session.add(hall)
@@ -54,12 +54,15 @@ def management():
     return render_template('management.html', title='Management', form=form, employees=employees, halls=halls, new_hall_form=new_hall_form)
 
 
-@employees.route("/_delete_hall", methods=['POST'])
+@employees.route("/management/remove_hall", methods=['POST'])
 @login_required
-def _delete_hall():
+def remove_hall():
     hall_id = request.form.get('hall_id', None)
     hall = Hall.query.get(hall_id)
     if hall:
+        student = Student.query.filter_by(hall=hall).first()
+        if student:
+            return jsonify({'error', f'{hall.name} cannot be removed if an employee belongs to that hall'})
         db.session.delete(hall)
         db.session.commit()
         return jsonify({'success': 'success'})
@@ -76,12 +79,11 @@ def _validate():
         email_exists = Employee.query.filter_by(email=email).first()
         if email_exists and email_exists.active == True:
             return jsonify({'error': 'This email is already in use'})
-        return jsonify({'success': 'success'})
-    if hall:
+    elif hall:
         hall = Hall.query.filter_by(name=hall.capitalize()).first()
         if hall:
             return jsonify({'hall_error': 'This hall already exists'})
-        return jsonify({'success': 'success'})
+    return jsonify({'success': 'success'})
 
 
 @employees.route("/management/delete", methods=['POST'])
@@ -168,6 +170,10 @@ def login():
                 'Login Unsuccessful. Management has removed you from the list of active employees', 'danger')
             return render_template('login.html', title='Login', form=form)
         if employee and bcrypt.check_password_hash(employee.password, form.password.data):
+            # check if the user still needs to reset their password
+            if employee.reset_password:
+                flash('Please reset your password before logging in', 'info')
+                return redirect(url_for('employees.reset_password'))
             login_user(employee)
             # log when user logs in
             login = Login(login_date=datetime.now(), employee=current_user)
@@ -212,9 +218,10 @@ def reset_token(token):
         flash('That is an invalid or expired token', 'warning')
         return redirect(url_for('employees.reset_request'))
     form = ResetPasswordForm()
-    if form.validate_on_submit():  # this will only be true if there is a form.submit in management.html
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode(
-            'utf-8')  # generate a password hash for the user that is being created
+    if form.validate_on_submit():
+        # hash the new password
+        hashed_password = bcrypt.generate_password_hash(
+            form.password.data).decode('utf-8')
         employee.password = hashed_password
         db.session.commit()
         flash('Your password has been reset!', 'success')
@@ -233,8 +240,10 @@ def reset_password():
                 form.new_password.data).decode('utf-8')
             employee.password = hashed_password
             db.session.commit()
+            employee.reset_password = False
+            db.session.commit()
             flash('Your password has been changed!', 'success')
             return redirect(url_for('employees.login'))
         else:
             flash(f'Invalid email or password', 'danger')
-    return render_template('reset_password.html', title='New Password', form=form)
+    return render_template('reset_password.html', title='Reset Password', form=form)

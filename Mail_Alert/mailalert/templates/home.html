@@ -38,6 +38,7 @@
                     <tr>
                         <th>Package&nbsp;#</th>
                         <th>Name</th>
+                        <th>Room</th>
                         <th>Description</th>
                         <th id="deliveryDateLabel">Delivered</th>
                         <th>Phone Number</th>
@@ -49,6 +50,7 @@
                         <tr class="table-danger" data-status="{{ perishable.status }}">
                             <td>{{ perishable.id }}</td>
                             <td>{{ perishable.owner.first_name }} {{ perishable.owner.last_name }}</td>
+                            <td>{{ perishable.owner.room_number }}</td>
                             <td>{{ perishable.description }}</td>
                             <td>{{ perishable.delivery_date.strftime('%m-%d-%Y') }}</td>
                             <td>{{ perishable.owner.phone_number }}</td>
@@ -86,21 +88,17 @@
     </div>
     <!-- End Pickup Package Modal -->
 </form>
-
- <!-- Pick up button -->
- <div class="col">
-    <div class="float-right" style="padding-top: 20px">
-        <a id="pickupBtn" href="#pickupPackageModal" class="btn btn-success" data-toggle="modal"><span>Pick Up</span></a>
-    </div>
-</div>
-<!-- End Pick up button -->
 {% endif %}
 
 <script>
-// toggle "pick up" button on based on if a package is checked
-var $pickUp = $("#pickupBtn").hide();
+// display pick up package modal when a checkbox is checked
 $cbs = $('input[name="pick_up"]').click(function(){
-    $pickUp.toggle( $cbs.is(":checked") );
+    $('#pickupPackageModal').modal('show');
+});
+
+// if pick up package modal disappears uncheck the checkbox
+$('#pickupPackageModal').on('hide.bs.modal', function (e) {
+    $('input[name="pick_up"]').prop('checked', false); 
 });
 
 // post package pickup through ajax

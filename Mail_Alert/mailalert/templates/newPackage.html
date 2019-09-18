@@ -100,6 +100,7 @@ $(document).ready(function() {
     var hall_error;
     var phone_error; 
     var phone_number;
+    var room_number;
     var name;
     var counter = 0;
     var cols = '';
@@ -176,6 +177,7 @@ $(document).ready(function() {
         $(this).closest('tr').remove();
         counter -= 1;
     });
+    // when a perishable is checked display the phone number header and input field
     $(document).on('click', ':checkbox', function() {
         if ($(this).is(':checked')) {
             $(this).next('input').remove();
@@ -286,6 +288,7 @@ $(document).ready(function() {
                 $('#error-modal').modal('show');
                 phone_number = $(this).val()
                 name = $(this).parent().prev().prev().prev().prev().children('input').val()
+                room_number = $(this).parent().prev().prev().prev().children('input').val()
                 // store the original number incase the student cancels
                 $(this).next().next().val(data.current_number)
                 $(this).removeClass('is-invalid');
@@ -311,6 +314,7 @@ $(document).ready(function() {
             url: url,
             context: this,
             data: { name: name, 
+                    room_number: room_number,
                     phone_number: phone_number,
                     update_number: 'True'
                 }
