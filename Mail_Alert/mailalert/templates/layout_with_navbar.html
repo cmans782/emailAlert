@@ -41,12 +41,15 @@
   {% else %}
   <title>Mail Alert</title>
   {% endif %}
+  
+  <link rel='icon' href={{ url_for('static', filename = '../static/favicon.png') }}>
+
 </head>
 
 <body>
   <header class="site-header">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-      <a class="navbar-brand" href="/">Mail Alert</a>
+	  <a href="/"><img src= {{ url_for('static', filename = '../static/logo.png') }} alt="Mail Alert" border="0" width="110px" height="50px"></a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
         aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -120,9 +123,11 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
-        <div class="alert alert-{{ category }}" id="flashMessage">
+		<div class="flash_message_position">
+        <div class="alert alert-{{ category }}" id="flashMessage" width="15%">
           {{ message }}
         </div>
+		</div>
         {% endfor %}
         {% endif %}
         {% endwith %}

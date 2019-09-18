@@ -199,3 +199,15 @@ a.article-title:hover {
 .table-borderless td {
 	border: 0;
 }
+
+.center-picture {
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
+
+.flash_message_position {
+	position: fixed;
+	top: 75px;
+	right: 15px;
+}
