@@ -95,14 +95,15 @@
 
 <script>
 $(document).ready(function() {
-    var name_error;
-    var room_error;
-    var hall_error;
-    var phone_error; 
-    var phone_number;
+    var name_error = 0;
+    var room_error = 0;
+    var hall_error = 0;
+    var phone_error = 0; 
+    var current_number_obj;
+    var new_number_obj;
     var room_number;
     var name;
-    var counter = 0;
+    var num_rows = 0;
     var cols = '';
     cols +=
         '<td style="width: 250px;"> \
@@ -148,8 +149,9 @@ $(document).ready(function() {
             <input type="hidden" name="current-number"> \
         </td>'; 
 
-    cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
+    cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger"  value="Delete"></td>';
     cols += '<td></td>';
+
     $('#addrow').on('keyup', function(event) {
         // if tab key is pressed
         if (event.which == 9) {
@@ -160,22 +162,35 @@ $(document).ready(function() {
         newRow();
     });
     function newRow() {
+        num_rows += 1;
         var newRow = $("<tr>");
         newRow.append(cols);
         $("table.order-list").append(newRow);
         
-        var empTable = document.getElementById("packageTable");
-        var trArray = empTable.rows;
-        var lastTrElem = trArray[trArray.length - 1];
-        var lastTdElem = lastTrElem.firstChild;
-        var inputElem = lastTdElem.firstChild;
-        console.log(lastTdElem)
-        inputElem.focus();
+        // var empTable = document.getElementById("packageTable");
+        // var trArray = empTable.rows;
+        // var lastTrElem = trArray[trArray.length - 1];
+        // var lastTdElem = lastTrElem.firstChild;
+        // var inputElem = lastTdElem.firstChild;
+        // console.log(lastTdElem)
+        // inputElem.focus();
 
     }
     $('table.order-list').on('click', '.ibtnDel', function(event) {
         $(this).closest('tr').remove();
-        counter -= 1;
+        // when the delete button is pressed check if any of the fields had errors
+        // if it did decrement the counter
+        // phone_number
+        if ($(this).parent().prev().children('input').hasClass('is-invalid')){
+            phone_error -= 1;
+        // room_number
+        } else if ($(this).parent().prev().prev().prev().prev().children('input').hasClass('is-invalid')){
+            room_error -= 1;
+        // name
+        } else if ($(this).parent().prev().prev().prev().prev().prev().children('input').hasClass('is-invalid')){
+            name_error -= 1;
+        }
+        num_rows -= 1;
     });
     // when a perishable is checked display the phone number header and input field
     $(document).on('click', ':checkbox', function() {
@@ -183,9 +198,10 @@ $(document).ready(function() {
             $(this).next('input').remove();
             $(this).parent().parent().next().children('input').show()
             $('[name="phone-label"]').show();
+            $(this).parent().parent().next().children('input').prop('required',true);
             $("[name='phone_number']").inputmask({"mask": "(999) 999-9999"});
-        }
-        else {
+        } else {
+            $(this).parent().parent().next().children('input').prop('required',false);
             $("<input type='hidden' name='perishable' value='False'>").insertAfter(this);
             $(this).parent().parent().next().children('input').hide()
             checkChecked();
@@ -213,21 +229,28 @@ $(document).ready(function() {
             context: this,
             data: { name: $(this).val() }
         }).done(function(data) {
-            if (data.name_error) {
-                name_error = data.name_error
+            // if there is an error for the first time
+            if ((data.name_error) && (!$(this).hasClass('is-invalid'))){
+                name_error += 1; 
                 $(this).addClass('is-invalid');
                 $(this).next().show()
                 $(this).next().children().text(data.name_error);
                 $(this).parent().next().children('div').hide(); // hide room_error
-            }
-            else {
-                name_error = '';
+            // if there was an error but it is correct now 
+            } else if ((!data.name_error) && ($(this).hasClass('is-invalid'))) {
+                name_error -= 1;
                 $(this).removeClass('is-invalid');
                 $(this).next().hide();
-                $(this).val(data.name);
-                $(this).parent().next().children('input').val(data.room_number);
                 $(this).parent().next().children('input').removeClass('is-invalid');
                 $(this).parent().next().children('div').hide();
+
+                $(this).val(data.name);
+                $(this).parent().next().children('input').val(data.room_number);
+                $(this).parent().next().next().next().next().children('input').val(data.phone_number);
+            // if there was never an error
+            } else {
+                $(this).val(data.name);
+                $(this).parent().next().children('input').val(data.room_number);
                 $(this).parent().next().next().next().next().children('input').val(data.phone_number);
             }
         });
@@ -247,16 +270,21 @@ $(document).ready(function() {
             if (data.name_error) {
                 return;
             }
-            else if (data.room_error) {
-                room_error = data.room_error; // assign error to global variable
+            // if there is an error for the first time
+            if ((data.room_error) && (!$(this).hasClass('is-invalid'))) {
+                room_error += 1;
                 $(this).addClass('is-invalid');
                 $(this).next().show();
                 $(this).next().children().text(data.room_error);
-            }
-            else {
-                room_error = '';
+            // if there was an error but it is correct now             
+            } else if ((!data.room_error) && ($(this).hasClass('is-invalid'))){
+                room_error -= 1;
                 $(this).removeClass('is-invalid');
                 $(this).next().hide();
+
+                $(this).parent().next().next().next().children('input').val(data.phone_number)
+            // if there was never an error 
+            } else {
                 $(this).parent().next().next().next().children('input').val(data.phone_number)
             }
         });
@@ -275,8 +303,9 @@ $(document).ready(function() {
                     phone_number: $(this).val() 
                 }
         }).done(function(data) {
-            if (data.phone_error) {
-                phone_error = data.phone_error; // assign error to global variable
+            // if there is an error for the first time
+            if ((data.phone_error) && (!$(this).hasClass('is-invalid'))) {
+                phone_error += 1;
                 $(this).addClass('is-invalid');
                 $(this).next().show();
                 $(this).next().children().text(data.phone_error);
@@ -284,9 +313,12 @@ $(document).ready(function() {
             // if the phone number entered does not match number in database
             // show modal and assign the current phone number to a hidden field 
             else if (data.conflicting_numbers){
-                phone_error = '';
+                if ((phone_error > 0) && ($(this).hasClass('is-invalid'))) {
+                    phone_error -= 1;
+                };
                 $('#error-modal').modal('show');
-                phone_number = $(this).val()
+                new_number_obj = $(this);
+                current_number_obj = $(this).next().next();
                 name = $(this).parent().prev().prev().prev().prev().children('input').val()
                 room_number = $(this).parent().prev().prev().prev().children('input').val()
                 // store the original number incase the student cancels
@@ -294,8 +326,9 @@ $(document).ready(function() {
                 $(this).removeClass('is-invalid');
                 $(this).next().hide();
             }
-            else {
-                phone_error = '';
+            // if there was an error but it is correct now             
+            else if ((!data.phone_error) && ($(this).hasClass('is-invalid'))){
+                phone_error -= 1;
                 $(this).removeClass('is-invalid');
                 $(this).next().hide();
             }
@@ -305,9 +338,6 @@ $(document).ready(function() {
 
     // if conflicting number is confirmed, send the new number to be saved 
     $('[name="confirm"]').on('click', function(e){
-        var new_number = $('#phone_number').val();
-        $('[name="current-number"]').val(new_number);
-        
         var url = "{{ url_for('packages._validate') }}"; // send the form data here.
         $.ajax({
             type: 'POST',
@@ -315,26 +345,52 @@ $(document).ready(function() {
             context: this,
             data: { name: name, 
                     room_number: room_number,
-                    phone_number: phone_number,
+                    phone_number: new_number_obj.val(),
                     update_number: 'True'
-                }
-        }).done(function(data) {
-            
+                },
+            success: update_input_number(true)
         });
         e.preventDefault(); // block the traditional submission of the form.
     });
 
 
-    // if conflicting phone number modal is closed, replace the number entered
-    // with the number saved in the database
-    $('#error-modal').on('hide.bs.modal', function (e) {
-        var current_number = $('[name="current-number"]').val();
-        $('#phone_number').val(current_number);
-    })
+    // if conflicting phone number modal is closed, replace the number entered (new_number_obj)
+    // with the number saved in the database (current_number)
+    $('#error-modal').on('hidden.bs.modal', function (e) {
+        update_input_number(false);
+    });
+
+    function update_input_number(submit){
+        // if the submit button was clicked
+        if (submit == true) {
+            var old_number = current_number_obj.val();
+            // make the current number the value of new number
+            current_number_obj.val(new_number_obj.val());
+            
+            // loop through all other phone number values to see 
+            // if those numbers need changing as well
+            $('[name="phone_number"]').each(function(){
+                var compare_number = $(this).val()
+                // remove all characters that are not numbers
+                compare_number = compare_number.replace(/\D+/g, '');
+                // if the numbers are the same change it to the new number 
+                if (old_number == compare_number){
+                    $(this).val(new_number_obj.val());
+                }
+            });
+        } else {
+            // if the submit button was not clicked, change the phone number back 
+            new_number_obj.val(current_number_obj.val());
+        }
+    };
 
     // validate name and room number on submit
     $('#submit').on('click', function(e) {
-        if (name_error || room_error || phone_error) {
+        // console.log('name_error:', name_error); 
+        // console.log('room_error', room_error);
+        // console.log('phone_error', phone_error);
+        // console.log('');
+        if (name_error > 0 || room_error > 0|| phone_error > 0) {
             $('[name="fix-error"]').show();
             e.preventDefault(e);
         }

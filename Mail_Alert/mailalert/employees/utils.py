@@ -1,6 +1,8 @@
 from flask import url_for
 from flask_mail import Message
-from mailalert import mail
+from mailalert import mail, bcrypt
+from sqlalchemy import event
+from mailalert.models import Employee
 import string
 from random import choice, randint
 
@@ -46,3 +48,12 @@ if you did not make this request then please ignore this email.
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
+
+
+@event.listens_for(Employee.password, 'set', retval=True)
+def hash_user_password(target, value, oldvalue, initiator):
+    print('here')
+    if value != oldvalue:
+        return bcrypt.generate_password_hash(value).decode(
+            'utf-8')
+    return value

@@ -2,7 +2,7 @@ from flask_admin.contrib.sqla import ModelView
 
 
 class EmployeeView(ModelView):
-    form_columns = ['hired_date', 'active', 'end_date', 'email',
+    form_columns = ['hired_date', 'active', 'email',
                     'first_name', 'last_name', 'password', 'access', 'hall']
 
     form_choices = {

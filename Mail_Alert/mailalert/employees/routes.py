@@ -34,12 +34,12 @@ def management():
                 f'{existing_employee.first_name}\'s account has been reactivated!', 'success')
         else:
             password = generate_random_string()
-            hashed_password = bcrypt.generate_password_hash(password).decode(
-                'utf-8')  # generate a password hash for the user that is being created
+            # hashed_password = bcrypt.generate_password_hash(password).decode(
+            # 'utf-8')  # generate a password hash for the user that is being created
             hall = Hall.query.get(form.hall.data)  # get hall object
             employee = Employee(email=form.email.data, first_name=form.firstName.data.capitalize(),
                                 last_name=form.lastName.data.capitalize(), access=form.role.data,
-                                hall=hall, password=hashed_password)
+                                hall=hall, password=password)
             flash(f'Account created for {employee.email}!', 'success')
             send_reset_password_email(employee, password)
             db.session.add(employee)
@@ -62,7 +62,11 @@ def remove_hall():
     if hall:
         student = Student.query.filter_by(hall=hall).first()
         if student:
-            return jsonify({'error', f'{hall.name} cannot be removed if an employee belongs to that hall'})
+            return jsonify({'error': f'{hall.name} cannot be removed if an student lives in that hall'})
+        employee = Employee.query.filter_by(hall=hall).first()
+        if employee:
+            return jsonify({'error': f'{hall.name} cannot be removed if an employee works in that hall'})
+
         db.session.delete(hall)
         db.session.commit()
         return jsonify({'success': 'success'})
@@ -165,11 +169,11 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         employee = Employee.query.filter_by(email=form.email.data).first()
-        if not employee.active:
+        if employee and not employee.active:
             flash(
                 'Login Unsuccessful. Management has removed you from the list of active employees', 'danger')
             return render_template('login.html', title='Login', form=form)
-        if employee and bcrypt.check_password_hash(employee.password, form.password.data):
+        elif employee and bcrypt.check_password_hash(employee.password, form.password.data):
             # check if the user still needs to reset their password
             if employee.reset_password:
                 flash('Please reset your password before logging in', 'info')
@@ -236,10 +240,10 @@ def reset_password():
         employee = Employee.query.filter_by(email=form.email.data).first()
         # if the current users password matches the old password field
         if employee and bcrypt.check_password_hash(employee.password, form.old_password.data):
-            hashed_password = bcrypt.generate_password_hash(
-                form.new_password.data).decode('utf-8')
-            employee.password = hashed_password
-            db.session.commit()
+            # hashed_password = bcrypt.generate_password_hash(
+            #     form.new_password.data).decode('utf-8')
+            # employee.password = hashed_password
+            employee.password = form.new_password.data
             employee.reset_password = False
             db.session.commit()
             flash('Your password has been changed!', 'success')

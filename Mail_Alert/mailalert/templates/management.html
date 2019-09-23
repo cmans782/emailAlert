@@ -40,6 +40,9 @@
 	<div class="card management">
 		<form>
 			<h2>Manage Halls</h2>
+			<div name='remove-hall-error' class="invalid-feedback" style='display:none;'>
+				<span name='remove-hall-error'></span>
+			</div>
 			<a href="#addHallModal" class="btn btn-success" data-toggle="modal">
 				<i class="material-icons">&#xE147;</i><span>Add New Hall</span>
 			</a>
@@ -326,7 +329,8 @@ $(document).ready(function() {
 				if (data.success) {
 					$(p.draggable).remove();
 				} else if (data.error){
-					alert(data.error);
+	                $("span[name='remove-hall-error']").text(data.error);
+					$("div[name='remove-hall-error']").show();
 				}
 			});
 		}
