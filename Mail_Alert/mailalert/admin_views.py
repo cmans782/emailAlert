@@ -5,8 +5,6 @@ from flask import url_for, redirect, flash, render_template
 
 
 class EmployeeView(ModelView):
-    # add CSRF protection
-    form_base_class = SecureForm
 
     form_columns = ['hired_date', 'active', 'email',
                     'first_name', 'last_name', 'password', 'access', 'hall']
@@ -27,8 +25,6 @@ class EmployeeView(ModelView):
 
 
 class StudentView(ModelView):
-     # add CSRF protection
-    form_base_class = SecureForm
 
     form_columns = ['student_id', 'first_name', 'last_name',
                     'email', 'room_number', 'phone_number', 'hall']
@@ -41,8 +37,6 @@ class StudentView(ModelView):
 
 
 class HallView(ModelView):
-     # add CSRF protection
-    form_base_class = SecureForm
 
     form_columns = ['name']
 
@@ -54,8 +48,6 @@ class HallView(ModelView):
 
 
 class PackageView(ModelView):
-     # add CSRF protection
-    form_base_class = SecureForm
 
     form_columns = ['status', 'description', 'delivery_date',
                     'picked_up_date', 'perishable', 'owner', 'hall', 'inputted', 'removed']
@@ -68,8 +60,6 @@ class PackageView(ModelView):
 
 
 class MessageView(ModelView):
-     # add CSRF protection
-    form_base_class = SecureForm
 
     form_columns = ['content']
 
@@ -81,8 +71,6 @@ class MessageView(ModelView):
 
 
 class SentMailView(ModelView):
-     # add CSRF protection
-    form_base_class = SecureForm
 
     form_columns = ['sent_date', 'cc_recipients', 'employee', 'message']
 
@@ -94,8 +82,6 @@ class SentMailView(ModelView):
 
 
 class LoginView(ModelView):
-     # add CSRF protection
-    form_base_class = SecureForm
 
     form_columns = ['login_date', 'logout_date', 'employee']
 
