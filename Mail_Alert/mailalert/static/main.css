@@ -97,6 +97,7 @@ a.article-title:hover {
 	position: sticky;
 	top: 0;
 	background: #fafafa;
+	z-index: 1;
 }
 
 .perishables {

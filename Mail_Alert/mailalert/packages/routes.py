@@ -59,13 +59,12 @@ def student_packages(student_id):
 def _pickup_package():
     form = PackagePickUpForm()
     if form.validate_on_submit():
-        student_id = form.student_id.data
         confirm_student_id = form.student_id_confirm.data
-        if confirm_student_id != student_id:
-            return jsonify({'error': 'The ID entered does not match this student'})
         package_id_list = request.form.getlist("pick_up")
         for package_id in package_id_list:
             package = Package.query.get(package_id)
+            if package.owner.student_id != confirm_student_id:
+                return jsonify({'error': 'The ID entered does not match this student'})
             package.status = 'Picked Up'
             package.picked_up_date = datetime.now()
             package.removed = current_user  # record the user that removed the package

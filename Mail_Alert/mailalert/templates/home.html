@@ -54,10 +54,13 @@
                             <td>{{ perishable.description }}</td>
                             <td>{{ perishable.delivery_date.strftime('%m-%d-%Y') }}</td>
                             <td>{{ perishable.owner.phone_number }}</td>
-                            <td>{{ package_pickup_form.pick_up(class="form-control form-control-md", value=perishable.id) }}</td>
+                            <td>
+                                <label class="checkbox-container">
+                                    {{ package_pickup_form.pick_up(class="form-control form-control-md", value=perishable.id) }}
+                                    <span class="checkmark"></span>
+                                </label>
+                            </td>
                         </tr>
-                        <!-- pass the students ID in the form as a hidden field -->
-                        {{ package_pickup_form.student_id(value=perishable.owner.student_id) }}
                     {% endfor %}
                 </tbody>
             </table>
@@ -92,7 +95,7 @@
 
 <script>
 // display pick up package modal when a checkbox is checked
-$cbs = $('input[name="pick_up"]').click(function(){
+$('input[name="pick_up"]').click(function(){
     $('#pickupPackageModal').modal('show');
 });
 
@@ -112,11 +115,11 @@ $('#pickup_form').submit(function (e) {
     })
     .done(function(data){
         if (data.error) {
-        $('#student_id_confirm').addClass('is-invalid');
-        $('#errorDiv').show();
-        $('#errorAlert').text(data.error);
+            $('#student_id_confirm').addClass('is-invalid');
+            $('#errorDiv').show();
+            $('#errorAlert').text(data.error);
         } else {
-        window.location.href = '/';
+            window.location.href = '/';
         }
     });
     e.preventDefault(); // block the traditional submission of the form.

@@ -16,8 +16,6 @@ class NewPackageForm(FlaskForm):
 
 class PackagePickUpForm(FlaskForm):
     pick_up = BooleanField('Pick up Package')
-    student_id = HiddenField('Student ID')
-    # student_id_confirm = IntegerField('ID Confirm', validators=[
     student_id_confirm = StringField('ID Confirm', validators=[
         DataRequired(message='Please enter a student ID')])
     confirm = SubmitField('Confirm')
