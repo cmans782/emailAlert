@@ -183,6 +183,11 @@ $(".btn-group .btn").click(function () {
     }
 });
 
+// focus on textbox when modal loads
+$('#pickupPackageModal').on('shown.bs.modal', function() {
+    $('#student_id_confirm').focus();
+});
+
 // toggle "pick up" button on based on if a package is checked
 var $pickUp = $("#pickupBtn").hide();
 $cbs = $('input[name="pick_up"]').click(function(){
