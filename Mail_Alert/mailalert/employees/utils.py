@@ -10,7 +10,7 @@ from random import choice, randint
 def send_reset_email(employee):
     token = employee.get_reset_token()
     msg = Message('Password Reset Request',
-                  sender='noreply@demo.com', recipients=[employee.email])
+                  sender='KutztownMail@gmail.com', recipients=[employee.email])
     msg.body = f"""To reset your password, visit the following link:
 {url_for('employees.reset_token', token=token, _external=True)}
 
@@ -30,7 +30,7 @@ def generate_random_string():
 
 
 def send_reset_password_email(employee, password):
-    msg = Message('Temporary Password', sender='noreply@demo.com',
+    msg = Message('Temporary Password', sender='KutztownMail@gmail.com',
                   recipients=[employee.email])
     msg.body = f"""You have just been added to the Kutztown Mail Alert team! 
 Your temporary password is:

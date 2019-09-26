@@ -5,7 +5,7 @@ from mailalert import mail
 
 def send_new_package_email(student_email, num_packages):
     msg = Message('Kutztown Package Update',
-                  sender='noreply@demo.com', recipients=[student_email])
+                  sender='KutztownMail@gmail.com', recipients=[student_email])
     if num_packages > 1:
         msg.body = f"You have {num_packages} packages ready to be picked up!"
     else:

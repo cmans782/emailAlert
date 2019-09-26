@@ -10,7 +10,7 @@ from mailalert.config import Config
 def send_package_update_email(message, recipients, cc_recipients):
     msg = Message()
     msg.subject = 'Package Update'
-    msg.sender = 'noreply@demo.com'
+    msg.sender = 'KutztownMail@gmail.com'
     msg.recipients = [recipients]
     msg.cc = [cc_recipients]
     msg.body = message
