@@ -99,6 +99,11 @@ $('input[name="pick_up"]').click(function(){
     $('#pickupPackageModal').modal('show');
 });
 
+// focus on pickup modal when it loads
+$('#pickupPackageModal').on('shown.bs.modal', function() {
+    $('#student_id_confirm').focus();
+});
+
 // if pick up package modal disappears uncheck the checkbox
 $('#pickupPackageModal').on('hide.bs.modal', function (e) {
     $('input[name="pick_up"]').prop('checked', false); 
@@ -159,6 +164,10 @@ function cardReader2()
     var found = card_number.match(regular);
     document.getElementById("student_id_confirm").value = found;
 }
+
+
+$("#student_id").focus();
+
 
 </script>
 
