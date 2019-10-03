@@ -32,7 +32,7 @@
     <div class="card management">
 		<h2>Add Students</h2>            
 		<div>
-			<a href="#setupModal" class="btn btn-success" data-toggle="modal"><i
+			<a href="#uploadModal" class="btn btn-success" data-toggle="modal"><i
 				class="material-icons">&#xE147;</i> <span>Add New Roster</span>
 			</a>
 		</div>
@@ -208,13 +208,13 @@
 	</form>
 
 	<!-- upload csv Modal -->
-	<form action="{{ url_for('employees.upload_csv') }}" method="POST" enctype="multipart/form-data">
+	<form id=upload_csv_form method="post" enctype="multipart/form-data">
 		{{ form.hidden_tag() }}
-		<div id="setupModal" class="modal fade">
+		<div id="uploadModal" class="modal fade">
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h4 class="modal-title">Mail Alert Setup</h4>
+						<h4 class="modal-title">Upload Roster</h4>
 						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 					</div>
 					<div class="modal-body">
@@ -222,13 +222,42 @@
 						<input name="file" type="file">
 					</div>
 					<div class="modal-footer">
+						<div style="padding-left: 10px;" name='csv-error' class="invalid-feedback" style='display:none;'>
+							<span name='csv-error'></span>
+						</div>
 						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-						<input type="submit" class="btn btn-success" value="Save">
+						<input name="upload_csv" type="submit" class="btn btn-success" value="Upload">
 					</div>
 				</div>
 			</div>
 		</div>
 	</form>
+
+	<!-- upload report modal -->
+	<div id="uploadReportModal" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Upload Report</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">
+					<div id="report_data"></div>
+					<div id="update_errors" style='display:none;'>
+						<p>A few students were not able to be uploaded.</p>
+						<p>A list of all the failed students is available for download below.</p>
+					</div>
+					<div name="no_upload_errors" style='display:none;'>
+						<p>All students were successfully uploaded!</p>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<input style='display:none;' name="download-csv" onclick="download_csv()" type="submit" class="btn btn-success" value="Download">
+				</div>
+			</div>
+		</div>
+	</div>
 </body>
 
 <script>
@@ -293,6 +322,63 @@ $(document).ready(function() {
         }
     });
 
+	// upload csv
+    $('#upload_csv_form').submit(function(e) {
+        var url = "{{ url_for('employees.upload_csv') }}"; // send the form data here.
+		var form_data = new FormData($('#upload_csv_form')[0]);
+
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: form_data,
+			contentType: false,
+            cache: false,
+            processData: false,
+        }).done(function(data) {
+            if (data.error) {
+                $('div[name="csv-error"]').show();
+                $('span[name="csv-error"]').text(data.error);
+            }
+            else {
+                $('div[name="csv-error"]').next().hide();
+				$('#uploadModal').modal('hide');
+				$('#uploadReportModal').modal('show');
+				$('#report_data').empty();
+				if (data.new_student_count != "0") {
+					$("<p><strong>New Students: </strong>" + data.new_student_count + "</p>").appendTo('#report_data');
+				}
+				if (data.hall_update_count != "0") {
+					$("<p><strong>Updated Halls: </strong>" + data.hall_update_count + "</p>").appendTo('#report_data');	
+				}
+				if (data.room_update_count != "0") {
+					$("<p><strong>Updated Rooms: </strong>" + data.room_update_count + "</p>").appendTo('#report_data');	
+				}
+				if (data.new_employee_count != "0") {
+					$("<p><strong>New Employees: </strong>" + data.new_employee_count + "</p>").appendTo('#report_data');	
+				}
+				if (data.removed_employee_count != "0") {
+					$("<p><strong>Removed Employees: </strong>" + data.removed_employee_count + "</p>").appendTo('#report_data');	
+				}
+				if (data.error_count != "0") {
+					$("<p><strong>Errors: </strong>" + data.error_count + "</p>").appendTo('#report_data');	
+				}
+
+				if (data.error_count == "0") {
+					$('#update_errors').hide();
+					$('[name="download-csv"]').hide();
+					$('[name="no_upload_errors"]').show();
+				} else {
+					$('[name="no_upload_errors"]').hide();
+					$('#update_errors').show();
+					$('[name="download-csv"]').show();
+					error_values = data.error_values
+					error_columns = data.error_columns
+				}
+            }
+        });
+        e.preventDefault(); // block the traditional submission of the form.
+    });
+
     // Inject our CSRF token into our AJAX request.
     var csrf_token = '{{ csrf_token() }}';
     $.ajaxSetup({
@@ -336,5 +422,19 @@ $(document).ready(function() {
 		}
 	});
 });
+
+function download_csv() {
+	var csv = error_columns + '\n';
+	error_values.forEach(function(row) {
+			csv += row.join(',');
+			csv += "\n";
+    });
+ 
+    var hiddenElement = document.createElement('a');
+    hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+    hiddenElement.target = '_blank';
+    hiddenElement.download = 'errors.csv';
+    hiddenElement.click();
+}
 </script>
 {% endblock %}

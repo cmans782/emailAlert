@@ -3,9 +3,10 @@ from flask_login import login_user, current_user, logout_user, login_required
 from mailalert import db, bcrypt
 from mailalert.models import Employee, Hall, Login, Student
 from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, NewPasswordForm, NewHallForm
-from mailalert.employees.utils import send_reset_email, send_reset_password_email, generate_random_string
+from mailalert.employees.utils import send_reset_email, send_reset_password_email, generate_random_string, clean_student_data, validate_student_data, update_student_data, column_names
 from mailalert.main.utils import requires_access_level, allowed_file
 from datetime import datetime
+import pandas as pd
 
 employees = Blueprint('employees', __name__)
 
@@ -29,6 +30,7 @@ def management():
             existing_employee.first_name = form.firstName.data.capitalize()
             existing_employee.last_name = form.lastName.data.capitalize()
             existing_employee.access = form.role.data
+            existing_employee.end_date = None
             existing_employee.active = True
             flash(
                 f'{existing_employee.first_name}\'s account has been reactivated!', 'success')
@@ -112,54 +114,57 @@ def delete_employee():
 def upload_csv():
     # check if the post request has the file part
     if 'file' not in request.files:
-        flash('No selected file')
-        return redirect('packages.home')
+        return jsonify({'error': 'No File Selected'})
     file = request.files['file']
     # if user does not select file, browser also
     # submit an empty part without filename
     if file.filename == '':
-        flash('No selected file')
-        return redirect('packages.home')
+        return jsonify({'error': 'No File Selected'})
+
     if file and allowed_file(file.filename):
-        data = file.read().decode('utf-8')
-        data = data.split('\r\n')
+        error_count = 0
+        error_values = []
+        error_columns = []
 
-        # for student in data:
-        # data = [None if value is '' else value for value in student]
+        students = file.read().decode('utf-8')
+        # convert to a list
+        students = students.split('\r\n')
+        # first row of students are the column names
+        columns = students[0].split(',')
+        # delete the column names from students
+        del students[0]
+        # move list into a pandas dataframe
+        student_df = pd.DataFrame([student.split(',')
+                                   for student in students], columns=columns)
+        # make an error dataframe to add of the errors to
+        error_df = pd.DataFrame()
 
-        # drop Student model
-        db.session.query(Student).delete()
-        db.session.commit()
+        # drop the CA column, we dont need it
+        student_df.drop(columns='CA', inplace=True)
 
-        for student in data:
-            student = student.split(',')
-            student_hall = Hall.query.filter_by(name=student[6]).first()
-            student_id_exists = Student.query.filter_by(
-                student_id=student[0]).first()
-            student_email_exists = Student.query.filter_by(
-                email=student[3]).first()
-            if student[5] == '':
-                student[5] = None
-            else:
-                student_phone_exists = Student.query.filter_by(
-                    phone_number=student[5]).first()
-            if student_id_exists:
-                flash('Error: Student ID\'s cannot be duplicated', 'danger')
-                return redirect(url_for('packages.home'))
-            if student_email_exists:
-                flash('Error: Student email addresses cannot be duplicated', 'danger')
-                return redirect(url_for('packages.home'))
-            if student_phone_exists:
-                flash('Error: Student phone numbers cannot be duplicated', 'danger')
-                return redirect(url_for('packages.home'))
-            else:
-                new_student = Student(student_id=student[0], first_name=student[1].capitalize(), last_name=student[2].capitalize(),
-                                      email=student[3], room_number=student[4], phone_number=student[5], hall=student_hall)
-                db.session.add(new_student)
-        flash('Students successfully added!', 'success')
-        db.session.commit()
+        student_df = clean_student_data(student_df)
+        student_df, error_df = validate_student_data(student_df, error_df)
+        student_df, error_df, new_student_count, hall_update_count, room_update_count, new_employee_count, removed_employee_count = update_student_data(
+            student_df, error_df)
 
-    return redirect(url_for('packages.home'))
+        if not error_df.empty:
+            # get a count of the errors
+            error_count = error_df['USERNAME'].count()
+            # reorder error_df columns
+            error_df = error_df[column_names]
+            # convert df to list so it can be passed to client
+            error_values = error_df.values.tolist()
+            error_columns = error_df.columns.tolist()
+        return jsonify({'new_student_count': new_student_count,
+                        'hall_update_count': hall_update_count,
+                        'room_update_count': room_update_count,
+                        'new_employee_count': new_employee_count,
+                        'removed_employee_count': removed_employee_count,
+                        'error_count': str(error_count),
+                        'error_values': error_values,
+                        'error_columns': error_columns})
+    else:
+        return jsonify({'error': 'That file type is not supported'})
 
 
 @employees.route("/login", methods=['GET', 'POST'])
