@@ -106,7 +106,7 @@ $(document).ready(function() {
     var num_rows = 0;
     var cols = '';
     cols +=
-        '<td style="width: 250px;"> \
+        '<td style="width: 250px;" id="nameField"> \
             {{ form.name(class="form-control form-control-md") }} \
             <div name="name-error" class="invalid-feedback" style="display:none;"> \
                 <span name="name-error"></span> \
@@ -167,15 +167,15 @@ $(document).ready(function() {
         newRow.append(cols);
         $("table.order-list").append(newRow);
         
-        // var empTable = document.getElementById("packageTable");
-        // var trArray = empTable.rows;
-        // var lastTrElem = trArray[trArray.length - 1];
-        // var lastTdElem = lastTrElem.firstChild;
-        // var inputElem = lastTdElem.firstChild;
-        // console.log(lastTdElem)
-        // inputElem.focus();
+        var empTable = document.getElementById("packageTable");
+        var trArray = empTable.rows;
+        var lastTrElem = trArray[trArray.length - 2];
+        var lastTdElem = lastTrElem.firstChild;
+        var inputElem = lastTdElem.firstElementChild;
+        inputElem.focus();
 
     }
+    
     $('table.order-list').on('click', '.ibtnDel', function(event) {
         $(this).closest('tr').remove();
         // when the delete button is pressed check if any of the fields had errors

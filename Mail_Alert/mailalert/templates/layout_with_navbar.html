@@ -123,11 +123,11 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
-		<div class="flash_message_position">
+		<!--<div class="flash_message_position">-->
         <div class="alert alert-{{ category }}" id="flashMessage" width="15%">
           {{ message }}
         </div>
-		</div>
+		<!--</div>-->
         {% endfor %}
         {% endif %}
         {% endwith %}
