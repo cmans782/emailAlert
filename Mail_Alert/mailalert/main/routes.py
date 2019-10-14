@@ -41,17 +41,22 @@ def compose_email():
     composeEmailForm = ComposeEmailForm()
     createMessageForm = CreateMessageForm()
     if composeEmailForm.validate_on_submit():
-        recipient_emails = composeEmailForm.recipient_email.data
+        recipient_email = composeEmailForm.recipient_email.data
         if composeEmailForm.cc_recipient.data:
             cc_recipients = composeEmailForm.cc_recipient.data
         message_id = request.form['options']
         message = Message.query.get(message_id)
+        student = Student.query.filter_by(email=recipient_email).first()
+        if not student: 
+            flash('Error getting student', 'danger')
+            return redirect(url_for('main.compose_email'))
         # log the email sent
-        email = SentMail(employee=current_user, message=message)
-        db.session.add(email)
+        sent_mail = SentMail(employee=current_user,
+                             student=student, message=message)
+        db.session.add(sent_mail)
         db.session.commit()
         send_package_update_email(
-            message.content, recipient_emails, cc_recipients)
+            message.content, recipient_email, cc_recipients)
         flash("Email successfully sent!", "success")
         return redirect(url_for('packages.home'))
 

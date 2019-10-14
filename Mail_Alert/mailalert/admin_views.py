@@ -92,7 +92,8 @@ class MessageView(ModelView):
 
 class SentMailView(ModelView):
 
-    form_columns = ['sent_date', 'cc_recipients', 'employee', 'message']
+    form_columns = ['sent_date', 'cc_recipients',
+                    'employee', 'message', 'student']
 
     def is_accessible(self):
         return current_user.is_authenticated and current_user.is_admin()

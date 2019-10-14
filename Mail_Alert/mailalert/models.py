@@ -66,9 +66,10 @@ class Student(db.Model):
     last_name = db.Column(db.String(100), nullable=False)
     room_number = db.Column(db.String(6), nullable=False)
     hall_id = db.Column(db.Integer, db.ForeignKey('hall.id'))
+    packages = db.relationship('Package', backref='owner')
+    sent_mail = db.relationship('SentMail', backref='student')
     phone_numbers = db.relationship(
         'Phone', secondary='assigned', backref=db.backref('assigned', lazy='dynamic'))
-    packages = db.relationship('Package', backref='owner')
 
     def __repr__(self):
         return f"Student('{self.first_name + ' ' + self.last_name}', '{self.email}','{self.student_id}', '{self.room_number}')"
@@ -117,6 +118,7 @@ class SentMail(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sent_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
     cc_recipients = db.Column(db.String(250))
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
     employee_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
     message_id = db.Column(db.Integer, db.ForeignKey('message.id'))
 

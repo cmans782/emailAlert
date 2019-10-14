@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from mailalert.packages.forms import NewPackageForm, PackagePickUpForm
 from mailalert.main.forms import StudentSearchForm
 from mailalert.packages.utils import send_new_package_email, string_to_bool
-from mailalert.models import Package, Student, Hall, Phone
+from mailalert.models import Package, Student, Hall, Phone, SentMail
 from mailalert import db
 from datetime import datetime
 import json
@@ -96,7 +96,7 @@ def newPackage():
             student = Student.query.filter_by(
                 first_name=fname.capitalize(), last_name=lname.capitalize(), hall=current_user.hall, room_number=room_number[i]).first()
             if not student:
-                flash('An error occurred', 'danger')
+                flash('Error getting student', 'danger')
                 return redirect(url_for('packages.newPackage'))
 
             if perishable[i]:
@@ -133,11 +133,14 @@ def newPackage():
             else:
                 student_dict[student.email] = 1
             db.session.add(package)
-        db.session.commit()
 
-        ######### uncomment before releasing #########
-        # for email, num_packages in student_dict.items():
-        # send_new_package_email(email, num_packages)
+        for email, num_packages in student_dict.items():
+            ######### uncomment before releasing #########
+            # send_new_package_email(email, num_packages)
+            student = Student.query.filter_by(email=email).first()
+            sent_mail = SentMail(employee=current_user, student=student)
+            db.session.add(sent_mail)
+        db.session.commit()
 
         flash('Packages sucessfully added!', 'success')
         return redirect(url_for("packages.home"))
