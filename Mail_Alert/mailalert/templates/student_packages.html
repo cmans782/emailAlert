@@ -196,7 +196,6 @@ $cbs = $('input[name="pick_up"]').click(function(){
 
 // post package pickup through ajax
 $('#pickup_form').submit(function (e) {
-    // var student_id = $('#student_id_confirm').val()
     var url = "{{ url_for('packages._pickup_package') }}"; // send the form data here.
     $.ajax({
         type: "POST",
@@ -209,7 +208,7 @@ $('#pickup_form').submit(function (e) {
             $('#errorDiv').show();
             $('#errorAlert').text(data.error);
         } else {
-            window.location.href = '/';
+            window.location.href = '/home/{{ student.student_id }}';
         }
     });
     e.preventDefault(); // block the traditional submission of the form.

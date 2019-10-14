@@ -65,12 +65,13 @@ class Student(db.Model):
     first_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String(100), nullable=False)
     room_number = db.Column(db.String(6), nullable=False)
-    phone_number = db.Column(db.String(15), unique=True)
     hall_id = db.Column(db.Integer, db.ForeignKey('hall.id'))
+    phone_numbers = db.relationship(
+        'Phone', secondary='assigned', backref=db.backref('assigned', lazy='dynamic'))
     packages = db.relationship('Package', backref='owner')
 
     def __repr__(self):
-        return f"Student('{self.first_name + ' ' + self.last_name}', '{self.email}','{self.student_id}', '{self.room_number}', '{self.phone_number}')"
+        return f"Student('{self.first_name + ' ' + self.last_name}', '{self.email}','{self.student_id}', '{self.room_number}')"
 
 
 class Hall(db.Model):
@@ -93,6 +94,7 @@ class Package(db.Model):
     picked_up_date = db.Column(db.DateTime)
     perishable = db.Column(db.Boolean, default=False, nullable=False)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
+    phone_id = db.Column(db.Integer, db.ForeignKey('phone.id'))
     hall_id = db.Column(db.Integer, db.ForeignKey('hall.id'))
     employee_input_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
     employee_remove_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
@@ -132,6 +134,18 @@ class Login(db.Model):
         return f"Login('{self.login_date}', '{self.logout_date}')"
 
 
-# class Receives(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     student_
+class Phone(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    phone_number = db.Column(db.String(15))
+    packages = db.relationship('Package', backref='phone')
+
+    def __repr__(self):
+        return f"Phone('{self.phone_number}')"
+
+
+assigned = db.Table('assigned',
+                    db.Column('student_id', db.Integer,
+                              db.ForeignKey('student.student_id')),
+                    db.Column('phone_id', db.Integer,
+                              db.ForeignKey('phone.id'))
+                    )

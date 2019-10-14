@@ -76,13 +76,13 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Conflicting Phone Numbers</h4>
+                    <h4 class="modal-title">New Phone Number</h4>
                     <button type="button" class="close" data-dismiss="modal"
                         aria-hidden="true">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <p>The phone number entered does not match the number in our system for this student.</p>
-                    <p><strong>Do you want to use this number instead?</strong></p>
+                    <p>The phone number entered does not match any of the numbers in our system for this student.</p>
+                    <p><strong>Do you want to add this number?</strong></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -346,7 +346,7 @@ $(document).ready(function() {
             data: { name: name, 
                     room_number: room_number,
                     phone_number: new_number_obj.val(),
-                    update_number: 'True'
+                    new_number: 'True'
                 },
             success: update_input_number(true)
         });

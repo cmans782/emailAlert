@@ -2,7 +2,7 @@ from flask import url_for, flash
 from flask_mail import Message
 from mailalert import mail, bcrypt, db
 from sqlalchemy import event
-from mailalert.models import Employee, Student, Hall
+from mailalert.models import Employee, Student, Hall, Phone
 import string
 from random import choice, randint
 import pandas as pd
@@ -225,13 +225,16 @@ def update_student_data(df, error_df):
                 error_df = pd.concat([error_df, temp_df], sort=True)
                 error_df.reset_index(drop=True, inplace=True)
                 continue
-            # if phone number is empty make it None
-            if student[6] == '':
-                student[6] = None
-            new_student_count += 1
+
             new_student = Student(email=email, first_name=student[1], last_name=student[2],
-                                  hall=hall_obj, room_number=student[4], student_id=student[5], phone_number=student[6])
+                                  hall=hall_obj, room_number=student[4], student_id=student[5])
             db.session.add(new_student)
+            # if phone number is not empty add it to db
+            if student[6] != '':
+                phone_number = Phone(phone_number=student[6])
+                new_student.phone_numbers.append(phone_number)
+                db.session.add(phone_number)
+            new_student_count += 1
 
         # check if the student is an existing employee
         if employee_obj:

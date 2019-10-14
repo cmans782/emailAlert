@@ -7,7 +7,7 @@ from mailalert.config import Config
 from flask_wtf.csrf import CSRFProtect
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from mailalert.admin_views import EmployeeView, StudentView, HallView, PackageView, MessageView, SentMailView, LoginView
+from mailalert.admin_views import EmployeeView, StudentView, HallView, PackageView, MessageView, SentMailView, LoginView, PhoneView
 
 
 db = SQLAlchemy()
@@ -34,7 +34,7 @@ def create_app(config_class=Config):
     csrf.init_app(app)
 
     # Admin Panel
-    from mailalert.models import Package, Employee, Message, SentMail, Student, Hall, Login
+    from mailalert.models import Package, Employee, Message, SentMail, Student, Hall, Login, Phone
     admin.add_view(PackageView(Package, db.session))
     admin.add_view(EmployeeView(Employee, db.session))
     admin.add_view(MessageView(Message, db.session))
@@ -42,6 +42,7 @@ def create_app(config_class=Config):
     admin.add_view(HallView(Hall, db.session))
     admin.add_view(SentMailView(SentMail, db.session))
     admin.add_view(LoginView(Login, db.session))
+    admin.add_view(PhoneView(Phone, db.session))
 
     from mailalert.employees.routes import employees  # import blueprint instance
     from mailalert.packages.routes import packages

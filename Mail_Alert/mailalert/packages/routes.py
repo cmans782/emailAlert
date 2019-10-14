@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from mailalert.packages.forms import NewPackageForm, PackagePickUpForm
 from mailalert.main.forms import StudentSearchForm
 from mailalert.packages.utils import send_new_package_email, string_to_bool
-from mailalert.models import Package, Student, Hall
+from mailalert.models import Package, Student, Hall, Phone
 from mailalert import db
 from datetime import datetime
 import json
@@ -85,6 +85,7 @@ def newPackage():
         description = request.form.getlist('description')
         perishable = request.form.getlist('perishable')
         phone_number_list = request.form.getlist('phone_number')
+        phone_number_obj = None
 
         # convert perishables from string values to boolean
         perishable = [string_to_bool(x) for x in perishable]
@@ -98,19 +99,31 @@ def newPackage():
                 flash('An error occurred', 'danger')
                 return redirect(url_for('packages.newPackage'))
 
-            if phone_number_list[i] and student.phone_number == None:
+            if perishable[i]:
                 # parse out formatting of phone number
                 phone_number = re.sub('[()-]', '', phone_number_list[i])
                 # remove white space
                 phone_number = phone_number.replace(' ', '')
-                student.phone_number = phone_number
+                # if student does not have any phone numbers saved in db
+                if student.phone_numbers == []:
+                    # create new phone number
+                    phone_number_obj = Phone(phone_number=phone_number)
+                    # assign number obj to student
+                    student.phone_numbers.append(phone_number_obj)
 
-            # create a new package from user input and make the package a child of the student object
+                if not phone_number_obj:
+                    phone_number_obj = Phone.query.filter_by(
+                        phone_number=phone_number).first()
+                    if phone_number_obj == None:
+                        flash('Error getting phone number', 'danger')
+                        return redirect(url_for('packages.newPackage'))
+
             package = Package(
-                description=description[i], perishable=perishable[i], inputted=current_user, owner=student, hall=current_user.hall)
+                description=description[i], perishable=perishable[i], inputted=current_user,
+                owner=student, hall=current_user.hall, phone=phone_number_obj)
 
             if not package:
-                flash('An error occurred', 'danger')
+                flash('Error getting package', 'danger')
                 return redirect(url_for('packages.newPackage'))
 
             if student.email in student_dict:  # check if the student is already in the dictionary
@@ -137,8 +150,8 @@ def _validate():
     name = request.form.get('name', None)
     room_number = request.form.get('room_number', None)
     phone_number = request.form.get('phone_number', None)
-    # check if student phone number needs updating
-    update_number = request.form.get('update_number', None)
+    # check if student has a new phone number
+    new_number = request.form.get('new_number', None)
 
     if name == None or len(name.split()) <= 1:
         return jsonify({'name_error': 'Enter first and last name of student'})
@@ -163,24 +176,33 @@ def _validate():
     if phone_number and '_' in phone_number:
         return jsonify({'phone_error': 'Invalid phone number'})
 
-    # check if phone number is different than number in database
-    if phone_number and student.phone_number:
+    # if student has phone numbers in db get the most recent one, else None
+    recent_phone_number = student.phone_numbers[-1].phone_number if student.phone_numbers else None
+
+    # check if there was a phone number submitted and see if there is
+    # a number saved in the db for this student
+    if phone_number and student.phone_numbers:
         # parse out formatting
         phone_number = re.sub('[()-]', '', phone_number)
         # remove white space
         phone_number = phone_number.replace(' ', '')
-        if update_number:
-            student.phone_number = phone_number
-        elif phone_number != student.phone_number:
-            # check if a student already has this number
-            existing_student = Student.query.filter_by(
-                phone_number=phone_number).first()
-            if existing_student:
-                return jsonify({'phone_error': 'This phone number already exists'})
-            else:
+        # check if user confirmed new number. if so, add it to db for this student
+        if new_number:
+            # create new phone number
+            phone_number_obj = Phone(phone_number=phone_number)
+            # assign number obj to student
+            student.phone_numbers.append(phone_number_obj)
+        elif phone_number != recent_phone_number:
+            # get all the phone numbers in db for this student
+            student_numbers = [
+                obj.phone_number for obj in student.phone_numbers]
+            if phone_number not in student_numbers:
                 return jsonify({'conflicting_numbers': 'True',
-                                'current_number': student.phone_number})
+                                'current_number': recent_phone_number})
+            else:
+                # if the number is in db then reassign recent_phone_number
+                recent_phone_number = phone_number
     db.session.commit()
     return jsonify({'room_number': student.room_number,
                     'name': fname + ' ' + lname,
-                    'phone_number': student.phone_number})
+                    'phone_number': recent_phone_number})
