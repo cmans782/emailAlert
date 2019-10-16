@@ -157,7 +157,7 @@ def _validate():
     new_number = request.form.get('new_number', None)
 
     if name == None or len(name.split()) <= 1:
-        return jsonify({'name_error': 'Enter first and last name of student'})
+        return jsonify({'success': 'success'})
 
     fname, lname = name.split()
     fname = fname.capitalize()
@@ -209,3 +209,44 @@ def _validate():
     return jsonify({'room_number': student.room_number,
                     'name': fname + ' ' + lname,
                     'phone_number': recent_phone_number})
+
+
+@packages.route("/newPackage/suggestions", methods=['GET', 'POST'])
+@login_required
+def suggestions():
+    suggestions = []
+    name = request.args.get('term', None)
+    room_number = request.args.get('room_number', None)
+    if name:
+        # if the user only typed in a first or a last name
+        if len(name.split()) == 1:
+            # get all the students that contain name in their first or last name
+            # and are in the same hall as the user
+            students = Student.query.filter((Student.first_name.contains(name)) |
+                                            (Student.last_name.contains(name)),
+                                            Student.hall == current_user.hall).all()
+        # user entered the full name
+        elif len(name.split()) > 1:
+            first_name, last_name = name.split()
+            students = Student.query.filter(
+                Student.first_name.contains(first_name,),
+                Student.last_name.contains(last_name),
+                Student.hall == current_user.hall).all()
+
+        for student in students:
+            data = {'value': student.first_name + ' ' + student.last_name,
+                    'label': student.first_name + ' ' + student.last_name + ' ' + student.room_number}
+            suggestions.append(data)
+
+    elif room_number:
+        if len(room_number.split()) == 1:
+            students = Student.query.filter(
+                Student.room_number.contains(room_number),
+                Student.hall == current_user.hall).all()
+
+        for student in students:
+            data = {'value': student.room_number,
+                    'label': student.first_name + ' ' + student.last_name + ' ' + student.room_number}
+            suggestions.append(data)
+
+    return jsonify(suggestions)

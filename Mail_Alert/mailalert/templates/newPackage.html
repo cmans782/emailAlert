@@ -15,13 +15,13 @@
         <tbody>
             <tr>
                 <td style="width: 250px;">
-                    {{ form.name(class="form-control form-control-md col-12") }}
+                    {{ form.name(class="form-control form-control-md col-12", autocomplete="off") }}
                     <div name='name-error' class="invalid-feedback" style='display:none'>
                         <span name='name-error'></span>
                     </div>
                 </td>
                 <td style="width: 150px">
-                    {{ form.room_number(class="form-control form-control-md") }}
+                    {{ form.room_number(class="form-control form-control-md", autocomplete="off") }}
                     <div name='room-error' class="invalid-feedback" style='display:none;'>
                         <span name='room-error'></span>
                     </div>
@@ -93,7 +93,7 @@
     </div>
 </fieldset>
 
-<script>
+<script> 
 $(document).ready(function() {
     var name_error = 0;
     var room_error = 0;
@@ -107,14 +107,14 @@ $(document).ready(function() {
     var cols = '';
     cols +=
         '<td style="width: 250px;" id="nameField"> \
-            {{ form.name(class="form-control form-control-md") }} \
+            {{ form.name(class="form-control form-control-md", autocomplete="off") }} \
             <div name="name-error" class="invalid-feedback" style="display:none;"> \
                 <span name="name-error"></span> \
             </div> \
         </td>';
     cols +=
         '<td style="width: 150px;"> \
-            {{ form.room_number(class="form-control form-control-md") }} \
+            {{ form.room_number(class="form-control form-control-md", autocomplete="off") }} \
             <div name="room-error" class="invalid-feedback" style="display:none;"> \
                 <span name="room-error"></span> \
             </div> \
@@ -405,7 +405,61 @@ $(document).ready(function() {
         }
     });
 });
+</script>
 
-$("#name").focus();
+<script>
+$(document).ready(function() {
+    // autocomplete for student name
+    $(document).on('focus', '[name="name"]', function() {
+        $(this).autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "{{ url_for('packages.suggestions') }}",
+                    data: {
+                        term: request.term
+                    },
+                    success: function(data) {
+                        response(data)
+                    }
+                });
+            },
+            // only make request if two characters have been typed in
+            minLength: 2,
+            // fill in room of student when name is selected
+            select: function(event, ui) {
+                var label = ui.item.label
+                var room = label.split(' ');
+                $(this).parent().next().children('input').val(room[2]);
+            }
+        });
+    });
+
+    // autocomplete for room number 
+    $(document).on('focus', '[name="room_number"]', function() {
+        $(this).autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "{{ url_for('packages.suggestions') }}",
+                    data: {
+                        room_number: request.term
+                    },
+                    success: function(data) {
+                        response(data)
+                    },
+                });
+            },
+            // only make request if two characters have been typed in
+            minLength: 2,
+            // fill in name of student when room is selected 
+            select: function(event, ui) {
+                var label = ui.item.label
+                var name = label.split(' ');
+                $(this).parent().prev().children('input').val(name[0] + ' ' + name[1]);
+            }
+        });
+    });
+    
+$('[name="name"]').focus();
+});
 </script>
 {% endblock %}
