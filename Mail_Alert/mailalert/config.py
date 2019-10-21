@@ -1,3 +1,4 @@
+import json
 with open('/etc/MailAlert_config.json') as config_file:
     # json.load turns the config file into a python dictionary
     config = json.load(config_file)
