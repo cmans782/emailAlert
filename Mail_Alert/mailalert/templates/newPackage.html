@@ -416,7 +416,7 @@ $(document).ready(function() {
                 $.ajax({
                     url: "{{ url_for('packages.suggestions') }}",
                     data: {
-                        term: request.term
+                        name: request.term
                     },
                     success: function(data) {
                         response(data)

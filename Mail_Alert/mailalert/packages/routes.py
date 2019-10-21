@@ -215,8 +215,16 @@ def _validate():
 @login_required
 def suggestions():
     suggestions = []
-    name = request.args.get('term', None)
+    # name and room_number are for when entering a new package
+    name = request.args.get('name', None)
     room_number = request.args.get('room_number', None)
+    # search bar is for when entering a name in the search bar
+    search_bar = request.args.get('search_bar', None)
+    # the process of search bar and name are the same. assign
+    # name the value of search_bar if name has no value
+    if search_bar and name == None:
+        name = search_bar
+
     if name:
         # if the user only typed in a first or a last name
         if len(name.split()) == 1:
@@ -233,6 +241,18 @@ def suggestions():
                 Student.last_name.contains(last_name),
                 Student.hall == current_user.hall).all()
 
+    if search_bar:
+        # if no name was found for what was entered, look based on id
+        if not students:
+            students = Student.query.filter(
+                Student.student_id.contains(search_bar)).all()
+
+        for student in students:
+            data = {'value': student.student_id,
+                    'label': student.first_name + ' ' + student.last_name + ' ' + student.student_id}
+            suggestions.append(data)
+
+    elif name:
         for student in students:
             data = {'value': student.first_name + ' ' + student.last_name,
                     'label': student.first_name + ' ' + student.last_name + ' ' + student.room_number}

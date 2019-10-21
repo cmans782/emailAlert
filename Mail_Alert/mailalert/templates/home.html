@@ -91,6 +91,19 @@
     </div>
     <!-- End Pickup Package Modal -->
 </form>
+
+<script>
+document.getElementById("student_id_confirm").addEventListener("change", cardReader2); 
+function cardReader2(){
+    var card_data = document.getElementById("student_id_confirm").value;
+    var details = card_data.split("^");
+    var card_number = details[0];
+    // var regular = /[0-9]{9}/g;
+    var regular = /[0-9]{9}|([a-zA-Z]+){3,}/g;
+    var found = card_number.match(regular);
+    document.getElementById("student_id_confirm").value = found;
+}
+</script>
 {% endif %}
 
 <script>
@@ -145,10 +158,7 @@ $.ajaxSetup({
     }
 });
 
- document.getElementById("student_id_confirm").addEventListener("change", cardReader2); 
-
-function cardReader()
-{
+function cardReader(){
     var card_data = document.getElementById("student_id").value;
     var details = card_data.split("^");
     var card_number = details[0];
@@ -158,16 +168,30 @@ function cardReader()
     document.getElementById("student_id").value = found;
 }
 
-function cardReader2()
-{
-    var card_data = document.getElementById("student_id_confirm").value;
-    var details = card_data.split("^");
-    var card_number = details[0];
-    // var regular = /[0-9]{9}/g;
-    var regular = /[0-9]{9}|([a-zA-Z]+){3,}/g;
-    var found = card_number.match(regular);
-    document.getElementById("student_id_confirm").value = found;
-}
+// autocomplete for search bar
+$(document).on('focus', '[name="student_id"]', function() {
+    $(this).autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: "{{ url_for('packages.suggestions') }}",
+                data: {
+                    search_bar: request.term
+                },
+                success: function(data) {
+                    response(data)
+                }
+            });
+        },
+        // only make request if two characters have been typed in
+        minLength: 2,
+        // fill in room of student when name is selected
+        select: function(event, ui) {
+            // var label = ui.item.label
+            // var room = label.split(' ');
+            // $(this).parent().next().children('input').val(room[2]);
+        }
+    });
+});
 
 
 $("#student_id").focus();
