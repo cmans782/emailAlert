@@ -85,7 +85,6 @@ def newPackage():
         description = request.form.getlist('description')
         perishable = request.form.getlist('perishable')
         phone_number_list = request.form.getlist('phone_number')
-        phone_number_obj = None
 
         # convert perishables from string values to boolean
         perishable = [string_to_bool(x) for x in perishable]
@@ -100,6 +99,7 @@ def newPackage():
                 return redirect(url_for('packages.newPackage'))
 
             if perishable[i]:
+                phone_number_obj = None
                 # parse out formatting of phone number
                 phone_number = re.sub('[()-]', '', phone_number_list[i])
                 # remove white space
@@ -110,7 +110,7 @@ def newPackage():
                     phone_number_obj = Phone(phone_number=phone_number)
                     # assign number obj to student
                     student.phone_numbers.append(phone_number_obj)
-
+                # if the student already has a number saved in db
                 if not phone_number_obj:
                     phone_number_obj = Phone.query.filter_by(
                         phone_number=phone_number).first()
@@ -184,7 +184,7 @@ def _validate():
 
     # check if there was a phone number submitted and see if there is
     # a number saved in the db for this student
-    if phone_number and student.phone_numbers:
+    if phone_number:
         # parse out formatting
         phone_number = re.sub('[()-]', '', phone_number)
         # remove white space
@@ -195,12 +195,18 @@ def _validate():
             phone_number_obj = Phone(phone_number=phone_number)
             # assign number obj to student
             student.phone_numbers.append(phone_number_obj)
+        # if student does not have any phone numbers in db
+        elif recent_phone_number == None:
+            return jsonify({'new_number': 'True',
+                            'current_number': recent_phone_number})
+        # if the phone number entered by user does not match most recent phone number
+        # or if there is no number saved for the student
         elif phone_number != recent_phone_number:
             # get all the phone numbers in db for this student
             student_numbers = [
                 obj.phone_number for obj in student.phone_numbers]
             if phone_number not in student_numbers:
-                return jsonify({'conflicting_numbers': 'True',
+                return jsonify({'new_number': 'True',
                                 'current_number': recent_phone_number})
             else:
                 # if the number is in db then reassign recent_phone_number

@@ -312,7 +312,7 @@ $(document).ready(function() {
             }
             // if the phone number entered does not match number in database
             // show modal and assign the current phone number to a hidden field 
-            else if (data.conflicting_numbers){
+            else if (data.new_number){
                 if ((phone_error > 0) && ($(this).hasClass('is-invalid'))) {
                     phone_error -= 1;
                 };
@@ -366,18 +366,6 @@ $(document).ready(function() {
             var old_number = current_number_obj.val();
             // make the current number the value of new number
             current_number_obj.val(new_number_obj.val());
-            
-            // loop through all other phone number values to see 
-            // if those numbers need changing as well
-            $('[name="phone_number"]').each(function(){
-                var compare_number = $(this).val()
-                // remove all characters that are not numbers
-                compare_number = compare_number.replace(/\D+/g, '');
-                // if the numbers are the same change it to the new number 
-                if (old_number == compare_number){
-                    $(this).val(new_number_obj.val());
-                }
-            });
         } else {
             // if the submit button was not clicked, change the phone number back 
             new_number_obj.val(current_number_obj.val());
@@ -386,10 +374,6 @@ $(document).ready(function() {
 
     // validate name and room number on submit
     $('#submit').on('click', function(e) {
-        // console.log('name_error:', name_error); 
-        // console.log('room_error', room_error);
-        // console.log('phone_error', phone_error);
-        // console.log('');
         if (name_error > 0 || room_error > 0|| phone_error > 0) {
             $('[name="fix-error"]').show();
             e.preventDefault(e);
