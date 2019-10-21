@@ -1,6 +1,6 @@
 {% extends "layout_with_navbar.html" %}
 {%block content %}
-<form action="" method="POST" onsubmit="cardReader2()">
+<form action="" method="POST" onsubmit="parseCardSwipe2()">
     {{ student_search_form.hidden_tag() }}
     <div class="card" style="width:500px; margin:0 auto;">
         <div class="card-body">
@@ -60,7 +60,7 @@
     <!-- end student information card -->
 
     <div class="col-8">
-        <form id=pickup_form onsubmit="processCardReader()">
+        <form id=pickup_form onsubmit="parseCardSwipe()">
             <!-- packages table -->
             <div class='fixed-header'>
                 <table id="packagesTable" class="table table-hover">
@@ -230,7 +230,7 @@ $.ajaxSetup({
 	document.getElementById("student_id_confirm").addEventListener("change", cardReader); 
 
     // function to parse card data swipe information
-    function cardReader()
+    function parseCardSwipe()
     {
         var card_data = document.getElementById("student_id_confirm").value;
         var details = card_data.split("^");
@@ -240,7 +240,7 @@ $.ajaxSetup({
         document.getElementById("student_id_confirm").value = found;
     }
 
-    function cardReader2()
+    function parseCardSwipe2()
     {
         var card_data = document.getElementById("student_id").value;
         var details = card_data.split("^");
