@@ -3,7 +3,7 @@
 
 
 
-<form action="" method="POST" onsubmit="cardReader()">
+<form action="" method="POST" onsubmit="parseCardSwipe()">
     {{ student_search_form.hidden_tag() }}
     <div class="card" style="width:500px; margin:0 auto;">
         <div class="card-body">
@@ -158,7 +158,7 @@ $.ajaxSetup({
     }
 });
 
-function cardReader(){
+function parseCardSwipe(){
     var card_data = document.getElementById("student_id").value;
     var details = card_data.split("^");
     var card_number = details[0];
