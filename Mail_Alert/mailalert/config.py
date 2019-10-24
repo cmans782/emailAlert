@@ -12,10 +12,11 @@ class Config:
     FLASK_ADMIN_SWATCH = 'lumen'
 
     ALLOWED_EXTENSIONS = {'csv'}
-    UPLOAD_FOLDER = '/home/taylor/Projects/emailAlert/Mail_Alert/mailalert/static/student_files'
 
     MAIL_SERVER = 'email-smtp.us-east-1.amazonaws.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
     MAIL_USERNAME = config.get('MAIL_USERNAME')
     MAIL_PASSWORD = config.get('MAIL_PASSWORD')
+    # remove sqlalchemy warning
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
