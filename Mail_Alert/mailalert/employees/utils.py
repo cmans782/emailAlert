@@ -251,7 +251,8 @@ def update_student_data(df, error_df):
                     employee_obj.reset_password = True
                     employee_obj.password = password
                     new_employee_count += 1
-                    # send_reset_password_email(employee_obj, password)
+                    ######### uncomment before releasing #########
+                    send_reset_password_email(employee_obj, password)
             # check if the employee was removed from building director position
             elif employee_obj.access == 'Building Director' and student[7] != employment_code:
                 employee_obj.end_date = datetime.now()  # record employees end date
