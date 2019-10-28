@@ -137,9 +137,17 @@
 						</div>
 						<div class="modal-body">
 							<div class="form-group">
+								{{ new_hall_form.hall.label(class="form-control-label") }}
 								{{ new_hall_form.hall(class="form-control form-control-md") }}
 								<div name='hall-error' class="invalid-feedback" style='display:none;'>
 									<span name='hall-error'></span>
+								</div>
+							</div>
+							<div class="form-group">
+								{{ new_hall_form.building_code.label(class="form-control-label") }}
+								{{ new_hall_form.building_code(class="form-control form-control-md") }}
+								<div name='bcode-error' class="invalid-feedback" style='display:none;'>
+									<span name='bcode-error'></span>
 								</div>
 							</div>
 						</div>
@@ -307,7 +315,32 @@ $(document).ready(function() {
             else {
                 error = '';
                 $('[name="hall"]').removeClass('is-invalid');
-                $('div[name="hall-error"]').next().hide();
+                $('div[name="hall-error"]').hide();
+            }
+        });
+        e.preventDefault(); // block the traditional submission of the form.
+    });
+
+	// validate building code entered
+    $(document).on('focusout','[name="building_code"]', function(e) {
+        var url = "{{ url_for('employees._validate') }}"; // send the form data here.
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: {
+                building_code: $('[name="building_code"]').val()
+                }
+        }).done(function(data) {
+            if (data.bcode_error) {
+                error = 'Fix errors before submitting'; // assign error to global variable
+                $('[name="building_code"]').addClass('is-invalid');
+                $('div[name="bcode-error"]').show();
+                $('span[name="bcode-error"]').text(data.bcode_error);
+            }
+            else {
+                error = '';
+                $('[name="building_code"]').removeClass('is-invalid');
+                $('div[name="bcode-error"]').hide();
             }
         });
         e.preventDefault(); // block the traditional submission of the form.

@@ -34,58 +34,58 @@ def change_working_hall():
     return jsonify({'success': 'success'})
 
 
-@main.route("/composeEmail", methods=['GET', 'POST'])
-@login_required
-def compose_email():
-    cc_recipients = ""
-    composeEmailForm = ComposeEmailForm()
-    createMessageForm = CreateMessageForm()
-    if composeEmailForm.validate_on_submit():
-        recipient_email = composeEmailForm.recipient_email.data
-        if composeEmailForm.cc_recipient.data:
-            cc_recipients = composeEmailForm.cc_recipient.data
-        message_id = request.form['options']
-        message = Message.query.get(message_id)
-        student = Student.query.filter_by(email=recipient_email).first()
-        if not student: 
-            flash('Error getting student', 'danger')
-            return redirect(url_for('main.compose_email'))
-        # log the email sent
-        sent_mail = SentMail(employee=current_user,
-                             student=student, message=message)
-        db.session.add(sent_mail)
-        db.session.commit()
-        send_package_update_email(
-            message.content, recipient_email, cc_recipients)
-        flash("Email successfully sent!", "success")
-        return redirect(url_for('packages.home'))
+# @main.route("/composeEmail", methods=['GET', 'POST'])
+# @login_required
+# def compose_email():
+#     cc_recipients = ""
+#     composeEmailForm = ComposeEmailForm()
+#     createMessageForm = CreateMessageForm()
+#     if composeEmailForm.validate_on_submit():
+#         recipient_email = composeEmailForm.recipient_email.data
+#         if composeEmailForm.cc_recipient.data:
+#             cc_recipients = composeEmailForm.cc_recipient.data
+#         message_id = request.form['options']
+#         message = Message.query.get(message_id)
+#         student = Student.query.filter_by(email=recipient_email).first()
+#         if not student:
+#             flash('Error getting student', 'danger')
+#             return redirect(url_for('main.compose_email'))
+#         # log the email sent
+#         sent_mail = SentMail(employee=current_user,
+#                              student=student, message=message)
+#         db.session.add(sent_mail)
+#         db.session.commit()
+#         send_package_update_email(
+#             message.content, recipient_email, cc_recipients)
+#         flash("Email successfully sent!", "success")
+#         return redirect(url_for('packages.home'))
 
-    messages = Message.query.all()
-    return render_template('composeEmail.html', title="Compose Email", composeEmailForm=composeEmailForm,
-                           createMessageForm=createMessageForm, messages=messages)
-
-
-@main.route("/_create_message", methods=['POST'])
-@login_required
-def create_message():
-    form = CreateMessageForm()
-    if form.validate_on_submit():
-        message = Message(content=form.new_message.data)
-        db.session.add(message)
-        db.session.commit()
-    else:
-        flash("Message not long enough", "danger")
-    return redirect(url_for('main.compose_email'))
+#     messages = Message.query.all()
+#     return render_template('composeEmail.html', title="Compose Email", composeEmailForm=composeEmailForm,
+#                            createMessageForm=createMessageForm, messages=messages)
 
 
-@main.route("/_delete_message", methods=['POST'])
-@login_required
-def delete_message():
-    message_id = request.form['deleteVal']
-    if message_id:
-        message = Message.query.get(message_id)
-        db.session.delete(message)
-        db.session.commit()
-    else:
-        flash("You must first select a message to delete!", "danger")
-    return redirect(url_for('main.compose_email'))
+# @main.route("/_create_message", methods=['POST'])
+# @login_required
+# def create_message():
+#     form = CreateMessageForm()
+#     if form.validate_on_submit():
+#         message = Message(content=form.new_message.data)
+#         db.session.add(message)
+#         db.session.commit()
+#     else:
+#         flash("Message not long enough", "danger")
+#     return redirect(url_for('main.compose_email'))
+
+
+# @main.route("/_delete_message", methods=['POST'])
+# @login_required
+# def delete_message():
+#     message_id = request.form['deleteVal']
+#     if message_id:
+#         message = Message.query.get(message_id)
+#         db.session.delete(message)
+#         db.session.commit()
+#     else:
+#         flash("You must first select a message to delete!", "danger")
+#     return redirect(url_for('main.compose_email'))

@@ -9,21 +9,6 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 
-building_dict = {
-    'BC': 'Beck',
-    'BR': 'Berks',
-    'BN': 'Bonner',
-    'DT': 'Deatrick',
-    'JH': 'Johnson',
-    'LH': 'Lehigh',
-    'RT': 'Rothermel',
-    'SC': 'Schuylkill',
-    'DI': 'Dixon',
-    'UP': 'University Place',
-    'GW': 'Golden Bear Village West',
-    'HB': 'Honors Building',
-    'GBVS': 'Golden Bear Village South'
-}
 
 column_names = ['USERNAME', 'FIRST NAME', 'LAST NAME',
                 'BUILDING', 'ROOM', 'ID NUMBER',
@@ -99,6 +84,12 @@ def clean_student_data(df):
 
 
 def validate_student_data(df, error_df):
+    building_dict = {}
+    halls = Hall.query.all()
+    # build hall dictionary
+    for hall in halls:
+        building_dict[hall.building_code] = hall.name
+
     # if username is correct, the row in the result df will be true, otherwise false
     result = df['USERNAME'].str.contains(r'^[a-z]{5}[0-9]{3}$', regex=True)
     # add the index of all the false rows to a list
@@ -121,7 +112,7 @@ def validate_student_data(df, error_df):
     if index_list:
         error_df = pd.concat([error_df, df.iloc[index_list]], sort=True)
         for index in index_list:
-            error_df.at[index, 'ERROR'] = 'BUILDING'
+            error_df.at[index, 'ERROR'] = 'NO HALL FOUND'
         df = df[df['BUILDING'].str.contains('|'.join(building_dict.keys()))]
         df.reset_index(drop=True, inplace=True)
         error_df.reset_index(drop=True, inplace=True)
@@ -173,18 +164,18 @@ def update_student_data(df, error_df):
     removed_employee_count = 0
     employment_code = '2198'
 
+    building_dict = {}
+    halls = Hall.query.all()
+    # build hall dictionary
+    for hall in halls:
+        building_dict[hall.building_code] = hall.name
+
     for student in students_list:
         email = student[0] + '@live.kutztown.edu'
         student_obj = Student.query.filter_by(email=email).first()
         employee_obj = Employee.query.filter_by(email=email).first()
         hall_obj = Hall.query.filter_by(
             name=building_dict.get(student[3])).first()
-        if not hall_obj:
-            student.append('NO HALL FOUND')
-            temp_df = pd.DataFrame([student], columns=column_names)
-            error_df = pd.concat([error_df, temp_df], sort=True)
-            error_df.reset_index(drop=True, inplace=True)
-            continue
         # update student hall and room number
         if student_obj:
             if student_obj.hall != hall_obj:
@@ -277,7 +268,8 @@ def update_student_data(df, error_df):
                                         last_name=student[2], access='DR',
                                         hall=hall_obj, password=password)
             new_employee_count += 1
-            # send_reset_password_email(new_employee, password)
+            ######### uncomment before releasing #########
+            send_reset_password_email(new_employee, password)
             db.session.add(new_employee)
     db.session.commit()
     return df, error_df, new_student_count, hall_update_count, room_update_count, new_employee_count, removed_employee_count

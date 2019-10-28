@@ -48,7 +48,9 @@ def management():
         db.session.commit()
     elif new_hall_form.submit.data and new_hall_form.validate_on_submit():
         hall = new_hall_form.hall.data
-        hall = Hall(name=hall.capitalize())
+        building_code = new_hall_form.building_code.data
+        hall = Hall(name=hall.capitalize(),
+                    building_code=building_code.upper())
         db.session.add(hall)
         db.session.commit()
     employees = Employee.query.filter(Employee.active == True).all()
@@ -81,6 +83,7 @@ def remove_hall():
 def _validate():
     email = request.form.get('email', None)
     hall = request.form.get('hall', None)
+    building_code = request.form.get('building_code', None)
     if email:
         email_exists = Employee.query.filter_by(email=email).first()
         if email_exists and email_exists.active == True:
@@ -89,6 +92,11 @@ def _validate():
         hall = Hall.query.filter_by(name=hall.capitalize()).first()
         if hall:
             return jsonify({'hall_error': 'This hall already exists'})
+    elif building_code:
+        hall = Hall.query.filter_by(
+            building_code=building_code.upper()).first()
+        if hall:
+            return jsonify({'bcode_error': 'This building code already exitsts'})
     return jsonify({'success': 'success'})
 
 
@@ -126,43 +134,49 @@ def upload_csv():
         error_values = []
         error_columns = []
 
-        students = file.read().decode('utf-8')
-        # convert to a list
-        students = students.split('\r\n')
-        # first row of students are the column names
-        columns = students[0].split(',')
-        # delete the column names from students
-        del students[0]
-        # move list into a pandas dataframe
-        student_df = pd.DataFrame([student.split(',')
-                                   for student in students], columns=columns)
-        # make an error dataframe to add of the errors to
-        error_df = pd.DataFrame()
+        try:
+            students = file.read().decode('utf-8')
+            # convert to a list
+            students = students.split('\r\n')
+            # first row of students are the column names
+            columns = students[0].split(',')
+            # delete the column names from students
+            del students[0]
+            # move list into a pandas dataframe
+            student_df = pd.DataFrame([student.split(',')
+                                       for student in students], columns=columns)
+            # make an error dataframe to add of the errors to
+            error_df = pd.DataFrame()
 
-        # drop the CA column, we dont need it
-        student_df.drop(columns='CA', inplace=True)
+            # drop the CA column, we dont need it
+            student_df.drop(columns='CA', inplace=True)
 
-        student_df = clean_student_data(student_df)
-        student_df, error_df = validate_student_data(student_df, error_df)
-        student_df, error_df, new_student_count, hall_update_count, room_update_count, new_employee_count, removed_employee_count = update_student_data(
-            student_df, error_df)
+            student_df = clean_student_data(student_df)
+            student_df, error_df = validate_student_data(student_df, error_df)
+            student_df, error_df, new_student_count, hall_update_count, room_update_count, new_employee_count, removed_employee_count = update_student_data(
+                student_df, error_df)
 
-        if not error_df.empty:
-            # get a count of the errors
-            error_count = error_df['USERNAME'].count()
-            # reorder error_df columns
-            error_df = error_df[column_names]
-            # convert df to list so it can be passed to client
-            error_values = error_df.values.tolist()
-            error_columns = error_df.columns.tolist()
-        return jsonify({'new_student_count': new_student_count,
-                        'hall_update_count': hall_update_count,
-                        'room_update_count': room_update_count,
-                        'new_employee_count': new_employee_count,
-                        'removed_employee_count': removed_employee_count,
-                        'error_count': str(error_count),
-                        'error_values': error_values,
-                        'error_columns': error_columns})
+            if not error_df.empty:
+                # get a count of the errors
+                error_count = error_df['USERNAME'].count()
+                # reorder error_df columns
+                error_df = error_df[column_names]
+                # convert df to list so it can be passed to client
+                error_values = error_df.values.tolist()
+                error_columns = error_df.columns.tolist()
+            return jsonify({'new_student_count': new_student_count,
+                            'hall_update_count': hall_update_count,
+                            'room_update_count': room_update_count,
+                            'new_employee_count': new_employee_count,
+                            'removed_employee_count': removed_employee_count,
+                            'error_count': str(error_count),
+                            'error_values': error_values,
+                            'error_columns': error_columns})
+        except KeyError as err:
+            return jsonify({'error': f'csv format error: {str(err)}'})
+        except:
+            return jsonify({'error': 'An unexpected error occurred'})
+
     else:
         return jsonify({'error': 'That file type is not supported'})
 
@@ -228,10 +242,8 @@ def reset_token(token):
         return redirect(url_for('employees.reset_request'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
-        # hash the new password
-        hashed_password = bcrypt.generate_password_hash(
-            form.password.data).decode('utf-8')
-        employee.password = hashed_password
+        employee.password = form.password.data
+        employee.reset_password = False
         db.session.commit()
         flash('Your password has been reset!', 'success')
         return redirect(url_for('employees.login'))
@@ -245,9 +257,6 @@ def reset_password():
         employee = Employee.query.filter_by(email=form.email.data).first()
         # if the current users password matches the old password field
         if employee and bcrypt.check_password_hash(employee.password, form.old_password.data):
-            # hashed_password = bcrypt.generate_password_hash(
-            #     form.new_password.data).decode('utf-8')
-            # employee.password = hashed_password
             employee.password = form.new_password.data
             employee.reset_password = False
             db.session.commit()

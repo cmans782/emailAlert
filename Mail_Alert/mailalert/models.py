@@ -78,12 +78,13 @@ class Student(db.Model):
 class Hall(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
+    building_code = db.Column(db.String(100), unique=True, nullable=False)
     students = db.relationship('Student', backref='hall')
     employees = db.relationship('Employee', backref='hall')
     packages = db.relationship('Package', backref='hall')
 
     def __repr__(self):
-        return f"Hall('{self.name}')"
+        return f"Hall('{self.name}', '{self.building_code}')"
 
 
 class Package(db.Model):

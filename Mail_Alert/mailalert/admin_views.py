@@ -46,7 +46,7 @@ class StudentView(ModelView):
 
 class HallView(ModelView):
 
-    form_columns = ['name']
+    form_columns = ['name', 'building_code']
 
     def is_accessible(self):
         return current_user.is_authenticated and current_user.is_admin()

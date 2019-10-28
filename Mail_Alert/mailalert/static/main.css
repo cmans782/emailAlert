@@ -86,6 +86,9 @@ a.article-title:hover {
 
 .working-hall {
 	color: white;
+	position: absolute;
+	right: 47%;
+	bottom: 7px;
 }
 
 .fixed-header {
