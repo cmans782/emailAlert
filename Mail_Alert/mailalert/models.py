@@ -65,6 +65,7 @@ class Student(db.Model):
     first_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String(100), nullable=False)
     room_number = db.Column(db.String(6), nullable=False)
+    subscribed = db.Column(db.Boolean, default=True)
     hall_id = db.Column(db.Integer, db.ForeignKey('hall.id'))
     packages = db.relationship('Package', backref='owner')
     sent_mail = db.relationship('SentMail', backref='student')

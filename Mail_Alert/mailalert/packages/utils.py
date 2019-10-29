@@ -1,17 +1,16 @@
 
 from flask_mail import Message
 from mailalert import mail
+from flask import url_for, render_template
 
 
-def send_new_package_email(student_email, num_packages):
+def send_new_package_email(student, num_packages):
     msg = Message('Kutztown Package Update',
                   sender='KutztownMail@gmail.com',
-                  recipients=[student_email])
-    if num_packages > 1:
-        msg.body = f"You have {num_packages} packages ready to be picked up!"
-    else:
-        msg.body = f"You have {num_packages} package ready to be picked up!"
+                  recipients=[student.email])
 
+    msg.html = render_template(
+        'new_package_email.html', num_packages=num_packages, student=student)
     mail.send(msg)
 
 

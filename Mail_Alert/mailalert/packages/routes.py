@@ -1,6 +1,6 @@
 from flask import render_template, url_for, flash, redirect, request, Blueprint, jsonify
 from flask_login import login_required, current_user
-from mailalert.packages.forms import NewPackageForm, PackagePickUpForm
+from mailalert.packages.forms import NewPackageForm, PackagePickUpForm, ResubscribeForm
 from mailalert.main.forms import StudentSearchForm
 from mailalert.packages.utils import send_new_package_email, string_to_bool
 from mailalert.models import Package, Student, Hall, Phone, SentMail
@@ -126,18 +126,21 @@ def newPackage():
                 flash('Error getting package', 'danger')
                 return redirect(url_for('packages.newPackage'))
 
-            if student.email in student_dict:  # check if the student is already in the dictionary
-                num_packages = student_dict[student.email]
-                num_packages += 1  # if student is in dict increment their number of packages
-                student_dict[student.email] = num_packages
-            else:
-                student_dict[student.email] = 1
+            # only add students to the dictonary that are subscribed to email notifications
+            if student.subscribed:
+                if student.email in student_dict:  # check if the student is already in the dictionary
+                    num_packages = student_dict[student.email]
+                    num_packages += 1  # if student is in dict increment their number of packages
+                    student_dict[student.email] = num_packages
+                else:
+                    student_dict[student.email] = 1
             db.session.add(package)
 
         for email, num_packages in student_dict.items():
-            ######### uncomment before releasing #########
-            send_new_package_email(email, num_packages)
             student = Student.query.filter_by(email=email).first()
+            ######### uncomment before releasing #########
+
+            send_new_package_email(student, num_packages)
             sent_mail = SentMail(employee=current_user, student=student)
             db.session.add(sent_mail)
         db.session.commit()
@@ -276,3 +279,18 @@ def suggestions():
             suggestions.append(data)
 
     return jsonify(suggestions)
+
+
+@packages.route("/subscription/<student_email>", methods=['GET', 'POST'])
+def subscription(student_email):
+    form = ResubscribeForm()
+    student = Student.query.filter_by(email=student_email).first()
+    # if form is sumbitted resubscribe student to emails
+    if form.is_submitted():
+        student.subscribed = True
+        db.session.commit()
+        return render_template('resubscribed.html', title='Resubscribed')
+    # unsubscribe the student from emails
+    student.subscribed = False
+    db.session.commit()
+    return render_template('unsubscribed.html', title='Unsubscribed', form=form)

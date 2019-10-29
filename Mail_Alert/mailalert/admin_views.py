@@ -30,8 +30,8 @@ class EmployeeView(ModelView):
 
 class StudentView(ModelView):
 
-    form_columns = ['student_id', 'first_name', 'last_name',
-                    'email', 'room_number', 'phone_numbers', 'hall']
+    form_columns = ['student_id', 'first_name', 'last_name', 'email',
+                    'room_number', 'subscribed', 'phone_numbers', 'hall']
 
     def is_accessible(self):
         return current_user.is_authenticated and current_user.is_admin()

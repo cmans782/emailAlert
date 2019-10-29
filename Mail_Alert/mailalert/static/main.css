@@ -130,6 +130,19 @@ a.article-title:hover {
 	color: rgb(251, 8, 8);
 }
 
+.unsubscribed-img {
+	border: 0;
+	width: 60%;
+	height: 22%;
+	padding-bottom: 50px;
+}
+
+.red-button {
+	background: #d92929;
+	color: white;
+	margin-top: 20px;
+}
+
 /* custom checkbox */
 
 /* Customize the label */
