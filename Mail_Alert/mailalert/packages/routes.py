@@ -139,7 +139,6 @@ def newPackage():
         for email, num_packages in student_dict.items():
             student = Student.query.filter_by(email=email).first()
             ######### uncomment before releasing #########
-
             send_new_package_email(student, num_packages)
             sent_mail = SentMail(employee=current_user, student=student)
             db.session.add(sent_mail)

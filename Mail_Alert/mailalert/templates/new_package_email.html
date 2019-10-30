@@ -10,7 +10,8 @@
         ready to be picked up at the {{ student.hall.name }} front desk.
         </p>
 
-        <img src="{{ url_for('static', filename='../static/logo-dark.png', _external=True) }}">
+        <img class="unsubscribed-img" src="{{ url_for('static', filename='logo-dark.png', _external=True) }}" alt="Mail Alert">
+        
 
         <p style="font-size: 12px;">No longer want to receive package alerts? 
             <a style="text-decoration: none;" href="{{ url_for('packages.subscription', student_email=student.email, _external=True) }}">Unsubscribe Here</a>
