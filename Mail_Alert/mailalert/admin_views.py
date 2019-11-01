@@ -18,7 +18,7 @@ class EmployeeView(ModelView):
     }
 
     def is_accessible(self):
-        return current_user.is_authenticated and current_user.is_admin()
+        return current_user.is_authenticated and current_user.allowed('Building Director')
 
     def inaccessible_callback(self, name):
         # check if the user is logged in
@@ -34,7 +34,7 @@ class StudentView(ModelView):
                     'room_number', 'subscribed', 'phone_numbers', 'hall']
 
     def is_accessible(self):
-        return current_user.is_authenticated and current_user.is_admin()
+        return current_user.is_authenticated and current_user.allowed('Building Director')
 
     def inaccessible_callback(self, name):
         # check if the user is logged in
@@ -49,7 +49,7 @@ class HallView(ModelView):
     form_columns = ['name', 'building_code']
 
     def is_accessible(self):
-        return current_user.is_authenticated and current_user.is_admin()
+        return current_user.is_authenticated and current_user.allowed('Building Director')
 
     def inaccessible_callback(self, name):
         # check if the user is logged in
@@ -65,7 +65,7 @@ class PackageView(ModelView):
                     'picked_up_date', 'perishable', 'owner', 'hall', 'inputted', 'removed']
 
     def is_accessible(self):
-        return current_user.is_authenticated and current_user.is_admin()
+        return current_user.is_authenticated and current_user.allowed('Building Director')
 
     def inaccessible_callback(self, name):
         # check if the user is logged in
@@ -80,7 +80,7 @@ class MessageView(ModelView):
     form_columns = ['content']
 
     def is_accessible(self):
-        return current_user.is_authenticated and current_user.is_admin()
+        return current_user.is_authenticated and current_user.allowed('Building Director')
 
     def inaccessible_callback(self, name):
         # check if the user is logged in
@@ -96,7 +96,7 @@ class SentMailView(ModelView):
                     'employee', 'message', 'student']
 
     def is_accessible(self):
-        return current_user.is_authenticated and current_user.is_admin()
+        return current_user.is_authenticated and current_user.allowed('Building Director')
 
     def inaccessible_callback(self, name):
         # check if the user is logged in
@@ -111,7 +111,7 @@ class LoginView(ModelView):
     form_columns = ['login_date', 'logout_date', 'employee']
 
     def is_accessible(self):
-        return current_user.is_authenticated and current_user.is_admin()
+        return current_user.is_authenticated and current_user.allowed('Building Director')
 
     def inaccessible_callback(self, name):
         # check if the user is logged in
@@ -126,7 +126,7 @@ class PhoneView(ModelView):
     form_columns = ['phone_number', 'assigned']
 
     def is_accessible(self):
-        return current_user.is_authenticated and current_user.is_admin()
+        return current_user.is_authenticated and current_user.allowed('Building Director')
 
     def inaccessible_callback(self, name):
         # check if the user is logged in

@@ -3,7 +3,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 from mailalert import db, bcrypt
 from mailalert.models import Employee, Hall, Login, Student
 from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, NewPasswordForm, NewHallForm
-from mailalert.employees.utils import send_reset_email, send_reset_password_email, generate_random_string, clean_student_data, validate_student_data, update_student_data, column_names
+from mailalert.employees.utils import send_reset_email, send_reset_password_email, generate_random_string, clean_student_data, validate_student_data, update_student_data, error_columns
 from mailalert.main.utils import requires_access_level, allowed_file
 from datetime import datetime
 import pandas as pd
@@ -120,6 +120,9 @@ def delete_employee():
 @employees.route("/upload_csv", methods=['POST'])
 @login_required
 def upload_csv():
+    columns = ['USERNAME', 'FIRST NAME', 'LAST NAME',
+               'BUILDING', 'ROOM', 'ID NUMBER',
+               'PHONE NUMBER', 'ARD', 'CA', 'DR']
     # check if the post request has the file part
     if 'file' not in request.files:
         return jsonify({'error': 'No File Selected'})
@@ -132,24 +135,18 @@ def upload_csv():
     if file and allowed_file(file.filename):
         error_count = 0
         error_values = []
-        error_columns = []
 
         try:
             students = file.read().decode('utf-8')
+            # remove all "" from fields
+            students = students.replace('\"', "")
             # convert to a list
             students = students.split('\r\n')
-            # first row of students are the column names
-            columns = students[0].split(',')
-            # delete the column names from students
-            del students[0]
             # move list into a pandas dataframe
             student_df = pd.DataFrame([student.split(',')
                                        for student in students], columns=columns)
             # make an error dataframe to add of the errors to
             error_df = pd.DataFrame()
-
-            # drop the CA column, we dont need it
-            student_df.drop(columns='CA', inplace=True)
 
             student_df = clean_student_data(student_df)
             student_df, error_df = validate_student_data(student_df, error_df)
@@ -160,10 +157,9 @@ def upload_csv():
                 # get a count of the errors
                 error_count = error_df['USERNAME'].count()
                 # reorder error_df columns
-                error_df = error_df[column_names]
+                error_df = error_df[error_columns]
                 # convert df to list so it can be passed to client
                 error_values = error_df.values.tolist()
-                error_columns = error_df.columns.tolist()
             return jsonify({'new_student_count': new_student_count,
                             'hall_update_count': hall_update_count,
                             'room_update_count': room_update_count,
@@ -174,6 +170,8 @@ def upload_csv():
                             'error_columns': error_columns})
         except KeyError as err:
             return jsonify({'error': f'csv format error: {str(err)}'})
+        except AssertionError as err:
+            return jsonify({'error': f'Number of columns error: {str(err)}'})
         except:
             return jsonify({'error': 'An unexpected error occurred'})
 
@@ -181,6 +179,7 @@ def upload_csv():
         return jsonify({'error': 'That file type is not supported'})
 
 
+@employees.route("/", methods=['GET', 'POST'])
 @employees.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -225,6 +224,7 @@ def reset_request():
     form = RequestResetForm()
     if form.validate_on_submit():
         employee = Employee.query.filter_by(email=form.email.data).first()
+        ######### uncomment before releasing #########
         send_reset_email(employee)
         flash(
             f'An email has been sent to {employee.email} with instructions to reset your password.', 'info')

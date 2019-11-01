@@ -12,7 +12,6 @@ import re
 packages = Blueprint('packages', __name__)
 
 
-@packages.route("/", methods=['GET', 'POST'])
 @packages.route("/home", methods=['GET', 'POST'])
 @login_required
 def home():

@@ -5,9 +5,10 @@ from flask import current_app
 from datetime import datetime
 
 ACCESS = {
-    'DR': 0,
-    'Building Director': 1,
-    'Admin': 2
+    'None': 0,
+    'DR': 1,
+    'Building Director': 2,
+    'Admin': 3
 }
 
 
