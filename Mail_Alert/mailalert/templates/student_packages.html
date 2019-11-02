@@ -123,7 +123,7 @@
                             <p>Please enter student ID to confirm pickup</p>
                             {{ package_pickup_form.student_id_confirm(class="form-control form-control-md", placeholder="Student ID") }}
                             <div id='errorDiv' class="invalid-feedback" style='display:none;'>
-                            <span id='errorAlert'></span>
+                                <span id='errorAlert'></span>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -236,7 +236,9 @@ $.ajaxSetup({
         var card_number = details[0];
         var regular = /[0-9]{9}|([a-zA-Z]+){3,}/g;
         var found = card_number.match(regular);
-        document.getElementById("student_id_confirm").value = found;
+        if (found){
+            document.getElementById("student_id_confirm").value = found;
+        }
     }
     // parse card information for student search box
     function search_student_card_swipe(){
