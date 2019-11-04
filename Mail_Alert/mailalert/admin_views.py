@@ -1,5 +1,4 @@
 from flask_admin.contrib.sqla import ModelView
-from flask_admin.form import SecureForm
 from flask_login import current_user, login_required
 from flask import url_for, redirect, flash, render_template, current_app
 
@@ -49,7 +48,7 @@ class HallView(ModelView):
     form_columns = ['name', 'building_code']
 
     def is_accessible(self):
-        return current_user.is_authenticated and current_user.allowed('Building Director')
+        return current_user.is_authenticated and current_user.is_admin()
 
     def inaccessible_callback(self, name):
         # check if the user is logged in
@@ -80,7 +79,7 @@ class MessageView(ModelView):
     form_columns = ['content']
 
     def is_accessible(self):
-        return current_user.is_authenticated and current_user.allowed('Building Director')
+        return current_user.is_authenticated and current_user.is_admin()
 
     def inaccessible_callback(self, name):
         # check if the user is logged in
@@ -126,7 +125,7 @@ class PhoneView(ModelView):
     form_columns = ['phone_number', 'assigned']
 
     def is_accessible(self):
-        return current_user.is_authenticated and current_user.allowed('Building Director')
+        return current_user.is_authenticated and current_user.is_admin()
 
     def inaccessible_callback(self, name):
         # check if the user is logged in

@@ -1,4 +1,6 @@
+from datetime import timedelta
 import json
+
 with open('/etc/MailAlert_config.json') as config_file:
     # json.load turns the config file into a python dictionary
     config = json.load(config_file)
@@ -9,6 +11,8 @@ class Config:
     SQLALCHEMY_DATABASE_URI = config.get('SQLALCHEMY_DATABASE_URI')
     # remove sqlalchemy warning
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # set timeout session
+    PERMANENT_SESSION_LIFETIME = timedelta(minutes=15)
 
     # theme for admin panel. can find other themes at http://bootswatch.com/3/
     FLASK_ADMIN_SWATCH = 'lumen'
