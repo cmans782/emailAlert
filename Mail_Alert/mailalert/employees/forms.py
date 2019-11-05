@@ -12,6 +12,7 @@ class LoginForm(FlaskForm):
 
 class NewHallForm(FlaskForm):
     hall = StringField('Hall', validators=[DataRequired()])
+    building_code = StringField('Building Code', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 
@@ -37,8 +38,8 @@ class RequestResetForm(FlaskForm):
 
 
 class ResetPasswordForm(FlaskForm):
-    password = PasswordField('Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password', validators=[
+    password = PasswordField('New Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm New Password', validators=[
                                      DataRequired(), EqualTo('password')])
     submit = SubmitField('Reset Password')
 

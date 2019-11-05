@@ -86,6 +86,9 @@ a.article-title:hover {
 
 .working-hall {
 	color: white;
+	position: absolute;
+	right: 47%;
+	bottom: 7px;
 }
 
 .fixed-header {
@@ -125,6 +128,23 @@ a.article-title:hover {
 
 .dropAreaHover {
 	color: rgb(251, 8, 8);
+}
+
+.unsubscribed-img {
+	border: 0;
+	width: 60%;
+	height: 22%;
+	padding-bottom: 50px;
+}
+
+.red-button {
+	background: #d92929;
+	color: white;
+	margin-top: 20px;
+}
+
+.management-button {
+	margin-bottom: 20px;
 }
 
 /* custom checkbox */

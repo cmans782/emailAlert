@@ -5,9 +5,10 @@ from flask import current_app
 from datetime import datetime
 
 ACCESS = {
-    'DR': 0,
-    'Building Director': 1,
-    'Admin': 2
+    'None': 0,
+    'DR': 1,
+    'Building Director': 2,
+    'Admin': 3
 }
 
 
@@ -65,6 +66,7 @@ class Student(db.Model):
     first_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String(100), nullable=False)
     room_number = db.Column(db.String(6), nullable=False)
+    subscribed = db.Column(db.Boolean, default=True)
     hall_id = db.Column(db.Integer, db.ForeignKey('hall.id'))
     packages = db.relationship('Package', backref='owner')
     sent_mail = db.relationship('SentMail', backref='student')
@@ -78,12 +80,13 @@ class Student(db.Model):
 class Hall(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
+    building_code = db.Column(db.String(100), unique=True, nullable=False)
     students = db.relationship('Student', backref='hall')
     employees = db.relationship('Employee', backref='hall')
     packages = db.relationship('Package', backref='hall')
 
     def __repr__(self):
-        return f"Hall('{self.name}')"
+        return f"Hall('{self.name}', '{self.building_code}')"
 
 
 class Package(db.Model):

@@ -1,10 +1,10 @@
-from flask import render_template, url_for, flash, redirect, request, Blueprint, jsonify
+from flask import render_template, url_for, flash, redirect, request, Blueprint, jsonify, session
 from flask_login import login_user, current_user, logout_user, login_required
 from mailalert import db, bcrypt
 from mailalert.models import Employee, Hall, Login, Student
 from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, NewPasswordForm, NewHallForm
-from mailalert.employees.utils import send_reset_email, send_reset_password_email, generate_random_string, clean_student_data, validate_student_data, update_student_data, column_names
-from mailalert.main.utils import requires_access_level, allowed_file
+from mailalert.employees.utils import send_reset_email, send_reset_password_email, generate_random_string
+from mailalert.main.utils import requires_access_level
 from datetime import datetime
 import pandas as pd
 
@@ -48,7 +48,9 @@ def management():
         db.session.commit()
     elif new_hall_form.submit.data and new_hall_form.validate_on_submit():
         hall = new_hall_form.hall.data
-        hall = Hall(name=hall.capitalize())
+        building_code = new_hall_form.building_code.data
+        hall = Hall(name=hall.capitalize(),
+                    building_code=building_code.upper())
         db.session.add(hall)
         db.session.commit()
     employees = Employee.query.filter(Employee.active == True).all()
@@ -81,6 +83,7 @@ def remove_hall():
 def _validate():
     email = request.form.get('email', None)
     hall = request.form.get('hall', None)
+    building_code = request.form.get('building_code', None)
     if email:
         email_exists = Employee.query.filter_by(email=email).first()
         if email_exists and email_exists.active == True:
@@ -89,6 +92,11 @@ def _validate():
         hall = Hall.query.filter_by(name=hall.capitalize()).first()
         if hall:
             return jsonify({'hall_error': 'This hall already exists'})
+    elif building_code:
+        hall = Hall.query.filter_by(
+            building_code=building_code.upper()).first()
+        if hall:
+            return jsonify({'bcode_error': 'This building code already exitsts'})
     return jsonify({'success': 'success'})
 
 
@@ -109,64 +117,7 @@ def delete_employee():
     return redirect(url_for('employees.management'))
 
 
-@employees.route("/upload_csv", methods=['POST'])
-@login_required
-def upload_csv():
-    # check if the post request has the file part
-    if 'file' not in request.files:
-        return jsonify({'error': 'No File Selected'})
-    file = request.files['file']
-    # if user does not select file, browser also
-    # submit an empty part without filename
-    if file.filename == '':
-        return jsonify({'error': 'No File Selected'})
-
-    if file and allowed_file(file.filename):
-        error_count = 0
-        error_values = []
-        error_columns = []
-
-        students = file.read().decode('utf-8')
-        # convert to a list
-        students = students.split('\r\n')
-        # first row of students are the column names
-        columns = students[0].split(',')
-        # delete the column names from students
-        del students[0]
-        # move list into a pandas dataframe
-        student_df = pd.DataFrame([student.split(',')
-                                   for student in students], columns=columns)
-        # make an error dataframe to add of the errors to
-        error_df = pd.DataFrame()
-
-        # drop the CA column, we dont need it
-        student_df.drop(columns='CA', inplace=True)
-
-        student_df = clean_student_data(student_df)
-        student_df, error_df = validate_student_data(student_df, error_df)
-        student_df, error_df, new_student_count, hall_update_count, room_update_count, new_employee_count, removed_employee_count = update_student_data(
-            student_df, error_df)
-
-        if not error_df.empty:
-            # get a count of the errors
-            error_count = error_df['USERNAME'].count()
-            # reorder error_df columns
-            error_df = error_df[column_names]
-            # convert df to list so it can be passed to client
-            error_values = error_df.values.tolist()
-            error_columns = error_df.columns.tolist()
-        return jsonify({'new_student_count': new_student_count,
-                        'hall_update_count': hall_update_count,
-                        'room_update_count': room_update_count,
-                        'new_employee_count': new_employee_count,
-                        'removed_employee_count': removed_employee_count,
-                        'error_count': str(error_count),
-                        'error_values': error_values,
-                        'error_columns': error_columns})
-    else:
-        return jsonify({'error': 'That file type is not supported'})
-
-
+@employees.route("/", methods=['GET', 'POST'])
 @employees.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -184,6 +135,8 @@ def login():
                 flash('Please reset your password before logging in', 'info')
                 return redirect(url_for('employees.reset_password'))
             login_user(employee)
+            # set their session to permanent once logged in
+            session.permanent = True
             # log when user logs in
             login = Login(login_date=datetime.now(), employee=current_user)
             db.session.add(login)
@@ -211,6 +164,7 @@ def reset_request():
     form = RequestResetForm()
     if form.validate_on_submit():
         employee = Employee.query.filter_by(email=form.email.data).first()
+        ######### uncomment before releasing #########
         send_reset_email(employee)
         flash(
             f'An email has been sent to {employee.email} with instructions to reset your password.', 'info')
@@ -228,10 +182,8 @@ def reset_token(token):
         return redirect(url_for('employees.reset_request'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
-        # hash the new password
-        hashed_password = bcrypt.generate_password_hash(
-            form.password.data).decode('utf-8')
-        employee.password = hashed_password
+        employee.password = form.password.data
+        employee.reset_password = False
         db.session.commit()
         flash('Your password has been reset!', 'success')
         return redirect(url_for('employees.login'))
@@ -245,9 +197,6 @@ def reset_password():
         employee = Employee.query.filter_by(email=form.email.data).first()
         # if the current users password matches the old password field
         if employee and bcrypt.check_password_hash(employee.password, form.old_password.data):
-            # hashed_password = bcrypt.generate_password_hash(
-            #     form.new_password.data).decode('utf-8')
-            # employee.password = hashed_password
             employee.password = form.new_password.data
             employee.reset_password = False
             db.session.commit()

@@ -24,3 +24,7 @@ class PackagePickUpForm(FlaskForm):
         student = Student.query.filter_by(student_id=field.data).first()
         if not student:
             raise ValidationError('Student does not exist')
+
+
+class ResubscribeForm(FlaskForm):
+    resubscribe = SubmitField('Re-Subscribe')

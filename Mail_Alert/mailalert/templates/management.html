@@ -29,8 +29,9 @@
 </head>
 
 <body>
+{% if current_user.is_admin() %}
     <div class="card management">
-		<h2>Add Students</h2>            
+		<h2>Roster Upload</h2>            
 		<div>
 			<a href="#uploadModal" class="btn btn-success" data-toggle="modal"><i
 				class="material-icons">&#xE147;</i> <span>Add New Roster</span>
@@ -58,49 +59,46 @@
 			</div>
 		</form>
 	</div>
+{% endif %}
 	<div class="card management">
 		<form action="{{ url_for('employees.delete_employee') }}" method="POST">
 			{{ form.hidden_tag() }}
 			<h2>Manage Employees</h2>
-			<table class="table table-striped table-hover">
-				<thead>
-					<tr>
-						<div class="btn-toolbar float-right">
-							<td colspan="7">
-								<a href="#addEmployeeModal" class="btn btn-success" data-toggle="modal"><i
-										class="material-icons">&#xE147;</i> <span>Add New Employee</span></a>
-								<a href="#deleteEmployeeModal" class="btn btn-danger" data-toggle="modal"><i
-										class="material-icons">&#xE15C;</i> <span>Remove Employee</span></a>
+			<a href="#addEmployeeModal" class="btn btn-success management-button" data-toggle="modal"><i
+					class="material-icons">&#xE147;</i> <span>Add New Employee</span></a>
+			<a href="#deleteEmployeeModal" class="btn btn-danger management-button" data-toggle="modal"><i
+					class="material-icons">&#xE15C;</i> <span>Deactivate Employee</span></a>
+			<div class='fixed-header'>
+				<table class="table table-striped table-hover">
+					<thead>
+						<tr>
+							<th>
+								<span class="custom-checkbox">
+									<input type="checkbox" id="selectAll" />
+									<label for="selectAll"></label>
+								</span>
+							</th>
+							<th>Email</th>
+							<th>Name</th>
+							<th>Role</th>
+							<th>Working Hall</th>
+						</tr>
+					</thead>
+					{% for employee in employees %}
+						<tr>
+							<td>
+								<span class="custom-checkbox">
+									<input type="checkbox" name="del_employees" value="{{ employee.id }}" />
+								</span>
 							</td>
-						</div>
-					</tr>
-					<tr>
-						<th>
-							<span class="custom-checkbox">
-								<input type="checkbox" id="selectAll" />
-								<label for="selectAll"></label>
-							</span>
-						</th>
-						<th>Email</th>
-						<th>Name</th>
-						<th>Role</th>
-						<th>Working Hall</th>
-					</tr>
-				</thead>
-				{% for employee in employees %}
-					<tr>
-						<td>
-							<span class="custom-checkbox">
-								<input type="checkbox" name="del_employees" value="{{ employee.id }}" />
-							</span>
-						</td>
-						<td>{{ employee.email }}</td>
-						<td>{{ employee.first_name }} {{ employee.last_name }}</td>
-						<td>{{ employee.access }}</td>
-						<td>{{ employee.hall.name }}</td>
-					</tr>
-				{% endfor %}
-			</table>
+							<td>{{ employee.email }}</td>
+							<td>{{ employee.first_name }} {{ employee.last_name }}</td>
+							<td>{{ employee.access }}</td>
+							<td>{{ employee.hall.name }}</td>
+						</tr>
+					{% endfor %}
+				</table>
+			</div>
 		
 			<!-- Delete Employee Modal-->
 			<div id="deleteEmployeeModal" class="modal fade">
@@ -111,7 +109,7 @@
 							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 						</div>
 						<div class="modal-body">
-							<p>Are you sure you want to delete these Empoyees?</p>
+							<p>Are you sure you want to delete these employees?</p>
 						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -137,9 +135,17 @@
 						</div>
 						<div class="modal-body">
 							<div class="form-group">
+								{{ new_hall_form.hall.label(class="form-control-label") }}
 								{{ new_hall_form.hall(class="form-control form-control-md") }}
 								<div name='hall-error' class="invalid-feedback" style='display:none;'>
 									<span name='hall-error'></span>
+								</div>
+							</div>
+							<div class="form-group">
+								{{ new_hall_form.building_code.label(class="form-control-label") }}
+								{{ new_hall_form.building_code(class="form-control form-control-md") }}
+								<div name='bcode-error' class="invalid-feedback" style='display:none;'>
+									<span name='bcode-error'></span>
 								</div>
 							</div>
 						</div>
@@ -226,11 +232,11 @@
 							<span name='csv-error'></span>
 						</div>
 						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-						<input name="upload_csv" type="submit" class="btn btn-success" value="Upload">
+						<button name="upload_csv" type="button" class="btn btn-success">Upload</button>
 					</div>
 				</div>
 			</div>
-		</div>
+		</div>	
 	</form>
 
 	<!-- upload report modal -->
@@ -307,7 +313,32 @@ $(document).ready(function() {
             else {
                 error = '';
                 $('[name="hall"]').removeClass('is-invalid');
-                $('div[name="hall-error"]').next().hide();
+                $('div[name="hall-error"]').hide();
+            }
+        });
+        e.preventDefault(); // block the traditional submission of the form.
+    });
+
+	// validate building code entered
+    $(document).on('focusout','[name="building_code"]', function(e) {
+        var url = "{{ url_for('employees._validate') }}"; // send the form data here.
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: {
+                building_code: $('[name="building_code"]').val()
+                }
+        }).done(function(data) {
+            if (data.bcode_error) {
+                error = 'Fix errors before submitting'; // assign error to global variable
+                $('[name="building_code"]').addClass('is-invalid');
+                $('div[name="bcode-error"]').show();
+                $('span[name="bcode-error"]').text(data.bcode_error);
+            }
+            else {
+                error = '';
+                $('[name="building_code"]').removeClass('is-invalid');
+                $('div[name="bcode-error"]').hide();
             }
         });
         e.preventDefault(); // block the traditional submission of the form.
@@ -323,10 +354,10 @@ $(document).ready(function() {
     });
 
 	// upload csv
-    $('#upload_csv_form').submit(function(e) {
-        var url = "{{ url_for('employees.upload_csv') }}"; // send the form data here.
+    $("[name='upload_csv']").click(function(e) {
+		$("[name='upload_csv']").html('<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>Loading...').addClass('disabled');
+        var url = "{{ url_for('main.upload_csv') }}"; // send the form data here.
 		var form_data = new FormData($('#upload_csv_form')[0]);
-
         $.ajax({
             type: 'POST',
             url: url,
@@ -375,6 +406,7 @@ $(document).ready(function() {
 					error_columns = data.error_columns
 				}
             }
+			$("[name='upload_csv']").html('Upload').removeClass('disabled');
         });
         e.preventDefault(); // block the traditional submission of the form.
     });
@@ -436,5 +468,6 @@ function download_csv() {
     hiddenElement.download = 'errors.csv';
     hiddenElement.click();
 }
+
 </script>
 {% endblock %}

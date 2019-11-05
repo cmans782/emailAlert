@@ -60,7 +60,7 @@
                     <input type="button" class="btn btn-lg btn-block " id="addrow" value="Add Row" />
                 </td>
                 <td>
-                    {{form.submit(class="form-control form-control-md btn-success")}}
+                    <button style="padding:6px 35px" id="submit" type="submit" class="btn btn-success">Submit</button>
                     <div name='fix-error' class="invalid-feedback" style='display:none;'>
                         <span>Fix errors before submitting</span>
                     </div>
@@ -379,6 +379,13 @@ $(document).ready(function() {
             e.preventDefault(e);
         }
     });
+
+    $('#newpackageform').submit(function(){
+        $('#submit').html('<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>Loading...')
+        $('#submit').addClass('disabled');
+        $('#submit').removeAttr("style");
+    });
+
     // Inject our CSRF token into our AJAX request.
     var csrf_token = '{{ csrf_token() }}';
     $.ajaxSetup({
@@ -408,7 +415,7 @@ $(document).ready(function() {
                 });
             },
             // only make request if two characters have been typed in
-            minLength: 2,
+            minLength: 3,
             // fill in room of student when name is selected
             select: function(event, ui) {
                 var label = ui.item.label
@@ -433,7 +440,7 @@ $(document).ready(function() {
                 });
             },
             // only make request if two characters have been typed in
-            minLength: 2,
+            minLength: 3,
             // fill in name of student when room is selected 
             select: function(event, ui) {
                 var label = ui.item.label
@@ -442,8 +449,8 @@ $(document).ready(function() {
             }
         });
     });
-    
-$('[name="name"]').focus();
+
+    $('[name="name"]').focus();
 });
 </script>
 {% endblock %}

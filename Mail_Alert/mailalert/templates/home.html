@@ -1,8 +1,6 @@
 {% extends "layout_with_navbar.html" %}
 {%block content %}
 
-
-
 <form action="" method="POST" onsubmit="parseCardSwipe()">
     {{ student_search_form.hidden_tag() }}
     <div class="card" style="width:500px; margin:0 auto;">
@@ -79,7 +77,7 @@
                     <p>Please enter student ID to confirm pickup</p>
                     {{ package_pickup_form.student_id_confirm(class="form-control form-control-md", placeholder="Student ID") }}
                     <div id='errorDiv' class="invalid-feedback" style='display:none;'>
-                    <span id='errorAlert'></span>
+                        <span id='errorAlert'></span>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -98,10 +96,11 @@ function cardReader2(){
     var card_data = document.getElementById("student_id_confirm").value;
     var details = card_data.split("^");
     var card_number = details[0];
-    // var regular = /[0-9]{9}/g;
     var regular = /[0-9]{9}|([a-zA-Z]+){3,}/g;
     var found = card_number.match(regular);
-    document.getElementById("student_id_confirm").value = found;
+    if (found){
+        document.getElementById("student_id_confirm").value = found;
+    }
 }
 </script>
 {% endif %}
@@ -183,7 +182,7 @@ $(document).on('focus', '[name="student_id"]', function() {
             });
         },
         // only make request if two characters have been typed in
-        minLength: 2,
+        minLength: 3,
         // fill in room of student when name is selected
         select: function(event, ui) {
             // var label = ui.item.label
@@ -193,9 +192,7 @@ $(document).on('focus', '[name="student_id"]', function() {
     });
 });
 
-
 $("#student_id").focus();
-
 
 </script>
 

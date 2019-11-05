@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css', _external=True) }}">
+</head>
+<body>
+  <main role="main" class="container">
+      <div class="row">
+        <div class="mx-auto" style="width:500px;">
+            <p>{{ student.first_name }},</p>
+            {% if num_packages > 1 %}
+                <p>You have {{ num_packages }} packages 
+            {% else %}
+                <p>You have {{ num_packages }} package 
+            {% endif %}
+    
+            ready to be picked up at the {{ student.hall.name }} front desk.
+            </p>
+    
+            <p style="font-size: 12px;">No longer want to receive package alerts? 
+                <a style="text-decoration: none;" href="{{ url_for('packages.subscription', student_email=student.email, _external=True) }}">Unsubscribe Here</a>
+            </p> 
+        </div>
+      </div>
+    </main>
+</body>
+</html>

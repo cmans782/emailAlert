@@ -1,0 +1,12 @@
+{% extends "layout_without_navbar.html" %}
+{% block content %}
+<div class="text-center">
+    <img class="unsubscribed-img" src="{{ url_for('static', filename='../static/logo-dark.png') }}" alt="Mail Alert">
+    <p style="font-size: 15px">You will no longer receive package update information.
+    <br>If you did this in error, you may re-subscribe by clicking the button below.</p>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.resubscribe(class="btn red-button") }}
+    </form>
+</div>
+{% endblock content %}
