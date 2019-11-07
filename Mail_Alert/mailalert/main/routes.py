@@ -59,9 +59,12 @@ def upload_csv():
             students = file.read().decode('utf-8')
             # remove all "" from fields
             students = students.replace('\"', "")
+            # getting rid of \n at end of line, to make it compatible with windows and linux
             students = students.replace('\n', "")
+
             # convert to a list
             students = students.split('\r')
+
             # move list into a pandas dataframe
             student_df = pd.DataFrame([student.split(',')
                                        for student in students], columns=columns)
