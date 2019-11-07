@@ -47,9 +47,8 @@ def clean_student_data(df):
     df['LAST NAME'] = df['LAST NAME'].str.capitalize()
     df['BUILDING'] = df['BUILDING'].str.upper()
     df['ROOM'] = df['ROOM'].str.upper()
-    # if id number is only 7 characters long, prepend 00 to it
-    df.loc[df["ID NUMBER"].str.len() == 7, ['ID NUMBER']] = '00' + \
-        df['ID NUMBER'].astype(str)
+    # prepend 0 to id number to make all id's 9 digits long
+    df['ID NUMBER'] = df['ID NUMBER'].apply(lambda x: str(int(x)).zfill(9))
     df['PHONE NUMBER'] = df['PHONE NUMBER'].replace(
         regex=True, to_replace=r'[-( ).]', value='')
     return df

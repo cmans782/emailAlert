@@ -20,13 +20,5 @@ class CreateMessageForm(FlaskForm):
 
 class StudentSearchForm(FlaskForm):
     # student_id = IntegerField('Student Identification', validators=[
-    student_id = StringField('Student Identification', validators=[
-        DataRequired(message="Please enter a student ID")])
+    student_id = StringField('Student Identification')
     submit = SubmitField("Search")
-
-    def validate_student_id(self, field):
-        student = Student.query.filter_by(
-            student_id=field.data, hall=current_user.hall).first()
-        if not student:
-            raise ValidationError(
-                f'This student does not live in {current_user.hall.name} hall')

@@ -20,11 +20,12 @@
                 <p>You have {{ num_packages }} package 
             {% endif %}
     
-            ready to be picked up at the {{ student.hall.name }} front desk.
+            ready to be picked up at the {{ hall }} front desk.
             </p>
     
             <p style="font-size: 12px;">No longer want to receive package alerts? 
                 <a style="text-decoration: none;" href="{{ url_for('packages.subscription', student_email=student.email, _external=True) }}">Unsubscribe Here</a>
+                <br>You must be connected to BearNet in order to Unsubscribe.
             </p> 
         </div>
       </div>

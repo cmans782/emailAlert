@@ -57,7 +57,7 @@
         <tfoot>
             <tr>
                 <td colspan="4" style="text-align: left;">
-                    <input type="button" class="btn btn-lg btn-block " id="addrow" value="Add Row" />
+                    <input type="button" class="btn btn-lg btn-block" id="addrow" style="background-color:#c4c4c4 !important" value="Add Row" />
                 </td>
                 <td>
                     <button style="padding:6px 35px" id="submit" type="submit" class="btn btn-success">Submit</button>
@@ -419,8 +419,9 @@ $(document).ready(function() {
             // fill in room of student when name is selected
             select: function(event, ui) {
                 var label = ui.item.label
-                var room = label.split(' ');
-                $(this).parent().next().children('input').val(room[2]);
+                var label = label.split(' ');
+                // the last element in the array is the room number
+                $(this).parent().next().children('input').val(label[label.length -1]);
             }
         });
     });
@@ -445,7 +446,10 @@ $(document).ready(function() {
             select: function(event, ui) {
                 var label = ui.item.label
                 var name = label.split(' ');
-                $(this).parent().prev().children('input').val(name[0] + ' ' + name[1]);
+                // at index -1 remove 1 item from arrary
+                name.splice(-1,1)
+                name = name.join(' ')
+                $(this).parent().prev().children('input').val(name);
             }
         });
     });

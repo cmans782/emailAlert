@@ -36,8 +36,6 @@ def management():
                 f'{existing_employee.first_name}\'s account has been reactivated!', 'success')
         else:
             password = generate_random_string()
-            # hashed_password = bcrypt.generate_password_hash(password).decode(
-            # 'utf-8')  # generate a password hash for the user that is being created
             hall = Hall.query.get(form.hall.data)  # get hall object
             employee = Employee(email=form.email.data, first_name=form.firstName.data.capitalize(),
                                 last_name=form.lastName.data.capitalize(), access=form.role.data,
@@ -49,8 +47,7 @@ def management():
     elif new_hall_form.submit.data and new_hall_form.validate_on_submit():
         hall = new_hall_form.hall.data
         building_code = new_hall_form.building_code.data
-        hall = Hall(name=hall.capitalize(),
-                    building_code=building_code.upper())
+        hall = Hall(name=hall, building_code=building_code.upper())
         db.session.add(hall)
         db.session.commit()
     employees = Employee.query.filter(Employee.active == True).all()

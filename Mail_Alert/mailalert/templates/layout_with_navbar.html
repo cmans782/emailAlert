@@ -39,14 +39,16 @@
   <!-- fontawesome icons -->
   <script src="https://kit.fontawesome.com/a7232715ba.js"></script>
 
+  
+  
   {% if title %}
   <title>Mail Alert - {{ title }}</title>
   {% else %}
   <title>Mail Alert</title>
   {% endif %}
   
-  <link rel='icon' href={{ url_for('static', filename = '../static/favicon.png') }}>
-
+  <link rel='icon' href="{{ url_for('static', filename = '../static/favicon.png') }}">
+  
 </head>
 {% if current_user.is_authenticated %}
 <body>
