@@ -26,4 +26,4 @@ class Config:
     MAIL_USERNAME = config.get('MAIL_USERNAME')
     MAIL_PASSWORD = config.get('MAIL_PASSWORD')
     # suppress emails from being sent
-    TESTING = False
+    # TESTING = False
