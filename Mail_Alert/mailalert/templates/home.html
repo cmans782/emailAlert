@@ -174,9 +174,6 @@ $('#student_id').focusout(function(e) {
 		type  : 'POST',
 		url   : url,
 		data  : { student_id: $('#student_id').val() },
-		error : function() {
-			alert('error making request');
-		}
 	}).done(function(data) {
 		if (data.error) {
 			$('#student_id').addClass('is-invalid');

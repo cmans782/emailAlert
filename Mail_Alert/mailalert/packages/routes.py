@@ -257,7 +257,7 @@ def suggestions():
             first_name, last_name = parse_name(name)
 
             students = Student.query.filter(
-                Student.first_name.contains(first_name,),
+                Student.first_name.contains(first_name,) |
                 Student.last_name.contains(last_name),
                 Student.hall == current_user.hall).all()
 

@@ -115,7 +115,7 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
-        <div class="alert alert-{{ category }} text-center" id="flashMessage" width="15%">
+        <div class="alert alert-{{ category }} text-center" name="flashMessage" width="15%">
           {{ message }}
         </div>
         {% endfor %}
@@ -131,8 +131,9 @@
 <script>
 $("document").ready(function() {
   setTimeout(function() {
-    $('#flashMessage').delay(3000).slideUp(300);
+    $('[name="flashMessage"]').delay(3000).slideUp(300);
   });
+
   // prevent dropdown for current user from closing on click
   $('.dropdown-menu').on('click', function(event){
       event.stopPropagation();
@@ -161,7 +162,7 @@ $("document").ready(function() {
       url: url,
       data: { new_hall: $(this).val() }
     }).done(function(data) {
-      location.reload();
+      location.href = '/';
       if (data.error) {
         alert(data.error);
       }

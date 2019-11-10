@@ -47,8 +47,6 @@ def clean_student_data(df):
     df['LAST NAME'] = df['LAST NAME'].str.capitalize()
     df['BUILDING'] = df['BUILDING'].str.upper()
     df['ROOM'] = df['ROOM'].str.upper()
-    # prepend 0 to id number to make all id's 9 digits long
-    df['ID NUMBER'] = df['ID NUMBER'].apply(lambda x: str(int(x)).zfill(9))
     df['PHONE NUMBER'] = df['PHONE NUMBER'].replace(
         regex=True, to_replace=r'[-( ).]', value='')
     return df
@@ -100,15 +98,17 @@ def validate_student_data(df, error_df):
         error_df.reset_index(drop=True, inplace=True)
 
     # validate id number
-    result = df['ID NUMBER'].str.contains(r'^[0-9]{9}$', regex=True)
+    result = df['ID NUMBER'].str.contains(r'^[0-9]{6,9}$', regex=True)
     index_list = df[result == False].index.tolist()
     if index_list:
         error_df = pd.concat([error_df, df.iloc[index_list]], sort=True)
         for index in index_list:
             error_df.at[index, 'ERROR'] = 'ID NUMBER'
-        df = df[df['ID NUMBER'].str.contains(r'^[0-9]{9}$', regex=True)]
+        df = df[df['ID NUMBER'].str.contains(r'^[0-9]{6,9}$', regex=True)]
         df.reset_index(drop=True, inplace=True)
         error_df.reset_index(drop=True, inplace=True)
+    # prepend 0 to id number to make all id's 9 digits long
+    df['ID NUMBER'] = df['ID NUMBER'].apply(lambda x: str(int(x)).zfill(9))
 
     # validate phone number allow empty numbers
     result = df['PHONE NUMBER'].str.contains(
@@ -152,14 +152,20 @@ def update_student_data(df, error_df):
         employee_obj = Employee.query.filter_by(email=email).first()
         hall_obj = Hall.query.filter_by(
             name=building_dict.get(student[3])).first()
-        # update student hall and room number
         if student_obj:
+            # update student hall
             if student_obj.hall != hall_obj:
                 student_obj.hall = hall_obj
                 hall_update_count += 1
+            # update student room number
             if student_obj.room_number != student[4]:
                 student_obj.room_number = student[4]
                 room_update_count += 1
+            # update student first name
+            student_obj.first_name = student[1].capitalize()
+            # update student last name
+            student_obj.last_name = student[2].capitalize()
+
             # check if the student goes by a different name
             if len(student[8].strip()):
                 student_obj.first_name = student[8].capitalize()

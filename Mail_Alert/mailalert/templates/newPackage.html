@@ -57,7 +57,7 @@
         <tfoot>
             <tr>
                 <td colspan="4" style="text-align: left;">
-                    <input type="button" class="btn btn-lg btn-block" id="addrow" style="background-color:#c4c4c4 !important" value="Add Row" />
+                    <input type="button" class="btn btn-lg btn-block add-package" id="addrow" value="Add Package" />
                 </td>
                 <td>
                     <button style="padding:6px 35px" id="submit" type="submit" class="btn btn-success">Submit</button>
@@ -281,7 +281,6 @@ $(document).ready(function() {
                 room_error -= 1;
                 $(this).removeClass('is-invalid');
                 $(this).next().hide();
-
                 $(this).parent().next().next().next().children('input').val(data.phone_number)
             // if there was never an error 
             } else {
@@ -380,6 +379,7 @@ $(document).ready(function() {
         }
     });
 
+    // display loader when packages are submitted
     $('#newpackageform').submit(function(){
         $('#submit').html('<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>Loading...')
         $('#submit').addClass('disabled');
@@ -395,11 +395,7 @@ $(document).ready(function() {
             }
         }
     });
-});
-</script>
 
-<script>
-$(document).ready(function() {
     // autocomplete for student name
     $(document).on('focus', '[name="name"]', function() {
         $(this).autocomplete({
@@ -449,7 +445,14 @@ $(document).ready(function() {
                 // at index -1 remove 1 item from arrary
                 name.splice(-1,1)
                 name = name.join(' ')
-                $(this).parent().prev().children('input').val(name);
+                name_field = $(this).parent().prev().children('input');
+                name_field.val(name)
+                if (name_field.hasClass('is-invalid')){
+                    name_error -= 1;
+                    name_field.removeClass('is-invalid');
+                    name_field.next().hide();
+                }
+
             }
         });
     });

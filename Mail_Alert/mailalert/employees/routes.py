@@ -5,6 +5,7 @@ from mailalert.models import Employee, Hall, Login, Student
 from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, NewPasswordForm, NewHallForm
 from mailalert.employees.utils import send_reset_email, send_reset_password_email, generate_random_string
 from mailalert.main.utils import requires_access_level
+from sqlalchemy import func
 from datetime import datetime
 import pandas as pd
 
@@ -26,14 +27,8 @@ def management():
             email=form.email.data).first()
         # check if employee already exists. if so update information and make active again
         if existing_employee:
-            existing_employee.hall = Hall.query.get(form.hall.data)
-            existing_employee.first_name = form.firstName.data.capitalize()
-            existing_employee.last_name = form.lastName.data.capitalize()
-            existing_employee.access = form.role.data
-            existing_employee.end_date = None
-            existing_employee.active = True
             flash(
-                f'{existing_employee.first_name}\'s account has been reactivated!', 'success')
+                f'{existing_employee.first_name}\'s account already exists', 'success')
         else:
             password = generate_random_string()
             hall = Hall.query.get(form.hall.data)  # get hall object
@@ -46,11 +41,21 @@ def management():
         db.session.commit()
     elif new_hall_form.submit.data and new_hall_form.validate_on_submit():
         hall = new_hall_form.hall.data
-        building_code = new_hall_form.building_code.data
-        hall = Hall(name=hall, building_code=building_code.upper())
-        db.session.add(hall)
-        db.session.commit()
-    employees = Employee.query.filter(Employee.active == True).all()
+        existing_hall = Hall.query.filter_by(name=hall).first()
+        if existing_hall:
+            flash('This hall already exists', 'danger')
+        else:
+            building_code = new_hall_form.building_code.data
+            hall = Hall(name=hall, building_code=building_code.upper())
+            db.session.add(hall)
+            db.session.commit()
+    # if the user is not an admin, only get employees that are DR's
+    if not current_user.is_admin():
+        employees = Employee.query.filter_by(
+            access='DR', hall=current_user.hall).all()
+    else:
+        # user is admin so get all the employees
+        employees = Employee.query.all()
     halls = Hall.query.all()
     return render_template('management.html', title='Management', form=form, employees=employees, halls=halls, new_hall_form=new_hall_form)
 
@@ -86,7 +91,9 @@ def _validate():
         if email_exists and email_exists.active == True:
             return jsonify({'error': 'This email is already in use'})
     elif hall:
-        hall = Hall.query.filter_by(name=hall.capitalize()).first()
+        # search for existing hall case insensitive
+        hall = Hall.query.filter(func.lower(
+            Hall.name) == func.lower(hall)).first()
         if hall:
             return jsonify({'hall_error': 'This hall already exists'})
     elif building_code:
@@ -97,20 +104,43 @@ def _validate():
     return jsonify({'success': 'success'})
 
 
+@employees.route("/management/activate", methods=['POST'])
+@login_required
+def _activate_employee():
+    employee_id_list = request.json
+    if employee_id_list:
+        for employee_id in employee_id_list:
+            employee = Employee.query.filter_by(id=employee_id).first()
+            if employee.active == True:
+                continue
+            employee.active = True
+            employee.end_date = None
+            employee.reset_password = True
+            employee.hired_date = datetime.now()
+            password = generate_random_string()
+            employee.password = password
+            send_reset_password_email(employee, password)
+            flash(f'{employee.first_name}\'s account has been reactivated', 'success')
+        db.session.commit()
+    else:
+        flash('No employees were selected', 'danger')
+    return jsonify({'success': 'success'})
+
+
 @employees.route("/management/delete", methods=['POST'])
 @login_required
 def delete_employee():
-    employee_id_list = request.form.getlist("del_employees")
+    employee_id_list = request.form.getlist("employee_checkbox")
     if employee_id_list:  # make sure the user selected at least one employee
         for employee_id in employee_id_list:
             # get the employee object using its id
             employee = Employee.query.get(employee_id)
             employee.end_date = datetime.now()  # record employees end date
             employee.active = False
-            flash(f'{employee.first_name} was successfully deactivated!', 'success')
+            flash(f'{employee.first_name}\'s account has been deactivated', 'success')
         db.session.commit()
     else:
-        flash('No employees were selected!', 'danger')
+        flash('No employees were selected', 'danger')
     return redirect(url_for('employees.management'))
 
 
@@ -179,6 +209,7 @@ def reset_token(token):
         return redirect(url_for('employees.reset_request'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
+        uncomment
         employee.password = form.password.data
         employee.reset_password = False
         db.session.commit()
