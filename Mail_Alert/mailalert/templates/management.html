@@ -65,9 +65,14 @@
 			{{ form.hidden_tag() }}
 			<h2>Manage Employees</h2>
 			<a href="#addEmployeeModal" class="btn btn-success management-button" data-toggle="modal"><i
-					class="material-icons">&#xE147;</i> <span>Add New Employee</span></a>
-			<a href="#deleteEmployeeModal" class="btn btn-danger management-button" data-toggle="modal"><i
-					class="material-icons">&#xE15C;</i> <span>Deactivate Employee</span></a>
+				class="material-icons">&#xE147;</i> <span>Add New Employee</span></a>
+			<div class="float-right">
+				<a href="#activateEmployeeModal" class="btn btn-success management-button" data-toggle="modal"><i
+					class="material-icons">&#xE147;</i> <span>Reactivate</span></a>
+				<a href="#deactivateEmployeeModal" class="btn btn-danger management-button" data-toggle="modal"><i
+					class="material-icons">&#xE15C;</i> <span>Deactivate</span></a>
+			</div>
+
 			<div class='fixed-header'>
 				<table class="table table-striped table-hover">
 					<thead>
@@ -80,6 +85,7 @@
 							</th>
 							<th>Email</th>
 							<th>Name</th>
+							<th>Status</th>
 							<th>Role</th>
 							<th>Working Hall</th>
 						</tr>
@@ -88,11 +94,16 @@
 						<tr>
 							<td>
 								<span class="custom-checkbox">
-									<input type="checkbox" name="del_employees" value="{{ employee.id }}" />
+									<input type="checkbox" name="employee_checkbox" value="{{ employee.id }}" autocomplete='off' />
 								</span>
 							</td>
 							<td>{{ employee.email }}</td>
 							<td>{{ employee.first_name }} {{ employee.last_name }}</td>
+							{% if employee.active %}
+								<td><span class="badge badge-success">Active</span></td>
+							{% else %}
+								<td><span class="badge badge-danger">Inactive</span></td>
+							{% endif%}
 							<td>{{ employee.access }}</td>
 							<td>{{ employee.hall.name }}</td>
 						</tr>
@@ -100,8 +111,8 @@
 				</table>
 			</div>
 		
-			<!-- Delete Employee Modal-->
-			<div id="deleteEmployeeModal" class="modal fade">
+			<!-- Deactivate Employee Modal-->
+			<div id="deactivateEmployeeModal" class="modal fade">
 				<div class="modal-dialog">
 					<div class="modal-content">
 						<div class="modal-header">
@@ -109,7 +120,7 @@
 							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 						</div>
 						<div class="modal-body">
-							<p>Are you sure you want to delete these employees?</p>
+							<p>Are you sure you want to deactivate these employees?</p>
 						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -121,8 +132,27 @@
 		</form>
 	</div>
 
+	<!-- Activate Employee Modal-->
+	<div id="activateEmployeeModal" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Activate Employee</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">
+					<p>Are you sure you want to activate these employees?</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<button name="activate-submit" class="btn btn-success">Activate</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<!-- Add Hall Modal -->
-	<form action="" method="POST">
+	<form action="" method="POST" autocomplete="off">
 		{{ new_hall_form.hidden_tag() }}
 		<fieldset class="form-group">
 			<div id="addHallModal" class="modal fade">
@@ -163,7 +193,7 @@
 	<!-- End Add Hall Modal -->
 
 	<!-- Add Employee Modal-->
-	<form action="" method="POST">
+	<form action="" method="POST" autocomplete="off">
 		{{ form.hidden_tag() }}
 		<fieldset class="form-group">
 			<div id="addEmployeeModal" class="modal fade">
@@ -177,7 +207,7 @@
 						<div class="modal-body">
 							<div class="form-group">
 								{{ form.email.label(class="form-control-label") }}
-								{{ form.email(class="form-control form-control-md") }}
+								{{ form.email(class="form-control form-control-md", autocomplete='off') }}
 								<div name='email-error' class="invalid-feedback" style='display:none;'>
 									<span name='email-error'></span>
 								</div>
@@ -214,7 +244,7 @@
 	</form>
 
 	<!-- upload csv Modal -->
-	<form id=upload_csv_form method="post" enctype="multipart/form-data">
+	<form id=upload_csv_form method="post" enctype="multipart/form-data" autocomplete="off">
 		{{ form.hidden_tag() }}
 		<div id="uploadModal" class="modal fade">
 			<div class="modal-dialog">
@@ -268,7 +298,34 @@
 
 <script>
 $(document).ready(function() {
-    error = '';
+
+	// if reactivate button is selected, send all selected employees
+	// to get reactivated 
+	$('[name="activate-submit"]').click(function(){
+		$("[name='activate-submit']").html('<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>Loading...').addClass('disabled');
+		var selected = [];
+        var url = "{{ url_for('employees._activate_employee') }}"; // send the form data here.
+		$('[name="employee_checkbox"]').each(function(){
+			if($(this).is(':checked')){
+				selected.push($(this).val())
+			}
+		});
+		$.ajax({
+            type: 'POST',
+            url: url,
+			contentType: 'application/json',
+			dataType : 'json',
+            data: JSON.stringify(selected)
+        }).done(function(data) {
+			location.reload()
+		});
+		
+	});
+
+    email_error = false;
+	hall_error = false;
+	bc_error = false;
+
     // validate email entered
     $(document).on('focusout','[name="email"]', function(e) {
         var url = "{{ url_for('employees._validate') }}"; // send the form data here.
@@ -280,13 +337,13 @@ $(document).ready(function() {
                 }
         }).done(function(data) {
             if (data.error) {
-                error = 'Fix errors before submitting'; // assign error to global variable
+                email_error = true;
                 $('[name="email"]').addClass('is-invalid');
                 $('div[name="email-error"]').show();
                 $('span[name="email-error"]').text(data.error);
             }
             else {
-                error = '';
+                email_error = false;
                 $('[name="email"]').removeClass('is-invalid');
                 $('div[name="email-error"]').next().hide();
             }
@@ -305,13 +362,13 @@ $(document).ready(function() {
                 }
         }).done(function(data) {
             if (data.hall_error) {
-                error = 'Fix errors before submitting'; // assign error to global variable
+                hall_error = true; 
                 $('[name="hall"]').addClass('is-invalid');
                 $('div[name="hall-error"]').show();
                 $('span[name="hall-error"]').text(data.hall_error);
             }
             else {
-                error = '';
+                hall_error = false;
                 $('[name="hall"]').removeClass('is-invalid');
                 $('div[name="hall-error"]').hide();
             }
@@ -330,13 +387,13 @@ $(document).ready(function() {
                 }
         }).done(function(data) {
             if (data.bcode_error) {
-                error = 'Fix errors before submitting'; // assign error to global variable
+                bc_error = true; 
                 $('[name="building_code"]').addClass('is-invalid');
                 $('div[name="bcode-error"]').show();
                 $('span[name="bcode-error"]').text(data.bcode_error);
             }
             else {
-                error = '';
+                bc_error = false;
                 $('[name="building_code"]').removeClass('is-invalid');
                 $('div[name="bcode-error"]').hide();
             }
@@ -345,10 +402,10 @@ $(document).ready(function() {
     });
 
     // dont allow submit if there are errors
-    $('#submit').on('click', function(e) {
-        if (error) {
+    $('[name="submit"]').on('click', function(e) {
+        if (email_error | hall_error | bc_error) {
             $('div[name="fix-error"]').show()
-            $('div[name="fix-error"]').text(error)
+            $('div[name="fix-error"]').text('Fix errors before submitting')
             e.preventDefault(e);
         }
     });

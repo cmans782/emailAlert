@@ -2,7 +2,7 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint,
 from flask_login import login_required, current_user
 from mailalert.packages.forms import NewPackageForm, PackagePickUpForm, ResubscribeForm
 from mailalert.main.forms import StudentSearchForm
-from mailalert.packages.utils import send_new_package_email, string_to_bool
+from mailalert.packages.utils import send_new_package_email, string_to_bool, parse_name
 from mailalert.models import Package, Student, Hall, Phone, SentMail
 from mailalert import db
 from datetime import datetime
@@ -23,6 +23,20 @@ def home():
         return redirect(url_for('packages.student_packages', student_id=student_search_form.student_id.data))
     return render_template('home.html', student_search_form=student_search_form,
                            package_pickup_form=package_pickup_form, perishables=perishables)
+
+
+@packages.route("/home/search_student", methods=['GET', 'POST'])
+@login_required
+def _search_student():
+    student_id = request.form.get('student_id', None)
+    if not student_id:
+        return jsonify({'success': 'success'})
+    student = Student.query.filter_by(
+        student_id=student_id, hall=current_user.hall).first()
+    if not student:
+        return jsonify({'error': f'This student does not live in {current_user.hall.name} hall'})
+
+    return jsonify({'success': 'success'})
 
 
 @packages.route("/home/<student_id>", methods=['GET', 'POST'])
@@ -79,7 +93,7 @@ def newPackage():
     form = NewPackageForm()
     if form.validate_on_submit():
         student_dict = {}
-        name = request.form.getlist('name')
+        name_list = request.form.getlist('name')
         room_number = request.form.getlist('room_number')
         description = request.form.getlist('description')
         perishable = request.form.getlist('perishable')
@@ -88,8 +102,9 @@ def newPackage():
         # convert perishables from string values to boolean
         perishable = [string_to_bool(x) for x in perishable]
 
-        for i in range(len(name)):
-            fname, lname = name[i].split()
+        for i in range(len(name_list)):
+            name = ''.join(name_list[i])
+            fname, lname = parse_name(name)
             # get the student with the name and room number entered
             student = Student.query.filter_by(
                 first_name=fname.capitalize(), last_name=lname.capitalize(), hall=current_user.hall, room_number=room_number[i]).first()
@@ -160,9 +175,7 @@ def _validate():
     if name == None or len(name.split()) <= 1:
         return jsonify({'success': 'success'})
 
-    fname, lname = name.split()
-    fname = fname.capitalize()
-    lname = lname.capitalize()
+    fname, lname = parse_name(name)
 
     student = Student.query.filter_by(
         first_name=fname, last_name=lname, hall=current_user.hall).first()
@@ -240,11 +253,11 @@ def suggestions():
             students = Student.query.filter((Student.first_name.contains(name)) |
                                             (Student.last_name.contains(name)),
                                             Student.hall == current_user.hall).all()
-        # user entered the full name
         elif len(name.split()) > 1:
-            first_name, last_name = name.split()
+            first_name, last_name = parse_name(name)
+
             students = Student.query.filter(
-                Student.first_name.contains(first_name,),
+                Student.first_name.contains(first_name,) |
                 Student.last_name.contains(last_name),
                 Student.hall == current_user.hall).all()
 
@@ -275,7 +288,6 @@ def suggestions():
             data = {'value': student.room_number,
                     'label': student.first_name + ' ' + student.last_name + ' ' + student.room_number}
             suggestions.append(data)
-
     return jsonify(suggestions)
 
 

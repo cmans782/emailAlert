@@ -59,8 +59,12 @@ def upload_csv():
             students = file.read().decode('utf-8')
             # remove all "" from fields
             students = students.replace('\"', "")
+            # getting rid of \n at end of line, to make it compatible with windows and linux
+            students = students.replace('\n', "")
+
             # convert to a list
-            students = students.split('\r\n')
+            students = students.split('\r')
+
             # move list into a pandas dataframe
             student_df = pd.DataFrame([student.split(',')
                                        for student in students], columns=columns)
@@ -91,8 +95,8 @@ def upload_csv():
             return jsonify({'error': f'csv format error: {str(err)}'})
         except AssertionError as err:
             return jsonify({'error': f'Number of columns error: {str(err)}'})
-        # except:
-        #     return jsonify({'error': 'An unexpected error occurred'})
+        except:
+            return jsonify({'error': 'An unexpected error occurred'})
 
     else:
         return jsonify({'error': 'That file type is not supported'})

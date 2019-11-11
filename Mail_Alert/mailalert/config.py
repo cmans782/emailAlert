@@ -12,7 +12,7 @@ class Config:
     # remove sqlalchemy warning
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # set timeout session
-    PERMANENT_SESSION_LIFETIME = timedelta(minutes=15)
+    PERMANENT_SESSION_LIFETIME = timedelta(minutes=120)
 
     # theme for admin panel. can find other themes at http://bootswatch.com/3/
     FLASK_ADMIN_SWATCH = 'lumen'
@@ -26,4 +26,4 @@ class Config:
     MAIL_USERNAME = config.get('MAIL_USERNAME')
     MAIL_PASSWORD = config.get('MAIL_PASSWORD')
     # suppress emails from being sent
-    TESTING = True
+    # TESTING = True

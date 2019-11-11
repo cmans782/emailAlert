@@ -19,7 +19,6 @@ csrf = CSRFProtect()
 login_manager = LoginManager()
 login_manager.login_view = 'employees.login'
 login_manager.login_message_category = 'info'
-
 mail = Mail()
 
 
