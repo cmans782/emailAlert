@@ -34,7 +34,7 @@
 
 <div class="row" style="margin-top:50px;">
     <!-- studnt information card -->
-    <div class="col-4">
+    <div class="col-3">
         <div class="card">
             <div class="card-body">
                 <div class='form-label-group'>
@@ -53,18 +53,22 @@
     </div>
     <!-- end student information card -->
 
-    <div class="col-8">
+    <div class="col-9">
         <form id=pickup_form onsubmit="confirm_student_card_swipe()">
             <!-- packages table -->
             <div class='fixed-header'>
                 <table id="packagesTable" class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Package&nbsp;#</th>
+                            <th>#</th>
+                            <th id="deliveryDateLabel">Date</th>
+                            <th>Time</th>
+                            <th>Logged</th>
                             <th>Description</th>
-                            <th>Status</th>
-                            <th id="deliveryDateLabel">Delivered</th>
                             <th id="pickUpLabel">Pick&nbsp;Up</th>
+                            <th id="date-out-label" style="display:none">Date&nbsp;Out</th>
+                            <th id="pickup-time-label" style="display:none">Time&nbsp;Out</th>
+                            <th id="logged-out-label" style="display:none">Logged&nbsp;Out</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -75,9 +79,10 @@
                                 <tr data-status="{{ package.status }}">
                             {% endif %}
                                 <td>{{ package.id }}</td>
-                                <td>{{ package.description }}</td>
-                                <td><span class="badge badge-success">{{ package.status }}</span></td>
                                 <td>{{ package.delivery_date.strftime('%m-%d-%Y') }}</td>
+                                <td>{{ package.delivery_date.strftime('%-I:%M') }}&nbsp;{{ package.delivery_date.strftime('%p') }}</td>
+                                <td>{{ package.inputted.first_name }}&nbsp;{{ package.inputted.last_name }}</td>
+                                <td>{{ package.description }}</td>
                                 <td>
                                     <label class="checkbox-container">
                                         {{ package_pickup_form.pick_up(class="form-control form-control-md", value=package.id) }}
@@ -94,11 +99,14 @@
                                 <tr style="display:none;" data-status="{{ package.status }}">
                             {% endif %}
                             <td>{{ package.id }}</td> 
-                            <td>{{ package.description }}</td> 
-                            <td><span class="badge badge-danger">{{ package.status }}</span></td> 
                             <td>{{ package.delivery_date.strftime("%m-%d-%Y") }}</td> 
+                            <td>{{ package.delivery_date.strftime("%-I:%M") }}&nbsp;{{ package.delivery_date.strftime('%p') }}</td>
+                            <td>{{ package.inputted.first_name }}&nbsp;{{ package.inputted.last_name }}</td>                            
+                            <td>{{ package.description }}</td> 
                             <td>{{ package.picked_up_date.strftime("%m-%d-%Y") }}</td> 
-                            </tr> 
+                            <td>{{ package.picked_up_date.strftime("%-I:%M") }}&nbsp;{{ package.picked_up_date.strftime("%p") }}</td> 
+                            <td>{{ package.removed.first_name }}&nbsp;{{ package.removed.last_name }}</td>
+                        </tr> 
                         {% endfor %}
                     </tbody>
                 </table>
@@ -141,7 +149,10 @@
 </div>
 
 <script type="text/javascript">
-$(document).ready(function () {
+// change bootstrap container size
+$('main').css("max-width", 1400);
+
+$(document).ready(function () {    
     // Filter buttons based on radio button selected
     $(".btn-group .btn").click(function () {
         var inputValue = $(this).find("input").val();
@@ -165,13 +176,19 @@ $(document).ready(function () {
 $(".btn-group .btn").click(function () {
     var inputValue = $(this).find("input").val();
     if (inputValue == 'Picked Up') {
-        $("#pickUpLabel").text("Picked up");
+        $("#date-out-label").show();
+        $("#pickup-time-label").show()
+        $('#logged-out-label').show()
         $("#active_page_selection").hide()
         $("#picked_up_page_selection").show()
+        $("#pickUpLabel").hide();
         $("#pickupBtn").hide();
         $('input[name="pick_up"]').prop("checked", false)
     } else {
-        $("#pickUpLabel").text("Pick Up");
+        $("#date-out-label").hide();
+        $("#pickUpLabel").show();
+        $('#logged-out-label').hide()
+        $("#pickup-time-label").hide()
         $("#picked_up_page_selection").hide()
         $("#active_page_selection").show()
     }
@@ -218,7 +235,6 @@ $.ajaxSetup({
         }
     }
 });
-
 
 </script>
  
