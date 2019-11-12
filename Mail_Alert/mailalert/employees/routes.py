@@ -32,8 +32,8 @@ def management():
         else:
             password = generate_random_string()
             hall = Hall.query.get(form.hall.data)  # get hall object
-            employee = Employee(email=form.email.data, first_name=form.firstName.data.capitalize(),
-                                last_name=form.lastName.data.capitalize(), access=form.role.data,
+            employee = Employee(email=form.email.data, first_name=form.firstName.data.title(),
+                                last_name=form.lastName.data.title(), access=form.role.data,
                                 hall=hall, password=password)
             flash(f'Account created for {employee.email}!', 'success')
             send_reset_password_email(employee, password)

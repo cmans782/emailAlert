@@ -107,7 +107,7 @@ def newPackage():
             fname, lname = parse_name(name)
             # get the student with the name and room number entered
             student = Student.query.filter_by(
-                first_name=fname.capitalize(), last_name=lname.capitalize(), hall=current_user.hall, room_number=room_number[i]).first()
+                first_name=fname.title(), last_name=lname.title(), hall=current_user.hall, room_number=room_number[i]).first()
             if not student:
                 flash('Error getting student', 'danger')
                 return redirect(url_for('packages.newPackage'))
