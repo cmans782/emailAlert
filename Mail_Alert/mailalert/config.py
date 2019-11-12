@@ -27,3 +27,4 @@ class Config:
     MAIL_PASSWORD = config.get('MAIL_PASSWORD')
     # suppress emails from being sent
     # TESTING = True
+    # test
