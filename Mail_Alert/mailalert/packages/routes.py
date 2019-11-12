@@ -288,7 +288,7 @@ def suggestions():
             data = {'value': student.room_number,
                     'label': student.first_name + ' ' + student.last_name + ' ' + student.room_number}
             suggestions.append(data)
-    return jsonify(suggestions)
+    return jsonify(suggestions[:8])
 
 
 @packages.route("/subscription/<student_email>", methods=['GET', 'POST'])

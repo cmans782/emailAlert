@@ -5,7 +5,7 @@ from mailalert.models import Employee
 
 
 class LoginForm(FlaskForm):
-    email = StringField('Email ', validators=[DataRequired(), Email()])
+    email = StringField('Email ', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 

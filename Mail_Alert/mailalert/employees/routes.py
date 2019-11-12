@@ -151,7 +151,14 @@ def login():
         return redirect(url_for('packages.home'))
     form = LoginForm()
     if form.validate_on_submit():
-        employee = Employee.query.filter_by(email=form.email.data).first()
+        email = form.email.data
+        # check full email
+        employee = Employee.query.filter_by(email=email).first()
+        # check if user just entered username
+        if not employee:
+            employee = Employee.query.filter_by(
+                email=email + '@live.kutztown.edu').first()
+
         if employee and not employee.active:
             flash(
                 'Login Unsuccessful. Management has removed you from the list of active employees', 'danger')
@@ -209,7 +216,6 @@ def reset_token(token):
         return redirect(url_for('employees.reset_request'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
-        uncomment
         employee.password = form.password.data
         employee.reset_password = False
         db.session.commit()

@@ -80,4 +80,4 @@ def parse_name(name):
         while i < len(name_list):
             lname = lname + ' ' + name_list[i]
             i += 1
-    return fname, lname
+    return fname.title(), lname.title()
