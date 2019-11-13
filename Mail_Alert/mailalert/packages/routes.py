@@ -107,7 +107,7 @@ def newPackage():
             fname, lname = parse_name(name)
             # get the student with the name and room number entered
             student = Student.query.filter_by(
-                first_name=fname.capitalize(), last_name=lname.capitalize(), hall=current_user.hall, room_number=room_number[i]).first()
+                first_name=fname.title(), last_name=lname.title(), hall=current_user.hall, room_number=room_number[i]).first()
             if not student:
                 flash('Error getting student', 'danger')
                 return redirect(url_for('packages.newPackage'))
@@ -288,7 +288,7 @@ def suggestions():
             data = {'value': student.room_number,
                     'label': student.first_name + ' ' + student.last_name + ' ' + student.room_number}
             suggestions.append(data)
-    return jsonify(suggestions)
+    return jsonify(suggestions[:8])
 
 
 @packages.route("/subscription/<student_email>", methods=['GET', 'POST'])

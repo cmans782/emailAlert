@@ -32,8 +32,8 @@ def management():
         else:
             password = generate_random_string()
             hall = Hall.query.get(form.hall.data)  # get hall object
-            employee = Employee(email=form.email.data, first_name=form.firstName.data.capitalize(),
-                                last_name=form.lastName.data.capitalize(), access=form.role.data,
+            employee = Employee(email=form.email.data, first_name=form.firstName.data.title(),
+                                last_name=form.lastName.data.title(), access=form.role.data,
                                 hall=hall, password=password)
             flash(f'Account created for {employee.email}!', 'success')
             send_reset_password_email(employee, password)
@@ -151,7 +151,14 @@ def login():
         return redirect(url_for('packages.home'))
     form = LoginForm()
     if form.validate_on_submit():
-        employee = Employee.query.filter_by(email=form.email.data).first()
+        email = form.email.data
+        # check full email
+        employee = Employee.query.filter_by(email=email).first()
+        # check if user just entered username
+        if not employee:
+            employee = Employee.query.filter_by(
+                email=email + '@live.kutztown.edu').first()
+
         if employee and not employee.active:
             flash(
                 'Login Unsuccessful. Management has removed you from the list of active employees', 'danger')
@@ -209,7 +216,6 @@ def reset_token(token):
         return redirect(url_for('employees.reset_request'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
-        uncomment
         employee.password = form.password.data
         employee.reset_password = False
         db.session.commit()

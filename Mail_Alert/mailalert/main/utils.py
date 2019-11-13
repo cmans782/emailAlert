@@ -43,8 +43,8 @@ def allowed_file(filename):
 
 def clean_student_data(df):
     df['USERNAME'] = df['USERNAME'].str.lower()
-    df['FIRST NAME'] = df['FIRST NAME'].str.capitalize()
-    df['LAST NAME'] = df['LAST NAME'].str.capitalize()
+    df['FIRST NAME'] = df['FIRST NAME'].str.title()
+    df['LAST NAME'] = df['LAST NAME'].str.title()
     df['BUILDING'] = df['BUILDING'].str.upper()
     df['ROOM'] = df['ROOM'].str.upper()
     df['PHONE NUMBER'] = df['PHONE NUMBER'].replace(
@@ -162,13 +162,13 @@ def update_student_data(df, error_df):
                 student_obj.room_number = student[4]
                 room_update_count += 1
             # update student first name
-            student_obj.first_name = student[1].capitalize()
+            student_obj.first_name = student[1].title()
             # update student last name
-            student_obj.last_name = student[2].capitalize()
+            student_obj.last_name = student[2].title()
 
             # check if the student goes by a different name
             if len(student[8].strip()):
-                student_obj.first_name = student[8].capitalize()
+                student_obj.first_name = student[8].title()
             # check if a student went by a different name but does not anymore
             if student[8].strip() == '':
                 student_obj.first_name = student[1]
@@ -192,7 +192,7 @@ def update_student_data(df, error_df):
 
             # check if the student goes by a different name
             if len(student[8].strip()):
-                new_student.first_name = student[8].capitalize()
+                new_student.first_name = student[8].title()
 
             db.session.add(new_student)
             # if phone number is not empty add it to db
@@ -234,7 +234,7 @@ def update_student_data(df, error_df):
                 removed_employee_count += 1
             # check if the student goes by a different name
             if len(student[8].strip()) and student[8] != employee_obj.first_name:
-                employee_obj.first_name = student[8].capitalize()
+                employee_obj.first_name = student[8].title()
             # check if a student went by a different name but does not anymore
             if student[8].strip() == '' and student[1] != employee_obj.first_name:
                 employee_obj.first_name = student[1]
@@ -250,7 +250,7 @@ def update_student_data(df, error_df):
 
             # check if the employee goes by a different name
             if len(student[8].strip()):
-                new_employee.first_name = student[8].capitalize()
+                new_employee.first_name = student[8].title()
 
             new_employee_count += 1
             ######### uncomment before releasing #########
