@@ -147,6 +147,10 @@ a.article-title:hover {
 	margin-bottom: 20px;
 }
 
+.add-package {
+	background-color: #c4c4c4;
+}
+
 /* custom checkbox */
 
 /* Customize the label */
@@ -179,7 +183,7 @@ a.article-title:hover {
 	left: 20px;
 	height: 25px;
 	width: 25px;
-	background-color: #eee;
+	background-color: #c4c4c4;
 }
 
 /* On mouse-over, add a grey background color */

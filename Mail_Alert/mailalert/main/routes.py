@@ -95,8 +95,8 @@ def upload_csv():
             return jsonify({'error': f'csv format error: {str(err)}'})
         except AssertionError as err:
             return jsonify({'error': f'Number of columns error: {str(err)}'})
-        # except:
-        #     return jsonify({'error': 'An unexpected error occurred'})
+        except:
+            return jsonify({'error': 'An unexpected error occurred'})
 
     else:
         return jsonify({'error': 'That file type is not supported'})

@@ -1,3 +1,4 @@
+wheel==0.33.4
 Flask==1.0.3
 Flask-Admin==1.5.3
 Flask-Bcrypt==0.7.1
@@ -7,3 +8,4 @@ Flask-SQLAlchemy==2.4.0
 Flask-WTF==0.14.2
 WTForms==2.2.1
 pandas==0.25.2
+gunicorn==19.9.0
