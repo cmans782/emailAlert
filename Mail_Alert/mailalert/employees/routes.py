@@ -2,7 +2,7 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint,
 from flask_login import login_user, current_user, logout_user, login_required
 from mailalert import db, bcrypt
 from mailalert.models import Employee, Hall, Login, Student
-from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, NewPasswordForm, NewHallForm
+from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, NewPasswordForm, NewHallForm, NewIssueForm
 from mailalert.employees.utils import send_reset_email, send_reset_password_email, generate_random_string
 from mailalert.main.utils import requires_access_level
 from sqlalchemy import func
@@ -252,10 +252,8 @@ def issues():
         options = {'server': 'https://mailalert.atlassian.net'}
         jira = JIRA(options, basic_auth=('corey2232@gmail.com', 'sIcygfuR6RqdHbbnsziT5C0D'))
         # issue = jira.issue('MA-1')
-
         # new_issue = jira.create_issue(project='MA', summary='testing this even more', description='Seeing how we can go about doing this', issuetype={'name': 'Bug'})
-        new_issue = jira.create_issue(project='MA', summary=form.summary, description='Seeing how we can go about doing this', issuetype={'name': 'Bug'})
-
+        new_issue = jira.create_issue(project='MA', summary=form.summary.data, description=form.description.data, issuetype={'name': 'Bug'})
         print(new_issue.fields.project.key)
         print(new_issue.fields.issuetype.name)
         print(new_issue.fields.reporter.displayName)
