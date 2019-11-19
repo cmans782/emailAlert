@@ -51,3 +51,10 @@ class NewPasswordForm(FlaskForm):
     confirm_new_password = PasswordField('Confirm New Password', validators=[
                                          DataRequired(), EqualTo('new_password')])
     submit = SubmitField('Reset Password')
+
+class NewIssueForm(FlaskForm):
+    summary = StringField('Summary ', validators=[DataRequired()])
+    description = StringField('Description ', validators=[DataRequired()])
+    submit = SubmitField('Create Issue')
+
+    

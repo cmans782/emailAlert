@@ -8,6 +8,11 @@ from mailalert.main.utils import requires_access_level
 from sqlalchemy import func
 from datetime import datetime
 import pandas as pd
+import requests
+from requests.auth import HTTPBasicAuth
+import json
+from jira import JIRA
+from bs4 import BeautifulSoup
 
 employees = Blueprint('employees', __name__)
 
@@ -239,3 +244,23 @@ def reset_password():
         else:
             flash(f'Invalid email or password', 'danger')
     return render_template('reset_password.html', title='Reset Password', form=form)
+
+@employees.route("/issues", methods=['GET', 'POST'])
+def issues():
+    form = NewIssueForm()
+    if form.validate_on_submit():
+        options = {'server': 'https://mailalert.atlassian.net'}
+        jira = JIRA(options, basic_auth=('corey2232@gmail.com', 'sIcygfuR6RqdHbbnsziT5C0D'))
+        # issue = jira.issue('MA-1')
+
+        # new_issue = jira.create_issue(project='MA', summary='testing this even more', description='Seeing how we can go about doing this', issuetype={'name': 'Bug'})
+        new_issue = jira.create_issue(project='MA', summary=form.summary, description='Seeing how we can go about doing this', issuetype={'name': 'Bug'})
+
+        print(new_issue.fields.project.key)
+        print(new_issue.fields.issuetype.name)
+        print(new_issue.fields.reporter.displayName)
+        print(new_issue.fields.summary)
+        print(new_issue.fields.project.id)
+        return redirect(url_for('issues.html'))
+    return render_template('issues.html', title='Issues', form=form)
+
