@@ -1,21 +1,24 @@
 {% extends "layout_with_navbar.html" %}
 {% block content %}
 
+<h2>Feedback</h2>
+<div style="font-size:large">Please use as much detail as possible when filling out this page. Such as, what page you were on, what you were trying to do, 
+        if there were any prompts, etc. Also, please put your name in the Description field!
+</div>
+
+<br>
 <form method="POST" action="">
     <!-- CSRF token for form submission -->
     {{ form.hidden_tag() }}
 
-    {{ form.summary.label(class="form-control-label") }}
-    {{ form.summary(class="form-control form-control-lg") }}
+    <!-- {{ form.summary.label(class="form-control-label") }} -->
+    {{ form.summary(class="form-control form-control-lg", placeholder='Reason for Feedback') }}
     <br>
-    {{ form.description.label(class="form-control-label") }}
+    <!-- {{ form.description.label(class="form-control-label") }} -->
 
     <br>
-    <div style="font-size:small">Please use as much detail as possible. Such as, what page you were on, what you were trying to do, 
-        if there were any prompts, etc. Also, please put your name in this field!
-    </div>
-
-    {{ form.description(class="form-control form-control-lg") }}
+    {{ form.description(class="form-control form-control-lg", placeholder='Description') }}
+        
     <br>
     {{ form.issueType.label(class="form-control-label") }}
     {{ form.issueType }}

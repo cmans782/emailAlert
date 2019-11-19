@@ -2,17 +2,15 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint,
 from flask_login import login_user, current_user, logout_user, login_required
 from mailalert import db, bcrypt
 from mailalert.models import Employee, Hall, Login, Student
-from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, NewPasswordForm, NewHallForm, NewIssueForm
+from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, NewPasswordForm, NewHallForm
 from mailalert.employees.utils import send_reset_email, send_reset_password_email, generate_random_string
 from mailalert.main.utils import requires_access_level
 from sqlalchemy import func
 from datetime import datetime
 import pandas as pd
-import requests
 from requests.auth import HTTPBasicAuth
 import json
 from jira import JIRA
-from bs4 import BeautifulSoup
 
 employees = Blueprint('employees', __name__)
 
@@ -245,24 +243,17 @@ def reset_password():
             flash(f'Invalid email or password', 'danger')
     return render_template('reset_password.html', title='Reset Password', form=form)
 
-@employees.route("/issues", methods=['GET', 'POST'])
-def issues():
-    form = NewIssueForm()
-    if form.validate_on_submit():
-        options = {'server': 'https://mailalert.atlassian.net'}
-        jira = JIRA(options, basic_auth=('corey2232@gmail.com', 'sIcygfuR6RqdHbbnsziT5C0D'))
-        # issue = jira.issue('MA-1')
-        # new_issue = jira.create_issue(project='MA', summary='testing this even more', description='Seeing how we can go about doing this', issuetype={'name': 'Bug'})
-        # new_issue = jira.create_issue(project='MA', summary=form.summary.data, description=form.description.data, issuetype={'name': 'Bug'})
-        # new_issue = jira.create_issue(project='MA', summary=form.summary.data, description=form.description.data, issuetype={'name': form.issueType.data})
-        jira.create_issue(project='MA', summary=form.summary.data, description=form.description.data, priority={'name': form.priority.data}, issuetype={'name': form.issueType.data})
+# @employees.route("/issues", methods=['GET', 'POST'])
+# @login_required
+# def issues():
+#     form = NewIssueForm()
+#     if form.validate_on_submit():
+#         options = {'server': 'https://mailalert.atlassian.net'}
+#         jira = JIRA(options, basic_auth=('corey2232@gmail.com', 'sIcygfuR6RqdHbbnsziT5C0D'))
+#         # issue = jira.issue('MA-1')
+#         jira.create_issue(project='MA', summary=form.summary.data, description=form.description.data, priority={'name': form.priority.data}, issuetype={'name': form.issueType.data})
 
-        # print(new_issue.fields.project.key)
-        # print(new_issue.fields.issuetype.name)
-        # print(new_issue.fields.reporter.displayName)
-        # print(new_issue.fields.summary)
-        # print(new_issue.fields.project.id)
-        flash(f'Your feedback has been created and sent to the development team!', 'success')
-        return redirect(url_for('employees.issues'))
-    return render_template('issues.html', title='Issues', form=form)
+#         flash(f'Your feedback has been created and sent to the development team!', 'success')
+#         return redirect(url_for('employees.issues'))
+#     return render_template('issues.html', title='Issues', form=form)
 
