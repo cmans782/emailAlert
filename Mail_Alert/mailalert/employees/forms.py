@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, RadioField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from mailalert.models import Employee
 
@@ -53,8 +53,11 @@ class NewPasswordForm(FlaskForm):
     submit = SubmitField('Reset Password')
 
 class NewIssueForm(FlaskForm):
-    summary = StringField('Summary ', validators=[DataRequired()])
-    description = StringField('Description ', validators=[DataRequired()])
-    submit = SubmitField('Create Issue')
+    summary = StringField('Summary', validators=[DataRequired()])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    issueType = RadioField('Type of Feedback', choices=[('Bug', 'Bug'), ('New Feature', 'New Feature Request')])
+    priority = RadioField('Priority of Feedback', choices=[('Trivial', 'Trivial - spelling error, etc.'), ('Low', 'Low - Site works, visual problem'), 
+        ('Medium', 'Medium - Site behaving poorly or slowly'), ('High', 'High - Site functionality limited'), ('Critical', 'Critical - Site broken or functionality broken')])
+    submit = SubmitField('Submit')
 
     

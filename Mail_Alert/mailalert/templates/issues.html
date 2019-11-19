@@ -1,13 +1,27 @@
-{% extends "layout_without_navbar.html" %}
+{% extends "layout_with_navbar.html" %}
 {% block content %}
 
 <form method="POST" action="">
+    <!-- CSRF token for form submission -->
     {{ form.hidden_tag() }}
+
     {{ form.summary.label(class="form-control-label") }}
     {{ form.summary(class="form-control form-control-lg") }}
     <br>
     {{ form.description.label(class="form-control-label") }}
+
+    <br>
+    <div style="font-size:small">Please use as much detail as possible. Such as, what page you were on, what you were trying to do, 
+        if there were any prompts, etc. Also, please put your name in this field!
+    </div>
+
     {{ form.description(class="form-control form-control-lg") }}
+    <br>
+    {{ form.issueType.label(class="form-control-label") }}
+    {{ form.issueType }}
+    <br>
+    {{ form.priority.label(class="form-control-label") }}
+    {{ form.priority }}
     <br>
     {{ form.submit(class="btn btn-outline-info") }}
 
