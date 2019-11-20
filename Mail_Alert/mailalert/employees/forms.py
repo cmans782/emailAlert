@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, RadioField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from mailalert.models import Employee
 
@@ -51,3 +51,6 @@ class NewPasswordForm(FlaskForm):
     confirm_new_password = PasswordField(
         'Confirm New Password', validators=[DataRequired()])
     submit = SubmitField('Reset Password')
+
+
+    
