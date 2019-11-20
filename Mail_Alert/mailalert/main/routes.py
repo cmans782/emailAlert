@@ -14,8 +14,7 @@ import pandas as pd
 main = Blueprint('main', __name__)
 
 
-@main.route("/get_halls", methods=['POST'])
-@login_required
+@main.route("/get_halls", methods=['GET'])
 def get_halls():
     hall_list = Hall.query.all()
     hall_list = [hall.name for hall in hall_list]
