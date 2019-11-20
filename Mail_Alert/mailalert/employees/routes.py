@@ -8,6 +8,9 @@ from mailalert.main.utils import requires_access_level
 from sqlalchemy import func
 from datetime import datetime
 import pandas as pd
+from requests.auth import HTTPBasicAuth
+import json
+from jira import JIRA
 
 employees = Blueprint('employees', __name__)
 
@@ -216,7 +219,7 @@ def reset_token(token):
         return redirect(url_for('employees.reset_request'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
-        employee.password = form.password.data
+        employee.password = form.new_password.data
         employee.reset_password = False
         db.session.commit()
         flash('Your password has been reset!', 'success')
@@ -237,5 +240,20 @@ def reset_password():
             flash('Your password has been changed!', 'success')
             return redirect(url_for('employees.login'))
         else:
-            flash(f'Invalid email or password', 'danger')
+            flash(f'Invalid Email or Old Password', 'danger')
     return render_template('reset_password.html', title='Reset Password', form=form)
+
+# @employees.route("/issues", methods=['GET', 'POST'])
+# @login_required
+# def issues():
+#     form = NewIssueForm()
+#     if form.validate_on_submit():
+#         options = {'server': 'https://mailalert.atlassian.net'}
+#         jira = JIRA(options, basic_auth=('corey2232@gmail.com', 'sIcygfuR6RqdHbbnsziT5C0D'))
+#         # issue = jira.issue('MA-1')
+#         jira.create_issue(project='MA', summary=form.summary.data, description=form.description.data, priority={'name': form.priority.data}, issuetype={'name': form.issueType.data})
+
+#         flash(f'Your feedback has been created and sent to the development team!', 'success')
+#         return redirect(url_for('employees.issues'))
+#     return render_template('issues.html', title='Issues', form=form)
+

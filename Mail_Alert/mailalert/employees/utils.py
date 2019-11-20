@@ -7,6 +7,7 @@ import string
 from random import choice, randint
 import numpy as np
 from datetime import datetime
+from password_generator import PasswordGenerator
 
 
 def send_reset_email(employee):
@@ -23,12 +24,12 @@ If you did not make this request then please ignore this email.
 
 
 def generate_random_string():
-    min_char = 8
-    max_char = 12
-    allchar = string.ascii_letters + string.punctuation + string.digits
-    password = "".join(choice(allchar)
-                       for x in range(randint(min_char, max_char)))
-    return password
+    password = PasswordGenerator()
+    password.minlen = 8
+    password.maxlen = 10
+    password.excludeschars = "!$\"\'^()."
+
+    return password.generate()
 
 
 def send_reset_password_email(employee, password):

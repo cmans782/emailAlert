@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, RadioField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from mailalert.models import Employee
 
@@ -34,20 +34,23 @@ class RequestResetForm(FlaskForm):
         employee = Employee.query.filter_by(email=email.data).first()
         if employee is None:
             raise ValidationError(
-                'There is no account with that email. Contact your supervisor about account access.')
+                'There is no account associated with that email. Contact your supervisor about account access.')
 
 
 class ResetPasswordForm(FlaskForm):
-    password = PasswordField('New Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm New Password', validators=[
-                                     DataRequired(), EqualTo('password')])
+    new_password = PasswordField('New Password', validators=[DataRequired()])
+    confirm_new_password = PasswordField(
+        'Confirm New Password', validators=[DataRequired()])
     submit = SubmitField('Reset Password')
 
 
 class NewPasswordForm(FlaskForm):
-    email = StringField('Email ', validators=[DataRequired(), Email()])
+    email = StringField('Email ', validators=[DataRequired()])
     old_password = PasswordField('Old Password', validators=[DataRequired()])
     new_password = PasswordField('New Password', validators=[DataRequired()])
-    confirm_new_password = PasswordField('Confirm New Password', validators=[
-                                         DataRequired(), EqualTo('new_password')])
+    confirm_new_password = PasswordField(
+        'Confirm New Password', validators=[DataRequired()])
     submit = SubmitField('Reset Password')
+
+
+    

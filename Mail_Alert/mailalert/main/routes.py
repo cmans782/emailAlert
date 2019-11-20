@@ -3,19 +3,20 @@ import csv
 from werkzeug.utils import secure_filename
 from flask import render_template, Blueprint, request, flash, redirect, url_for, jsonify
 from flask_login import login_required, current_user
-from mailalert.main.forms import ComposeEmailForm, CreateMessageForm, StudentSearchForm
+from mailalert.main.forms import ComposeEmailForm, CreateMessageForm, StudentSearchForm, NewIssueForm
 from mailalert.models import Message, Package, SentMail, Student, Hall
 from mailalert import db
 from mailalert.config import Config
 from mailalert.main.utils import send_package_update_email, clean_student_data, \
     validate_student_data, update_student_data, error_columns, allowed_file
 import pandas as pd
+import json
+from jira import JIRA
 
 main = Blueprint('main', __name__)
 
 
-@main.route("/get_halls", methods=['POST'])
-@login_required
+@main.route("/get_halls", methods=['GET'])
 def get_halls():
     hall_list = Hall.query.all()
     hall_list = [hall.name for hall in hall_list]
@@ -100,6 +101,24 @@ def upload_csv():
 
     else:
         return jsonify({'error': 'That file type is not supported'})
+
+
+@main.route("/issues", methods=['GET', 'POST'])
+@login_required
+def issues():
+    form = NewIssueForm()
+    if form.validate_on_submit():
+        options = {'server': 'https://mailalert.atlassian.net'}
+        jira = JIRA(options, basic_auth=(
+            'corey2232@gmail.com', 'sIcygfuR6RqdHbbnsziT5C0D'))
+        # issue = jira.issue('MA-1')
+        jira.create_issue(project='MA', summary=form.summary.data, description=form.description.data, priority={
+                          'name': form.priority.data}, issuetype={'name': form.issueType.data})
+
+        flash(
+            f'Your feedback has been created and sent to the development team!', 'success')
+        return redirect(url_for('main.issues'))
+    return render_template('issues.html', title='Issues', form=form)
 
 
 # @main.route("/composeEmail", methods=['GET', 'POST'])

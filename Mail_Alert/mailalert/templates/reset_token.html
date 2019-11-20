@@ -2,35 +2,29 @@
 {% block content %}
 <div class="mx-auto" style="width:500px">
     <div class="content-section">
-        <form method="POST" action="">
+        <form method="POST" action="" onsubmit="checkPasswordRequirements()">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
                 <legend class="border-bottom mb-4">Reset Password</legend>
-                <div class="form-group">
-                    {{ form.password.label(class="form-control-label") }}
-                    {% if form.password.errors %}
-                        {{ form.password(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.password.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.password(class="form-control form-control-lg") }}
-                    {% endif %}
+                <div name='password-criteria-error' class="invalid-feedback" style='display:none;padding-bottom:20px;'>
+                    <span>Your new password must contain the following:<br>
+                        * At least 8 characters<br>
+                        * An uppercase character<br>
+                        * A lowercase character<br>
+                        * A numeric character<br>
+                        * A special character
+                    </span>
                 </div>
                 <div class="form-group">
-                    {{ form.confirm_password.label(class="form-control-label") }}
-                    {% if form.confirm_password.errors %}
-                        {{ form.confirm_password(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.confirm_password.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.confirm_password(class="form-control form-control-lg") }}
-                    {% endif %}
+                    {{ form.new_password.label(class="form-control-label") }}
+                    {{ form.new_password(class="form-control form-control-lg") }}
+                </div>
+                <div class="form-group">
+                    {{ form.confirm_new_password.label(class="form-control-label") }}
+                    {{ form.confirm_new_password(class="form-control form-control-lg") }}
+                    <div name="confirm_password_error" class="invalid-feedback" style="display:none">
+                        <span>Passwords do not match</span>
+                    </div>
                 </div>
             </fieldset>
             <div class="form-group">
@@ -39,4 +33,6 @@
         </form>
     </div>
 </div>
+<!-- jquery validation for passwords -->
+<script src="{{ url_for('static', filename='passwords.js') }}"></script>         
 {% endblock content %}
