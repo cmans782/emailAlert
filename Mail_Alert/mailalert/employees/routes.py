@@ -216,7 +216,7 @@ def reset_token(token):
         return redirect(url_for('employees.reset_request'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
-        employee.password = form.password.data
+        employee.password = form.new_password.data
         employee.reset_password = False
         db.session.commit()
         flash('Your password has been reset!', 'success')
@@ -237,5 +237,5 @@ def reset_password():
             flash('Your password has been changed!', 'success')
             return redirect(url_for('employees.login'))
         else:
-            flash(f'Invalid Email or Password', 'danger')
+            flash(f'Invalid Email or Old Password', 'danger')
     return render_template('reset_password.html', title='Reset Password', form=form)
