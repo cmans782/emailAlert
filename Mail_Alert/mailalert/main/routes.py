@@ -20,7 +20,6 @@ main = Blueprint('main', __name__)
 def get_halls():
     hall_list = Hall.query.all()
     hall_list = [hall.name for hall in hall_list]
-    print(hall_list)
     # remove the current users hall because it is already being displayed
     hall_list.remove(current_user.hall.name)
     return jsonify({'halls': hall_list})
@@ -103,17 +102,21 @@ def upload_csv():
     else:
         return jsonify({'error': 'That file type is not supported'})
 
+
 @main.route("/issues", methods=['GET', 'POST'])
 @login_required
 def issues():
     form = NewIssueForm()
     if form.validate_on_submit():
         options = {'server': 'https://mailalert.atlassian.net'}
-        jira = JIRA(options, basic_auth=('corey2232@gmail.com', 'sIcygfuR6RqdHbbnsziT5C0D'))
+        jira = JIRA(options, basic_auth=(
+            'corey2232@gmail.com', 'sIcygfuR6RqdHbbnsziT5C0D'))
         # issue = jira.issue('MA-1')
-        jira.create_issue(project='MA', summary=form.summary.data, description=form.description.data, priority={'name': form.priority.data}, issuetype={'name': form.issueType.data})
+        jira.create_issue(project='MA', summary=form.summary.data, description=form.description.data, priority={
+                          'name': form.priority.data}, issuetype={'name': form.issueType.data})
 
-        flash(f'Your feedback has been created and sent to the development team!', 'success')
+        flash(
+            f'Your feedback has been created and sent to the development team!', 'success')
         return redirect(url_for('main.issues'))
     return render_template('issues.html', title='Issues', form=form)
 
