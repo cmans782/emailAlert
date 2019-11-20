@@ -2,10 +2,19 @@
 {% block content %}
 <div class="mx-auto" style="width:500px">
     <div class="content-section">
-        <form method="POST" action="">
+        <form method="POST" action="" onsubmit="checkPasswordRequirements()">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
                 <legend class="border-bottom mb-4">Reset Password</legend>
+                   <div name='password-criteria-error' class="invalid-feedback" style='display:none; padding-bottom: 25px;'>
+                        <span>Your password must contain the following:<br>
+                             * At least 8 characters<br>
+                             * A uppercase character<br>
+                             * A lowercase character<br>
+                             * A numeric character<br>
+                             * A special character<br>
+                        </span>
+                    </div>
                 <div class="form-group">
                     {{ form.password.label(class="form-control-label") }}
                     {% if form.password.errors %}
@@ -39,4 +48,26 @@
         </form>
     </div>
 </div>
+
+<script>
+        function checkPasswordRequirements() {
+            var passwordResetBox = document.getElementById("password").value;
+            var regex = /(?=.{8,127})(?=.*?[^\w\s])(?=.*?[0-9])(?=.*?[A-Z])(?!.*\s)(?!.*\")(?!.*\')(?!.*\\)(?!.*\/).*?[a-z].*/g;
+        
+            if (regex.test(passwordResetBox)) {
+                // Allow form submission if it meets all the regular expression criteria
+                var validation = passwordResetBox.match(regex);
+                document.getElementById("password").value = validation;
+            }
+            else {
+                // Don't allow form submission if it doesn't mean criteria
+                event.preventDefault();
+                $('div[name="password-criteria-error"]').show();
+                //$('span[name="password-criteria-error"]').text("Your password must contain at least 8 characters.\n" + " An uppercase letter\n" + "A lowercase letter\n" 
+                  //  + "A number\n"+ "A special character.");
+            }
+        }
+        
+        </script>
+        
 {% endblock content %}
