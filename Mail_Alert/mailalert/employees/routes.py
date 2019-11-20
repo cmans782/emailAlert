@@ -237,5 +237,5 @@ def reset_password():
             flash('Your password has been changed!', 'success')
             return redirect(url_for('employees.login'))
         else:
-            flash(f'Invalid email or password', 'danger')
+            flash(f'Invalid Email or Password', 'danger')
     return render_template('reset_password.html', title='Reset Password', form=form)
