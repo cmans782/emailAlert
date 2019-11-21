@@ -242,18 +242,3 @@ def reset_password():
         else:
             flash(f'Invalid Email or Old Password', 'danger')
     return render_template('reset_password.html', title='Reset Password', form=form)
-
-# @employees.route("/issues", methods=['GET', 'POST'])
-# @login_required
-# def issues():
-#     form = NewIssueForm()
-#     if form.validate_on_submit():
-#         options = {'server': 'https://mailalert.atlassian.net'}
-#         jira = JIRA(options, basic_auth=('corey2232@gmail.com', 'sIcygfuR6RqdHbbnsziT5C0D'))
-#         # issue = jira.issue('MA-1')
-#         jira.create_issue(project='MA', summary=form.summary.data, description=form.description.data, priority={'name': form.priority.data}, issuetype={'name': form.issueType.data})
-
-#         flash(f'Your feedback has been created and sent to the development team!', 'success')
-#         return redirect(url_for('employees.issues'))
-#     return render_template('issues.html', title='Issues', form=form)
-
