@@ -22,10 +22,10 @@
 <!-- Filter buttons -->
 <h2> 
     <div class="btn-group btn-group-toggle pull-right" data-toggle="buttons"> 
-        <label id='active-tab' class="btn btn-success">
+        <label id='active-tab' class="btn btn-outline-success active">
             <input style="visibility:hidden" type="radio" name="status" value="Active"> Active
         </label>
-        <label id='pickedUp-tab' class="btn btn-danger">
+        <label id='pickedUp-tab' class="btn btn-outline-danger">
             <input style="visibility:hidden" type="radio" name="status" value="Picked Up"> Picked Up
         </label>
     </div>
@@ -183,14 +183,18 @@ $(".btn-group .btn").click(function () {
         $("#picked_up_page_selection").show()
         $("#pickUpLabel").hide();
         $("#pickupBtn").hide();
-        $('input[name="pick_up"]').prop("checked", false)
+        $('input[name="pick_up"]').prop("checked", false);
+        $('#active-tab').removeClass('active');
+        $('#pickedUp-tab').addClass('active');
     } else {
         $("#date-out-label").hide();
         $("#pickUpLabel").show();
-        $('#logged-out-label').hide()
-        $("#pickup-time-label").hide()
-        $("#picked_up_page_selection").hide()
-        $("#active_page_selection").show()
+        $('#logged-out-label').hide();
+        $("#pickup-time-label").hide();
+        $("#picked_up_page_selection").hide();
+        $("#active_page_selection").show();
+        $('#active-tab').addClass('active');
+        $('#pickedUp-tab').removeClass('active');
     }
 });
 
