@@ -7,10 +7,7 @@ from mailalert.employees.utils import send_reset_email, send_reset_password_emai
 from mailalert.main.utils import requires_access_level
 from sqlalchemy import func
 from datetime import datetime
-import pandas as pd
-from requests.auth import HTTPBasicAuth
 import json
-from jira import JIRA
 
 employees = Blueprint('employees', __name__)
 
@@ -19,16 +16,29 @@ employees = Blueprint('employees', __name__)
 @login_required
 @requires_access_level('Building Director')
 def management():
+    """
+    renders management.html page as well as handles adding new employees and halls 
+
+    GET - 
+        returns all the halls
+    POST - 
+        form.validate_on_submit() - will add a new employee if the employee does not yet exist 
+        new_hall_form.validate_on_submit - will add a new hall if the hall does not yet exist
+
+    Returns: 
+        management.html 
+    """
     form = ManagementForm()
     new_hall_form = NewHallForm()
-    # query database for all halls and add them to the list of choices for the halls dropdown
+    # get all halls and add them to the list of choices for the
+    # halls dropdown when adding a new employee
     hall_list = Hall.query.all()
     hall_list = [(hall.id, hall.name) for hall in hall_list]
     form.hall.choices = hall_list
+
     if form.validate_on_submit():
         existing_employee = Employee.query.filter_by(
             email=form.email.data).first()
-        # check if employee already exists. if so update information and make active again
         if existing_employee:
             flash(
                 f'{existing_employee.first_name}\'s account already exists', 'success')
@@ -52,6 +62,8 @@ def management():
             hall = Hall(name=hall, building_code=building_code.upper())
             db.session.add(hall)
             db.session.commit()
+
+    # only add certain employees to employees list based on the current users access
     # if the user is not an admin, only get employees that are DR's
     if not current_user.is_admin():
         employees = Employee.query.filter_by(
@@ -66,6 +78,14 @@ def management():
 @employees.route("/management/remove_hall", methods=['POST'])
 @login_required
 def remove_hall():
+    """
+    Removes a hall if no students or employees live there 
+
+    Returns: 
+        JSON response to ajax
+        "success" if hall was successfully removed
+        "error" if hall could not be removed 
+    """
     hall_id = request.form.get('hall_id', None)
     hall = Hall.query.get(hall_id)
     if hall:
@@ -86,6 +106,20 @@ def remove_hall():
 @employees.route("/management/validate", methods=['POST'])
 @login_required
 def _validate():
+    """
+    Validate new employee information 
+    Validate new hall information
+
+    email - make sure no other employees have that email
+    hall name- make sure the hall entered does not yet exist
+    building code - make sure the building code entered does 
+                    not yet exist
+
+    Returns: 
+        JSON response to ajax
+        "success" if hall, building code or email do not yet exist
+        "error" if hall, building code, or email do exist
+    """
     email = request.form.get('email', None)
     hall = request.form.get('hall', None)
     building_code = request.form.get('building_code', None)
@@ -110,6 +144,12 @@ def _validate():
 @employees.route("/management/activate", methods=['POST'])
 @login_required
 def _activate_employee():
+    """
+    Reactivate an inactive employee
+
+    Returns: 
+        "success" JSON response to ajax
+    """
     employee_id_list = request.json
     if employee_id_list:
         for employee_id in employee_id_list:
@@ -130,9 +170,15 @@ def _activate_employee():
     return jsonify({'success': 'success'})
 
 
-@employees.route("/management/delete", methods=['POST'])
+@employees.route("/management/deactivate", methods=['POST'])
 @login_required
-def delete_employee():
+def deactivate_employee():
+    """
+    deactivate an employee
+
+    Returns: 
+        redirect to management route
+    """
     employee_id_list = request.form.getlist("employee_checkbox")
     if employee_id_list:  # make sure the user selected at least one employee
         for employee_id in employee_id_list:
@@ -150,12 +196,23 @@ def delete_employee():
 @employees.route("/", methods=['GET', 'POST'])
 @employees.route("/login", methods=['GET', 'POST'])
 def login():
+    """
+    Login an employee
+
+    Returns: 
+        GET - 
+            renders login.html
+        POST -
+            redirect for password reset if password has not yet been reset 
+            redirect for home route on success
+    """
+    # check if user is already logged in
     if current_user.is_authenticated:
         return redirect(url_for('packages.home'))
     form = LoginForm()
     if form.validate_on_submit():
         email = form.email.data
-        # check full email
+        # check if user enterd full email
         employee = Employee.query.filter_by(email=email).first()
         # check if user just entered username
         if not employee:
@@ -165,7 +222,8 @@ def login():
         if employee and not employee.active:
             flash(
                 'Login Unsuccessful. Management has removed you from the list of active employees', 'danger')
-            return render_template('login.html', title='Login', form=form)
+
+        # check that employee exists and that password entered matches password hash
         elif employee and bcrypt.check_password_hash(employee.password, form.password.data):
             # check if the user still needs to reset their password
             if employee.reset_password:
@@ -187,6 +245,12 @@ def login():
 
 @employees.route("/logout")
 def logout():
+    """
+    Logout an employee
+
+    Returns: 
+        redirect to login route
+    """
     # get the last login date by the current user and log logout date and time
     current_user.logins[-1].logout_date = datetime.now()
     db.session.commit()
@@ -196,12 +260,21 @@ def logout():
 
 @employees.route("/forgot_password", methods=['GET', 'POST'])
 def reset_request():
+    """
+    send an email to user to reset passowrd
+
+    Returns: 
+        GET - 
+            renders reset_request.html
+        POST - 
+            redirect to login route
+    """
+    # check if user is already logged in
     if current_user.is_authenticated:
         return redirect(url_for('packages.home'))
     form = RequestResetForm()
     if form.validate_on_submit():
         employee = Employee.query.filter_by(email=form.email.data).first()
-        ######### uncomment before releasing #########
         send_reset_email(employee)
         flash(
             f'An email has been sent to {employee.email} with instructions to reset your password.', 'info')
@@ -211,8 +284,21 @@ def reset_request():
 
 @employees.route("/forgot_password/<token>", methods=['GET', 'POST'])
 def reset_token(token):
+    """
+    reset the users password if the password was forgotten
+
+    Returns: 
+        GET - 
+            render reset_token.html
+        POST - 
+            if expired token redirect to reset_request route
+            if password reset was successful redirect to 
+            login route 
+    """
+    # check if user is already logged in
     if current_user.is_authenticated:
         return redirect(url_for('packages.home'))
+    # get employee associated with reset token
     employee = Employee.verify_reset_token(token)
     if employee is None:
         flash('That is an invalid or expired token', 'warning')
@@ -229,10 +315,20 @@ def reset_token(token):
 
 @employees.route("/reset_password", methods=['GET', 'POST'])
 def reset_password():
+    """
+    Reset a users password while the user is logged in
+
+    Returns: 
+        GET - 
+            render reset_password.html
+        POST -
+            redirect to login route on success
+            render reset_password.html if not valid 
+    """
     form = NewPasswordForm()
     if form.validate_on_submit():
         employee = Employee.query.filter_by(email=form.email.data).first()
-        # if the current users password matches the old password field
+        # check that employee exists and that old password entered matches old password hash
         if employee and bcrypt.check_password_hash(employee.password, form.old_password.data):
             employee.password = form.new_password.data
             employee.reset_password = False

@@ -61,7 +61,7 @@
 	</div>
 {% endif %}
 	<div class="card management">
-		<form action="{{ url_for('employees.delete_employee') }}" method="POST">
+		<form action="{{ url_for('employees.deactivate_employee') }}" method="POST">
 			{{ form.hidden_tag() }}
 			<h2>Manage Employees</h2>
 			<a href="#addEmployeeModal" class="btn btn-success management-button" data-toggle="modal"><i
@@ -298,9 +298,7 @@
 
 <script>
 $(document).ready(function() {
-
-	// if reactivate button is selected, send all selected employees
-	// to get reactivated 
+	// reactivated all selected employees 
 	$('[name="activate-submit"]').click(function(){
 		$("[name='activate-submit']").html('<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>Loading...').addClass('disabled');
 		var selected = [];

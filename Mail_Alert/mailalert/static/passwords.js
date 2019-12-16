@@ -22,7 +22,29 @@ $(document).ready(function() {
 		}
 	});
 
-	$('#confirm_new_password').focusout(match_passwords);
+	$('#confirm_new_password').focusout(function() {
+		if ($(this).val() != '' && password_criteria_error == false) {
+			match_passwords();
+		}
+	});
+
+	$('#new_password').keyup(remove_errors);
+	$('#confirm_new_password').keyup(function() {
+		if (!password_criteria_error) {
+			remove_errors();
+		}
+	});
+
+	// if there are errors but the user goes back into the
+	// field to fix them, remove the errors when a key is hit
+	function remove_errors() {
+		if (password_criteria_error | password_match_error) {
+			$('#new_password').removeClass('is-invalid');
+			$('#confirm_new_password').removeClass('is-invalid');
+			$('div[name="password-criteria-error"]').hide();
+			$('[name="confirm_password_error"]').hide();
+		}
+	}
 
 	// validate that passwords match
 	function match_passwords() {

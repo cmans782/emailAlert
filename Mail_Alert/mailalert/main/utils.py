@@ -1,4 +1,4 @@
-from flask import url_for, redirect, render_template
+from flask import render_template
 from flask_mail import Message
 from mailalert import mail, db
 from mailalert.models import Employee, Hall, Student, Phone
@@ -13,17 +13,6 @@ import pandas as pd
 error_columns = ['USERNAME', 'FIRST NAME', 'LAST NAME',
                  'BUILDING', 'ROOM', 'ID NUMBER',
                  'PHONE NUMBER', 'ERROR']
-
-
-def send_package_update_email(message, recipients, cc_recipients):
-    msg = Message()
-    msg.subject = 'Package Update'
-    msg.sender = 'KutztownMail@gmail.com'
-    msg.recipients = [recipients]
-    msg.cc = [cc_recipients]
-    msg.body = message
-
-    mail.send(msg)
 
 
 def requires_access_level(access_level):
@@ -42,6 +31,16 @@ def allowed_file(filename):
 
 
 def clean_student_data(df):
+    """
+    Change all data in df to the same case
+    Remove any special characters from phone number
+
+    Parameters: 
+        df - Dataframe object of students and employees
+
+    Return: 
+        df - Dataframe object of students and employees
+    """
     df['USERNAME'] = df['USERNAME'].str.lower()
     df['FIRST NAME'] = df['FIRST NAME'].str.title()
     df['LAST NAME'] = df['LAST NAME'].str.title()
@@ -53,15 +52,32 @@ def clean_student_data(df):
 
 
 def validate_student_data(df, error_df):
+    """
+    validate that all data in df is correct. If a student or
+    employee is invalid, remove it from the df and add it to 
+    error_df 
+
+    Parameters: 
+        df - Dataframe object of students and employees
+        error_df - Dataframe object of the students and 
+                    employees that are invalid
+
+    Return: 
+        df - Dataframe object of students and employees
+        error_df - Dataframe object of the students and 
+                    employees that are invalid
+    """
     building_dict = {}
     halls = Hall.query.all()
     # build hall dictionary
     for hall in halls:
         building_dict[hall.building_code] = hall.name
 
-    # if username is correct, the row in the result df will be true, otherwise false
+    # validate username
+    # if username is valid, the row in the result df will be true, if
+    # username is invalid the row in the result df will be false
     result = df['USERNAME'].str.contains(r'^[a-z]{4,5}[0-9]{3}$', regex=True)
-    # add the index of all the false rows to a list
+    # find all of the false rows and add their index to a index_list
     index_list = df[result == False].index.tolist()
     if index_list:
         # get the false row by index and append it to error_df
@@ -69,9 +85,9 @@ def validate_student_data(df, error_df):
         # add the name of the column where there was an error to the ERROR column
         for index in index_list:
             error_df.at[index, 'ERROR'] = 'USERNAME'
-        # remove the students that had errors from df
+        # create a new df of only usernames that are valid
         df = df[df['USERNAME'].str.contains(r'^[a-z]{5}[0-9]{3}$', regex=True)]
-        # reset the index after removing rows
+        # reset the index of both df's
         df.reset_index(drop=True, inplace=True)
         error_df.reset_index(drop=True, inplace=True)
 
@@ -107,10 +123,11 @@ def validate_student_data(df, error_df):
         df = df[df['ID NUMBER'].str.contains(r'^[0-9]{6,9}$', regex=True)]
         df.reset_index(drop=True, inplace=True)
         error_df.reset_index(drop=True, inplace=True)
-    # prepend 0 to id number to make all id's 9 digits long
+    # if id number is not 9 digits long, prepend 0 to it
+    # to make all id's 9 digits long
     df['ID NUMBER'] = df['ID NUMBER'].apply(lambda x: str(int(x)).zfill(9))
 
-    # validate phone number allow empty numbers
+    # validate phone number. allow empty numbers
     result = df['PHONE NUMBER'].str.contains(
         r'^[0-9]{0}$|^[0-9]{10,11}$', regex=True)
     index_list = df[result == False].index.tolist()
@@ -127,13 +144,38 @@ def validate_student_data(df, error_df):
 
 
 def update_student_data(df, error_df):
+    """
+    Update student and employee information if there are 
+    any changes. Add any new students or employees. deactive
+    any employees if they no longer have the correct employment
+    code.
+
+    Parameters: 
+        df - Dataframe object of students and employees
+        error_df - Dataframe object of the students and 
+                    employees that are invalid
+
+    Return: 
+        df - Dataframe object of students and employees
+        error_df - Dataframe object of the students and 
+                    employees that are invalid
+        new_student_count
+        hall_update_count
+        room_update_count
+        new_employee_count 
+        removed_employee_count
+    """
     students_list = df.values.tolist()
     new_student_count = 0
     hall_update_count = 0
     room_update_count = 0
     new_employee_count = 0
     removed_employee_count = 0
+    # hardcoded Building director code. A Building Director
+    # is only active if they have this code
     employment_code = '2198'
+    # hardcoded DR code. A DR
+    # is only active if they have this code
     roth_employment_code = '2198 RT'
 
     building_dict = {}
@@ -194,17 +236,17 @@ def update_student_data(df, error_df):
             if len(student[8].strip()):
                 new_student.first_name = student[8].title()
 
-            db.session.add(new_student)
             # if phone number is not empty add it to db
             if student[6] != '':
                 phone_number = Phone(phone_number=student[6])
                 new_student.phone_numbers.append(phone_number)
                 db.session.add(phone_number)
+
+            db.session.add(new_student)
             new_student_count += 1
 
         # check if the student is an existing employee
         if employee_obj:
-            password = generate_random_string()
             # check if the employee has the current employment code
             if student[7] == employment_code or student[9] == roth_employment_code:
                 # give the student the correct access
@@ -212,12 +254,12 @@ def update_student_data(df, error_df):
                 employee_obj.hall = roth_hall_obj
                 # check if the employee was deactivated
                 if employee_obj.active == False:
+                    password = generate_random_string()
                     employee_obj.active = True
                     employee_obj.end_date = None
                     employee_obj.reset_password = True
                     employee_obj.password = password
                     new_employee_count += 1
-                    ######### uncomment before releasing #########
                     send_reset_password_email(employee_obj, password)
 
             # check if the employee was removed from building director position
@@ -232,18 +274,19 @@ def update_student_data(df, error_df):
                 employee_obj.active = False
                 employee_obj.access = 'None'
                 removed_employee_count += 1
-            # check if the student goes by a different name
+            # check if the employee goes by a different name
             if len(student[8].strip()) and student[8] != employee_obj.first_name:
                 employee_obj.first_name = student[8].title()
-            # check if a student went by a different name but does not anymore
+            # check if a the employee went by a different name but does not anymore
             if student[8].strip() == '' and student[1] != employee_obj.first_name:
                 employee_obj.first_name = student[1]
 
         # check if the student is a new employee
         elif student[7] == employment_code or student[9] == roth_employment_code:
-            password = generate_random_string()
+            # determine the employees access level
             access = 'Building Director' if student[7] == employment_code else 'DR'
 
+            password = generate_random_string()
             new_employee = Employee(email=email, first_name=student[1],
                                     last_name=student[2], access=access,
                                     hall=roth_hall_obj, password=password)
@@ -253,7 +296,6 @@ def update_student_data(df, error_df):
                 new_employee.first_name = student[8].title()
 
             new_employee_count += 1
-            ######### uncomment before releasing #########
             send_reset_password_email(new_employee, password)
             db.session.add(new_employee)
     db.session.commit()

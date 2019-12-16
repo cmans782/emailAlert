@@ -1,11 +1,21 @@
 
 from flask_mail import Message
 from mailalert import mail
-from flask import url_for, render_template
+from flask import render_template
 from mailalert.models import Student
 
 
 def send_new_package_email(student, num_packages):
+    """
+    send new package email 
+
+    Parameters:
+        student - student object
+        num_packages - number of packages that student is receiving
+
+    Returns: 
+        None
+    """
     msg = Message('Kutztown Package Update',
                   sender='KutztownMail@gmail.com',
                   recipients=[student.email])
@@ -17,8 +27,19 @@ def send_new_package_email(student, num_packages):
                                student=student, hall=hall)
     mail.send(msg)
 
+    return
+
 
 def string_to_bool(s):
+    """
+    Convert a string to a boolean
+
+    Parameters:
+        s (string)- "True" or "False"
+
+    Returns: 
+        Boolean True or False, if neither raise ValueError
+    """
     if s == 'True':
         return True
     elif s == 'False':
@@ -35,11 +56,11 @@ def parse_name(name):
     with multiple last names  
 
     Parameters:
-    name (string):
+        name (string):
 
     Returns:
-    fname - first name
-    lname - last name
+        fname - first name
+        lname - last name
     """
 
     name_list = name.split()
@@ -50,7 +71,7 @@ def parse_name(name):
     # as fname in the variable name. if this returns students,
     # append the next word in the list to fname and search. Keep
     # doing this until students returns none. When students returns
-    # None we now knwo that the previous fname was the students first name.
+    # None we now know that the previous fname was the students first name.
     # we can then figure out the students last name with this information
     elif len(name_list) > 2:
         # assign the first element in the list to fname
@@ -80,4 +101,5 @@ def parse_name(name):
         while i < len(name_list):
             lname = lname + ' ' + name_list[i]
             i += 1
+
     return fname.title(), lname.title()

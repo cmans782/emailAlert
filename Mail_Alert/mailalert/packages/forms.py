@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, IntegerField, FieldList, BooleanField, HiddenField, SelectField
-from wtforms.validators import DataRequired, Length, Email, ValidationError, NumberRange
+from wtforms import StringField, SubmitField, BooleanField
+from wtforms.validators import DataRequired, ValidationError
 from mailalert.models import Student
 
 

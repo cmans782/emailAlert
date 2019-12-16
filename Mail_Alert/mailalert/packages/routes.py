@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from mailalert.packages.forms import NewPackageForm, PackagePickUpForm, ResubscribeForm
 from mailalert.main.forms import StudentSearchForm
 from mailalert.packages.utils import send_new_package_email, string_to_bool, parse_name
-from mailalert.models import Package, Student, Hall, Phone, SentMail
+from mailalert.models import Package, Student, Phone, SentMail
 from mailalert import db
 from datetime import datetime
 import json
@@ -15,6 +15,16 @@ packages = Blueprint('packages', __name__)
 @packages.route("/home", methods=['GET', 'POST'])
 @login_required
 def home():
+    """
+    render home.html and display perishables table if there are any.
+    Allow for perishables to be picked up from here
+
+    Returns:
+        GET -
+            renders home.html
+        POST -
+            redirect to student_packages route
+    """
     package_pickup_form = PackagePickUpForm()
     student_search_form = StudentSearchForm()
     perishables = Package.query.filter_by(
@@ -25,9 +35,15 @@ def home():
                            package_pickup_form=package_pickup_form, perishables=perishables)
 
 
-@packages.route("/home/search_student", methods=['GET', 'POST'])
+@packages.route("/home/search_student", methods=['POST'])
 @login_required
 def _search_student():
+    """
+    validate that the student ID entered is valid
+
+    Returns:
+        Json "success" if the ID is valid, otherwise "error"
+    """
     student_id = request.form.get('student_id', None)
     if not student_id:
         return jsonify({'success': 'success'})
@@ -42,6 +58,16 @@ def _search_student():
 @packages.route("/home/<student_id>", methods=['GET', 'POST'])
 @login_required
 def student_packages(student_id):
+    """
+    Display all of a students active and picked up packages.
+    Allow employee to search for a different student
+
+    Returns:
+        GET - render student_packages.html
+        POST -
+            success - redirect for student_packages with new student
+            error - redirect for home route
+    """
     package_pickup_form = PackagePickUpForm()
     student_search_form = StudentSearchForm()
 
@@ -70,6 +96,13 @@ def student_packages(student_id):
 @packages.route("/home/pickup_package", methods=['POST'])
 @login_required
 def _pickup_package():
+    """
+    Mark a package as picked up
+
+    Returns:
+        "success" json response if package was successfully
+        picked up, otherwise "error"
+    """
     form = PackagePickUpForm()
     if form.validate_on_submit():
         confirm_student_id = form.student_id_confirm.data
@@ -90,6 +123,16 @@ def _pickup_package():
 @packages.route("/newPackage", methods=['GET', 'POST'])
 @login_required
 def newPackage():
+    """
+    add new packages for students and send them an
+    email notification
+
+    Returns:
+        GET - render newPackage.html
+        POST -
+            success - redirect for home route
+            error - redirect for newPackage route
+    """
     form = NewPackageForm()
     if form.validate_on_submit():
         student_dict = {}
@@ -152,7 +195,6 @@ def newPackage():
 
         for email, num_packages in student_dict.items():
             student = Student.query.filter_by(email=email).first()
-            ######### uncomment before releasing #########
             send_new_package_email(student, num_packages)
             sent_mail = SentMail(employee=current_user, student=student)
             db.session.add(sent_mail)
@@ -166,6 +208,14 @@ def newPackage():
 @packages.route("/newPackage/validate", methods=['POST'])
 @login_required
 def _validate():
+    """
+    Validate the package information as it is being entered
+
+    Returns: 
+        POST - 
+            success - student name, room and phone number as a JSON response 
+            error - JSON response reporting what the error is 
+    """
     name = request.form.get('name', None)
     room_number = request.form.get('room_number', None)
     phone_number = request.form.get('phone_number', None)
@@ -234,6 +284,15 @@ def _validate():
 @packages.route("/newPackage/suggestions", methods=['GET', 'POST'])
 @login_required
 def suggestions():
+    """
+    create a list of name suggestions based on what the user
+    is inputting. Works for search box and when entering 
+    student first name, last name, and room number
+
+    Returns: 
+        JSON response with all of the student suggestions
+
+    """
     suggestions = []
     # name and room_number are for when entering a new package
     name = request.args.get('name', None)
@@ -293,6 +352,16 @@ def suggestions():
 
 @packages.route("/subscription/<student_email>", methods=['GET', 'POST'])
 def subscription(student_email):
+    """
+    Manage the students email subscription 
+    GET request will unsubscribe user
+    POST request will resubscribe user 
+
+    Returns: 
+        GET - render unsubscribed.html
+        POST - render resubscibed.html
+
+    """
     form = ResubscribeForm()
     student = Student.query.filter_by(email=student_email).first()
     # if form is sumbitted resubscribe student to emails

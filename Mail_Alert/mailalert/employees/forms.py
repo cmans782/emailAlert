@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, RadioField, TextAreaField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from wtforms import StringField, PasswordField, SubmitField, SelectField
+from wtforms.validators import DataRequired, Email, ValidationError
 from mailalert.models import Employee
 
 
@@ -31,10 +31,20 @@ class RequestResetForm(FlaskForm):
     submit = SubmitField('Request Password Reset')
 
     def validate_email(self, email):
+        """
+        validate that the email entered is associated with an account
+
+        Parameters:
+            self - current user object
+            email - the users email to be validated
+
+        Returns: 
+            None
+        """
         employee = Employee.query.filter_by(email=email.data).first()
         if employee is None:
             raise ValidationError(
-                'There is no account associated with that email. Contact your supervisor about account access.')
+                'There is no account associated with that email')
 
 
 class ResetPasswordForm(FlaskForm):
@@ -51,6 +61,3 @@ class NewPasswordForm(FlaskForm):
     confirm_new_password = PasswordField(
         'Confirm New Password', validators=[DataRequired()])
     submit = SubmitField('Reset Password')
-
-
-    

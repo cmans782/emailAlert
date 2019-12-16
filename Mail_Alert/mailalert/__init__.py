@@ -6,8 +6,8 @@ from flask_mail import Mail
 from mailalert.config import Config
 from flask_wtf.csrf import CSRFProtect
 from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
-from mailalert.admin_views import EmployeeView, StudentView, HallView, PackageView, MessageView, SentMailView, LoginView, PhoneView
+from mailalert.admin_views import EmployeeView, StudentView, HallView, \
+    PackageView, SentMailView, LoginView, PhoneView
 
 
 db = SQLAlchemy()
@@ -36,7 +36,6 @@ def create_app(config_class=Config):
     from mailalert.models import Package, Employee, Message, SentMail, Student, Hall, Login, Phone
     admin.add_view(PackageView(Package, db.session))
     admin.add_view(EmployeeView(Employee, db.session))
-    admin.add_view(MessageView(Message, db.session))
     admin.add_view(StudentView(Student, db.session))
     admin.add_view(HallView(Hall, db.session))
     admin.add_view(SentMailView(SentMail, db.session))

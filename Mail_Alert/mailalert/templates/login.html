@@ -1,8 +1,7 @@
 {% extends "layout_without_navbar.html" %}
 {%block content %}
 <body>
-	<img src= {{ url_for('static', filename = '../static/logo-dark.png') }} alt="Mail Alert" border="0" width="45%" height="22%" class="center-picture">
-
+	<img class="login-logo" src="{{ url_for('static', filename = 'logo-dark.png') }}"" alt="Mail Alert">
     <div class="content-section">
         <form method="POST" action="">
             {{ form.hidden_tag() }}

@@ -1,6 +1,6 @@
 from flask_admin.contrib.sqla import ModelView
-from flask_login import current_user, login_required
-from flask import url_for, redirect, flash, render_template, current_app
+from flask_login import current_user
+from flask import render_template, current_app
 
 
 class EmployeeView(ModelView):
@@ -74,21 +74,6 @@ class PackageView(ModelView):
 
     def is_accessible(self):
         return current_user.is_authenticated and current_user.allowed('Building Director')
-
-    def inaccessible_callback(self, name):
-        # check if the user is logged in
-        if not current_user.is_authenticated:
-            return current_app.login_manager.unauthorized()
-        # return if user is logged in but not authorized
-        return render_template('errors/403.html')
-
-
-class MessageView(ModelView):
-
-    form_columns = ['content']
-
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.is_admin()
 
     def inaccessible_callback(self, name):
         # check if the user is logged in
