@@ -345,6 +345,9 @@ def reset_password():
             db.session.commit()
             flash('Your password has been changed!', 'success')
             login_user(employee)
+            login = Login(login_date=datetime.now(), employee=current_user)
+            db.session.add(login)
+            db.session.commit()
             return redirect(url_for('packages.home'))
         else:
             flash(f'Invalid Email or Old Password', 'danger')
