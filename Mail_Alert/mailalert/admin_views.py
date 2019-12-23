@@ -18,15 +18,15 @@ class EmployeeView(ModelView):
         ]
     }
 
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.is_admin()
+    # def is_accessible(self):
+    #     return current_user.is_authenticated and current_user.is_admin()
 
-    def inaccessible_callback(self, name):
-        # check if the user is logged in
-        if not current_user.is_authenticated:
-            return current_app.login_manager.unauthorized()
-        # return if user is logged in but not authorized
-        return render_template('errors/403.html')
+    # def inaccessible_callback(self, name):
+    #     # check if the user is logged in
+    #     if not current_user.is_authenticated:
+    #         return current_app.login_manager.unauthorized()
+    #     # return if user is logged in but not authorized
+    #     return render_template('errors/403.html')
 
 
 class StudentView(ModelView):
@@ -54,15 +54,15 @@ class HallView(ModelView):
 
     column_searchable_list = ('name', 'building_code', 'active', 'end_date')
 
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.is_admin()
+    # def is_accessible(self):
+    #     return current_user.is_authenticated and current_user.is_admin()
 
-    def inaccessible_callback(self, name):
-        # check if the user is logged in
-        if not current_user.is_authenticated:
-            return current_app.login_manager.unauthorized()
-        # return if user is logged in but not authorized
-        return render_template('errors/403.html')
+    # def inaccessible_callback(self, name):
+    #     # check if the user is logged in
+    #     if not current_user.is_authenticated:
+    #         return current_app.login_manager.unauthorized()
+    #     # return if user is logged in but not authorized
+    #     return render_template('errors/403.html')
 
 
 class PackageView(ModelView):
