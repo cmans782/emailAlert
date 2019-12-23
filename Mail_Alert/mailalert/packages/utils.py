@@ -2,7 +2,7 @@
 from flask_mail import Message
 from mailalert import mail
 from flask import render_template
-from mailalert.models import Student
+from mailalert.models import Student, Package
 
 
 def send_new_package_email(student, num_packages):
@@ -103,3 +103,13 @@ def parse_name(name):
             i += 1
 
     return fname.title(), lname.title()
+
+
+def get_package_num(student):
+    package = Package.query.filter_by(
+        hall=student.hall).order_by(Package.package_number.desc()).first()
+
+    if package:
+        return package.package_number + 1
+    else:
+        return 1
