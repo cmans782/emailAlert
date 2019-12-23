@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField, RadioField, IntegerField
 from wtforms.validators import DataRequired, Email, Length
-from mailalert.models import Message, Student
+from mailalert.models import Student
 
 
 class ComposeEmailForm(FlaskForm):

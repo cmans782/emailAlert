@@ -324,7 +324,7 @@ $(document).ready(function() {
 	hall_error = false;
 	bc_error = false;
 
-    // validate email entered
+    // validate email entered when adding employee
     $(document).on('focusout','[name="email"]', function(e) {
         var url = "{{ url_for('employees._validate') }}"; // send the form data here.
         $.ajax({
@@ -342,6 +342,7 @@ $(document).ready(function() {
             }
             else {
                 email_error = false;
+				$('div[name="fix-error"]').hide()
                 $('[name="email"]').removeClass('is-invalid');
                 $('div[name="email-error"]').next().hide();
             }
@@ -442,6 +443,9 @@ $(document).ready(function() {
 				if (data.new_employee_count != "0") {
 					$("<p><strong>New Employees: </strong>" + data.new_employee_count + "</p>").appendTo('#report_data');	
 				}
+				if (data.deactived_students_count != "0") {
+					$("<p><strong>Deactivated Students: </strong>" + data.deactived_students_count + "</p>").appendTo('#report_data');	
+				}
 				if (data.removed_employee_count != "0") {
 					$("<p><strong>Removed Employees: </strong>" + data.removed_employee_count + "</p>").appendTo('#report_data');	
 				}
@@ -464,7 +468,12 @@ $(document).ready(function() {
 			$("[name='upload_csv']").html('Upload').removeClass('disabled');
         });
         e.preventDefault(); // block the traditional submission of the form.
-    });
+	});
+	
+	// reload management page after uploading csv
+	$('#uploadReportModal').on('hidden.bs.modal', function(){
+		window.location.href = "{{ url_for('employees.management') }}"
+	});
 
     // Inject our CSRF token into our AJAX request.
     var csrf_token = '{{ csrf_token() }}';
@@ -474,7 +483,7 @@ $(document).ready(function() {
                 xhr.setRequestHeader('X-CSRFToken', csrf_token);
             }
         }
-    });
+	});
 
 	// drag and drop feature to remove halls 
 	$("#hallList").sortable({

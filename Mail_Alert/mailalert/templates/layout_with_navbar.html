@@ -110,7 +110,7 @@
                   </select>
                 </div>
               </div>  
-              <a class="dropdown-item" href="{{ url_for('employees.logout') }}">Logout</a>
+              <a id="logout" class="dropdown-item" href="{{ url_for('employees.logout') }}">Logout</a>
               <a class="dropdown-item" href="{{ url_for('employees.reset_password') }}">Reset Password</a>
             </div>
           </li>
@@ -149,6 +149,7 @@ $('.nav-link').each(function () {
 }); 
 
 $("document").ready(function() {
+  // set timeout for flash messages
   setTimeout(function() {
     $('[name="flashMessage"]').delay(3000).slideUp(300);
   });
@@ -157,6 +158,21 @@ $("document").ready(function() {
   $('.dropdown-menu').on('click', function(event){
       event.stopPropagation();
   });
+
+  // is triggered when local storage is changed in browser
+  // looks to see if a user logged out of another open tab
+  // if they did, log them out of all other open tabs
+  window.addEventListener('storage', function(event){
+    if (event.key == 'logout-event') { 
+      window.location.href = "{{ url_for('employees.logout') }}"
+    }
+  });
+
+  // change local storage value when user goes to logout
+  $('#logout').click(function(){
+    localStorage.setItem('logout-event', 'logout' + Math.random());
+  });
+
 
   // populate hall options in current user dropdown 
   $('#currentUserDropDown').one('click', function(e) {
@@ -182,9 +198,6 @@ $("document").ready(function() {
       data: { new_hall: $(this).val() }
     }).done(function(data) {
       location.href = '/';
-      if (data.error) {
-        alert(data.error);
-      }
     });
   });
 

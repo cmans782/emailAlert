@@ -8,6 +8,7 @@ from mailalert.main.utils import requires_access_level
 from sqlalchemy import func
 from datetime import datetime
 import json
+import re
 
 employees = Blueprint('employees', __name__)
 
@@ -30,11 +31,15 @@ def management():
     """
     form = ManagementForm()
     new_hall_form = NewHallForm()
-    # get all halls and add them to the list of choices for the
-    # halls dropdown when adding a new employee
-    hall_list = Hall.query.all()
-    hall_list = [(hall.id, hall.name) for hall in hall_list]
-    form.hall.choices = hall_list
+    # get all active halls and add them to the list of choices
+    # for the halls dropdown when adding a new employee
+    halls = Hall.query.filter_by(active=True)
+    form.hall.choices = [(hall.id, hall.name) for hall in halls]
+
+    # if the user is a Building director and they are adding
+    # a new employee, the employee will always be a DR by default
+    if form.submit.data and not current_user.is_admin():
+        form.role.data = "DR"
 
     if form.validate_on_submit():
         existing_employee = Employee.query.filter_by(
@@ -71,7 +76,6 @@ def management():
     else:
         # user is admin so get all the employees
         employees = Employee.query.all()
-    halls = Hall.query.all()
     return render_template('management.html', title='Management', form=form, employees=employees, halls=halls, new_hall_form=new_hall_form)
 
 
@@ -89,14 +93,16 @@ def remove_hall():
     hall_id = request.form.get('hall_id', None)
     hall = Hall.query.get(hall_id)
     if hall:
-        student = Student.query.filter_by(hall=hall).first()
+        student = Student.query.filter_by(hall=hall, active=True).first()
         if student:
-            return jsonify({'error': f'{hall.name} cannot be removed if an student lives in that hall'})
-        employee = Employee.query.filter_by(hall=hall).first()
+            return jsonify({'error': f'{hall.name} cannot be removed if a student lives in that hall'})
+        employee = Employee.query.filter_by(hall=hall, active=True).first()
         if employee:
             return jsonify({'error': f'{hall.name} cannot be removed if an employee works in that hall'})
 
-        db.session.delete(hall)
+        hall.active = False
+        hall.end_date = datetime.now()
+
         db.session.commit()
         return jsonify({'success': 'success'})
     else:
@@ -124,8 +130,12 @@ def _validate():
     hall = request.form.get('hall', None)
     building_code = request.form.get('building_code', None)
     if email:
-        email_exists = Employee.query.filter_by(email=email).first()
-        if email_exists and email_exists.active == True:
+        # check if email entered is valid
+        if not re.search('^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$', email):
+            return jsonify({'error': 'Invalid email'})
+        user = Employee.query.filter_by(email=email).first()
+        # check if that email is already in use
+        if user:
             return jsonify({'error': 'This email is already in use'})
     elif hall:
         # search for existing hall case insensitive
@@ -159,7 +169,7 @@ def _activate_employee():
             employee.active = True
             employee.end_date = None
             employee.reset_password = True
-            employee.hired_date = datetime.now()
+            employee.start_date = datetime.now()
             password = generate_random_string()
             employee.password = password
             send_reset_password_email(employee, password)
@@ -334,7 +344,8 @@ def reset_password():
             employee.reset_password = False
             db.session.commit()
             flash('Your password has been changed!', 'success')
-            return redirect(url_for('employees.login'))
+            login_user(employee)
+            return redirect(url_for('packages.home'))
         else:
             flash(f'Invalid Email or Old Password', 'danger')
     return render_template('reset_password.html', title='Reset Password', form=form)

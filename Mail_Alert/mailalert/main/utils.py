@@ -1,7 +1,7 @@
 from flask import render_template
 from flask_mail import Message
 from mailalert import mail, db
-from mailalert.models import Employee, Hall, Student, Phone
+from mailalert.models import Employee, Hall, Student, Phone, Utils
 from mailalert.employees.utils import generate_random_string, send_reset_password_email
 from flask_login import current_user
 from functools import wraps
@@ -13,6 +13,7 @@ import pandas as pd
 error_columns = ['USERNAME', 'FIRST NAME', 'LAST NAME',
                  'BUILDING', 'ROOM', 'ID NUMBER',
                  'PHONE NUMBER', 'ERROR']
+building_dict = {}
 
 
 def requires_access_level(access_level):
@@ -35,10 +36,10 @@ def clean_student_data(df):
     Change all data in df to the same case
     Remove any special characters from phone number
 
-    Parameters: 
+    Parameters:
         df - Dataframe object of students and employees
 
-    Return: 
+    Return:
         df - Dataframe object of students and employees
     """
     df['USERNAME'] = df['USERNAME'].str.lower()
@@ -54,25 +55,23 @@ def clean_student_data(df):
 def validate_student_data(df, error_df):
     """
     validate that all data in df is correct. If a student or
-    employee is invalid, remove it from the df and add it to 
-    error_df 
+    employee is invalid, remove it from the df and add it to
+    error_df
 
-    Parameters: 
+    Parameters:
         df - Dataframe object of students and employees
-        error_df - Dataframe object of the students and 
+        error_df - Dataframe object of the students and
                     employees that are invalid
 
-    Return: 
+    Return:
         df - Dataframe object of students and employees
-        error_df - Dataframe object of the students and 
+        error_df - Dataframe object of the students and
                     employees that are invalid
     """
-    building_dict = {}
-    halls = Hall.query.all()
     # build hall dictionary
+    halls = Hall.query.filter_by(active=True)
     for hall in halls:
         building_dict[hall.building_code] = hall.name
-
     # validate username
     # if username is valid, the row in the result df will be true, if
     # username is invalid the row in the result df will be false
@@ -145,24 +144,24 @@ def validate_student_data(df, error_df):
 
 def update_student_data(df, error_df):
     """
-    Update student and employee information if there are 
+    Update student and employee information if there are
     any changes. Add any new students or employees. deactive
     any employees if they no longer have the correct employment
     code.
 
-    Parameters: 
+    Parameters:
         df - Dataframe object of students and employees
-        error_df - Dataframe object of the students and 
+        error_df - Dataframe object of the students and
                     employees that are invalid
 
-    Return: 
+    Return:
         df - Dataframe object of students and employees
-        error_df - Dataframe object of the students and 
+        error_df - Dataframe object of the students and
                     employees that are invalid
         new_student_count
         hall_update_count
         room_update_count
-        new_employee_count 
+        new_employee_count
         removed_employee_count
     """
     students_list = df.values.tolist()
@@ -171,25 +170,21 @@ def update_student_data(df, error_df):
     room_update_count = 0
     new_employee_count = 0
     removed_employee_count = 0
-    # hardcoded Building director code. A Building Director
-    # is only active if they have this code
-    employment_code = '2198'
-    # hardcoded DR code. A DR
-    # is only active if they have this code
-    roth_employment_code = '2198 RT'
 
-    building_dict = {}
-    halls = Hall.query.all()
     # build hall dictionary
+    halls = Hall.query.filter_by(active=True)
     for hall in halls:
         building_dict[hall.building_code] = hall.name
 
-    # for now just hardcode the hall the we are running in
-    # will have to change if this goes campus wide
-    roth_hall_obj = Hall.query.filter_by(name='Rothermel').first()
+    # make sure there is an active utility
+    utils = Utils.query.filter_by(active=True).first()
+    if not utils:
+        return -1, -1, -1, -1, -1, -1, -1
+    employment_code = utils.employment_code
 
     for student in students_list:
         email = student[0] + '@live.kutztown.edu'
+        working_hall = ''
         student_obj = Student.query.filter_by(email=email).first()
         employee_obj = Employee.query.filter_by(email=email).first()
         hall_obj = Hall.query.filter_by(
@@ -207,7 +202,6 @@ def update_student_data(df, error_df):
             student_obj.first_name = student[1].title()
             # update student last name
             student_obj.last_name = student[2].title()
-
             # check if the student goes by a different name
             if len(student[8].strip()):
                 student_obj.first_name = student[8].title()
@@ -247,12 +241,12 @@ def update_student_data(df, error_df):
 
         # check if the student is an existing employee
         if employee_obj:
+            valid_DR = validate_DR(student[9], employment_code)
             # check if the employee has the current employment code
-            if student[7] == employment_code or student[9] == roth_employment_code:
+            if student[7] == employment_code or valid_DR:
                 # give the student the correct access
                 employee_obj.access = 'Building Director' if student[7] == employment_code else 'DR'
-                employee_obj.hall = roth_hall_obj
-                # check if the employee was deactivated
+                # check if the employee was deactivated but is now activated
                 if employee_obj.active == False:
                     password = generate_random_string()
                     employee_obj.active = True
@@ -263,16 +257,14 @@ def update_student_data(df, error_df):
                     send_reset_password_email(employee_obj, password)
 
             # check if the employee was removed from building director position
-            elif employee_obj.access == 'Building Director' and student[7] != employment_code:
+            elif employee_obj.active == True and employee_obj.access == 'Building Director' and student[7] != employment_code:
                 employee_obj.end_date = datetime.now()  # record employees end date
                 employee_obj.active = False
-                employee_obj.access = 'None'
                 removed_employee_count += 1
             # check if employee was removed from DR position
-            if employee_obj.access == 'DR' and student[9] != roth_employment_code:
+            if employee_obj.active == True and employee_obj.access == 'DR' and not valid_DR:
                 employee_obj.end_date = datetime.now()  # record employees end date
                 employee_obj.active = False
-                employee_obj.access = 'None'
                 removed_employee_count += 1
             # check if the employee goes by a different name
             if len(student[8].strip()) and student[8] != employee_obj.first_name:
@@ -281,15 +273,24 @@ def update_student_data(df, error_df):
             if student[8].strip() == '' and student[1] != employee_obj.first_name:
                 employee_obj.first_name = student[1]
 
-        # check if the student is a new employee
-        elif student[7] == employment_code or student[9] == roth_employment_code:
-            # determine the employees access level
-            access = 'Building Director' if student[7] == employment_code else 'DR'
+        # check if the student is a new Building Director
+        elif student[7] == employment_code:
+            access = 'Building Director'
+            working_hall = building_dict.get(student[3])
 
+        # check if the student is a new DR
+        elif student[9]:
+            working_hall = validate_DR(student[9], employment_code)
+            access = 'DR'
+
+        # working hall will only have a value if the student is either
+        # a DR or Building director with a correct hall
+        if working_hall:
+            hall_obj = Hall.query.filter_by(name=working_hall).first()
             password = generate_random_string()
             new_employee = Employee(email=email, first_name=student[1],
                                     last_name=student[2], access=access,
-                                    hall=roth_hall_obj, password=password)
+                                    hall=hall_obj, password=password)
 
             # check if the employee goes by a different name
             if len(student[8].strip()):
@@ -300,3 +301,63 @@ def update_student_data(df, error_df):
             db.session.add(new_employee)
     db.session.commit()
     return df, error_df, new_student_count, hall_update_count, room_update_count, new_employee_count, removed_employee_count
+
+
+def is_active(df):
+    """
+    validate that a student is still active. If the student
+    is no longer in the csv file being uploaded, they are
+    marked as inactive. If the student is also an employee,
+    mark them as inactive as well.
+
+    Parameters:
+        df - Dataframe object of students and employees
+
+    Return:
+        deactivate_count - number of students deactivated
+    """
+    deactivate_count = 0
+    student_id_list = df['ID NUMBER'].values.tolist()
+    current_students = Student.query.all()
+    for student in current_students:
+        # if the student is no longer in the csv file, deactivate them
+        if student.active == True and not student.student_id in student_id_list:
+            student.active = False
+            student.end_date = datetime.now()
+            deactivate_count += 1
+            # if the student is also an employee, then deactive them as well
+            employee = Employee.query.filter_by(email=student.email).first()
+            if employee:
+                employee.end_date = datetime.now()  # record employees end date
+                employee.active = False
+        # check if the student was deactivated but is now active
+        elif student.active == False and student.student_id in student_id_list:
+            student.active = True
+            student.start_date = datetime.now()
+            student.end_date = None
+    db.session.commit()
+    return deactivate_count
+
+
+def validate_DR(student_code, employment_code):
+    """
+    Make sure the DR is valid. first make sure they
+    have the employment code, then see if they have
+    a building key in their code.
+
+    Parameters:
+        student_code - contains students employment code and working hall
+        employment_code - current code for all valid employees
+
+    Return:
+        DR's working hall if valid, None if not valid 
+    """
+    # check if the employment code is in student code
+    if employment_code not in student_code:
+        return None
+    # iterate through all the keys in the building_dict
+    # to see if the buildiing code is in the student code
+    for key, _ in building_dict.items():
+        if key in student_code.upper():
+            return building_dict.get(key)
+    return None

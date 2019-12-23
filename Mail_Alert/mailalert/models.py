@@ -5,7 +5,6 @@ from flask import current_app
 from datetime import datetime
 
 ACCESS = {
-    'None': 0,
     'DR': 1,
     'Building Director': 2,
     'Admin': 3
@@ -19,7 +18,7 @@ def load_user(id):
 
 class Employee(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    hired_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    start_date = db.Column(db.DateTime, default=datetime.now)
     end_date = db.Column(db.DateTime)
     active = db.Column(db.Boolean, default=True)
     reset_password = db.Column(db.Boolean, default=True)
@@ -67,6 +66,9 @@ class Student(db.Model):
     last_name = db.Column(db.String(100), nullable=False)
     room_number = db.Column(db.String(6), nullable=False)
     subscribed = db.Column(db.Boolean, default=True)
+    start_date = db.Column(db.DateTime, default=datetime.now)
+    active = db.Column(db.Boolean, default=True)
+    end_date = db.Column(db.DateTime)
     hall_id = db.Column(db.Integer, db.ForeignKey('hall.id'))
     packages = db.relationship('Package', backref='owner')
     sent_mail = db.relationship('SentMail', backref='student')
@@ -74,13 +76,16 @@ class Student(db.Model):
         'Phone', secondary='assigned', backref=db.backref('assigned', lazy='dynamic'))
 
     def __repr__(self):
-        return f"Student('{self.first_name + ' ' + self.last_name}', '{self.email}','{self.student_id}', '{self.room_number}')"
+        return f"Student('{self.first_name + ' ' + self.last_name}', '{self.email}', '{self.student_id}', \
+                          '{self.hall.name}', '{self.room_number}')"
 
 
 class Hall(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
+    name = db.Column(db.String(50), unique=True, nullable=False)
     building_code = db.Column(db.String(100), unique=True, nullable=False)
+    active = db.Column(db.Boolean, default=True)
+    end_date = db.Column(db.DateTime)
     students = db.relationship('Student', backref='hall')
     employees = db.relationship('Employee', backref='hall')
     packages = db.relationship('Package', backref='hall')
@@ -91,7 +96,8 @@ class Hall(db.Model):
 
 class Package(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.String(100), nullable=False, default="Active")
+    package_number = db.Column(db.Integer)
+    status = db.Column(db.String(10), nullable=False, default="Active")
     description = db.Column(db.String(250), nullable=False)
     delivery_date = db.Column(
         db.DateTime, nullable=False, default=datetime.now)
@@ -104,29 +110,18 @@ class Package(db.Model):
     employee_remove_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
 
     def __repr__(self):
-        return f"Package('{self.status}', '{self.description}', '{self.delivery_date}', \
-                        '{self.picked_up_date}', '{self.perishable}')"
-
-
-class Message(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String(255), unique=True, nullable=False)
-    sent_mail = db.relationship('SentMail', backref='message')
-
-    def __repr__(self):
-        return f"Message('{self.content}')"
+        return f"Package('{self.package_number}', '{self.status}', '{self.description}', \
+                         '{self.delivery_date}', '{self.picked_up_date}', '{self.perishable}')"
 
 
 class SentMail(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sent_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
-    cc_recipients = db.Column(db.String(250))
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
     employee_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
-    message_id = db.Column(db.Integer, db.ForeignKey('message.id'))
 
     def __repr__(self):
-        return f"SentMail({self.sent_date}', '{self.cc_recipients}')"
+        return f"SentMail({self.sent_date}')"
 
 
 class Login(db.Model):
@@ -146,6 +141,16 @@ class Phone(db.Model):
 
     def __repr__(self):
         return f"Phone('{self.phone_number}')"
+
+
+class Utils(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    semester = db.Column(db.String(20), nullable=False)
+    employment_code = db.Column(db.String(10), nullable=False)
+    active = db.Column(db.Boolean, default=True)
+
+    def __repr__(self):
+        return f"Utils('{self.semester}', '{self.employment_code}')"
 
 
 assigned = db.Table('assigned',

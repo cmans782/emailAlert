@@ -48,7 +48,7 @@ def _search_student():
     if not student_id:
         return jsonify({'success': 'success'})
     student = Student.query.filter_by(
-        student_id=student_id, hall=current_user.hall).first()
+        student_id=student_id, hall=current_user.hall, active=True).first()
     if not student:
         return jsonify({'error': f'This student does not live in {current_user.hall.name} hall'})
 
@@ -72,7 +72,7 @@ def student_packages(student_id):
     student_search_form = StudentSearchForm()
 
     student = Student.query.filter_by(
-        student_id=student_id, hall=current_user.hall).first()
+        student_id=student_id, hall=current_user.hall, active=True).first()
     if not student:
         flash(
             f'That student does not live in {current_user.hall.name}', 'danger')
@@ -228,7 +228,7 @@ def _validate():
     fname, lname = parse_name(name)
 
     student = Student.query.filter_by(
-        first_name=fname, last_name=lname, hall=current_user.hall).first()
+        first_name=fname, last_name=lname, hall=current_user.hall, active=True).first()
 
     if not student:
         return jsonify({'name_error': f'This student does not live in {current_user.hall.name} hall'})
@@ -311,14 +311,16 @@ def suggestions():
             # and are in the same hall as the user
             students = Student.query.filter((Student.first_name.contains(name)) |
                                             (Student.last_name.contains(name)),
-                                            Student.hall == current_user.hall).all()
+                                            Student.hall == current_user.hall,
+                                            Student.active == True).all()
         elif len(name.split()) > 1:
             first_name, last_name = parse_name(name)
 
             students = Student.query.filter(
                 Student.first_name.contains(first_name,) |
                 Student.last_name.contains(last_name),
-                Student.hall == current_user.hall).all()
+                Student.hall == current_user.hall,
+                Student.active == True).all()
 
     if search_bar:
         # if no name was found for what was entered, look based on id

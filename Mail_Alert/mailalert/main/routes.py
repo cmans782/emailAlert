@@ -7,9 +7,9 @@ from mailalert import db
 from flask import render_template, Blueprint, request, flash, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from mailalert.main.forms import ComposeEmailForm, CreateMessageForm, NewIssueForm
-from mailalert.models import Message, SentMail, Student, Hall
+from mailalert.models import SentMail, Student, Hall
 from mailalert.main.utils import clean_student_data, validate_student_data, \
-    update_student_data, error_columns, allowed_file
+    update_student_data, error_columns, allowed_file, is_active
 
 
 main = Blueprint('main', __name__)
@@ -23,7 +23,7 @@ def get_halls():
     Return: 
         JSON object of all the halls to ajax request
     """
-    hall_list = Hall.query.all()
+    hall_list = Hall.query.filter_by(active=True)
     hall_list = [hall.name for hall in hall_list]
     # remove the current users hall because it is already being displayed
     hall_list.remove(current_user.hall.name)
@@ -43,11 +43,12 @@ def change_working_hall():
         exist
     """
     new_hall = request.form.get('new_hall', None)
-    hall = Hall.query.filter_by(name=new_hall).first()
-    if not hall:
-        return jsonify({'error', 'could not find that hall'})
-    current_user.hall = hall
-    db.session.commit()
+    hall = Hall.query.filter_by(name=new_hall, active=True).first()
+    if hall:
+        current_user.hall = hall
+        db.session.commit()
+    else:
+        flash(f'Error changing to {new_hall}', 'danger')
     return jsonify({'success': 'success'})
 
 
@@ -91,6 +92,9 @@ def upload_csv():
 
         try:
             students = file.read().decode('utf-8')
+            # check if file is empty
+            if not students:
+                return jsonify({'error': 'File is Empty'})
             # remove all "" from fields
             students = students.replace('\"', "")
             # getting rid of \n at end of line, to make it compatible with windows and linux
@@ -107,6 +111,9 @@ def upload_csv():
             student_df, error_df = validate_student_data(student_df, error_df)
             student_df, error_df, new_student_count, hall_update_count, room_update_count, new_employee_count, removed_employee_count = update_student_data(
                 student_df, error_df)
+            if new_student_count == -1:
+                return jsonify({'error': 'You must set an active employment code before adding students or employees'})
+            deactived_students_count = is_active(student_df)
 
             # check if there were any errors
             if not error_df.empty:
@@ -120,6 +127,7 @@ def upload_csv():
                             'room_update_count': room_update_count,
                             'new_employee_count': new_employee_count,
                             'removed_employee_count': removed_employee_count,
+                            'deactived_students_count': deactived_students_count,
                             'error_count': str(error_count),
                             'error_values': error_values,
                             'error_columns': error_columns})
@@ -129,7 +137,6 @@ def upload_csv():
             return jsonify({'error': f'Number of columns error: {str(err)}'})
         except:
             return jsonify({'error': 'An unexpected error occurred'})
-
     else:
         return jsonify({'error': 'That file type is not supported'})
 
