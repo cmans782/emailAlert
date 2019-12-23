@@ -223,11 +223,11 @@ def login():
     if form.validate_on_submit():
         email = form.email.data
         # check if user enterd full email
-        employee = Employee.query.filter_by(email=email).first()
+        employee = Employee.query.filter_by(email=email.lower()).first()
         # check if user just entered username
         if not employee:
             employee = Employee.query.filter_by(
-                email=email + '@live.kutztown.edu').first()
+                email=email.lower() + '@live.kutztown.edu').first()
 
         if employee and not employee.active:
             flash(
@@ -284,7 +284,8 @@ def reset_request():
         return redirect(url_for('packages.home'))
     form = RequestResetForm()
     if form.validate_on_submit():
-        employee = Employee.query.filter_by(email=form.email.data).first()
+        employee = Employee.query.filter_by(
+            email=form.email.data.lower()).first()
         send_reset_email(employee)
         flash(
             f'An email has been sent to {employee.email} with instructions to reset your password.', 'info')
@@ -337,7 +338,8 @@ def reset_password():
     """
     form = NewPasswordForm()
     if form.validate_on_submit():
-        employee = Employee.query.filter_by(email=form.email.data).first()
+        employee = Employee.query.filter_by(
+            email=form.email.data.lower()).first()
         # check that employee exists and that old password entered matches old password hash
         if employee and bcrypt.check_password_hash(employee.password, form.old_password.data):
             employee.password = form.new_password.data

@@ -41,7 +41,7 @@ class RequestResetForm(FlaskForm):
         Returns: 
             None
         """
-        employee = Employee.query.filter_by(email=email.data).first()
+        employee = Employee.query.filter_by(email=email.data.lower()).first()
         if employee is None:
             raise ValidationError(
                 'There is no account associated with that email')

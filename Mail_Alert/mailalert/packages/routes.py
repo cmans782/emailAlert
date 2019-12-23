@@ -2,7 +2,7 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint,
 from flask_login import login_required, current_user
 from mailalert.packages.forms import NewPackageForm, PackagePickUpForm, ResubscribeForm
 from mailalert.main.forms import StudentSearchForm
-from mailalert.packages.utils import send_new_package_email, string_to_bool, parse_name
+from mailalert.packages.utils import send_new_package_email, string_to_bool, parse_name, get_package_num
 from mailalert.models import Package, Student, Phone, SentMail
 from mailalert import db
 from datetime import datetime
@@ -149,8 +149,8 @@ def newPackage():
             name = ''.join(name_list[i])
             fname, lname = parse_name(name)
             # get the student with the name and room number entered
-            student = Student.query.filter_by(
-                first_name=fname.title(), last_name=lname.title(), hall=current_user.hall, room_number=room_number[i]).first()
+            student = Student.query.filter_by(first_name=fname.title(), last_name=lname.title(),
+                                              hall=current_user.hall, room_number=room_number[i]).first()
             if not student:
                 flash('Error getting student', 'danger')
                 return redirect(url_for('packages.newPackage'))
@@ -175,9 +175,10 @@ def newPackage():
                         flash('Error getting phone number', 'danger')
                         return redirect(url_for('packages.newPackage'))
 
-            package = Package(
-                description=description[i], perishable=perishable[i], inputted=current_user,
-                owner=student, hall=current_user.hall, phone=phone_number_obj)
+            package_num = get_package_num(student)
+            package = Package(package_number=package_num, description=description[i],
+                              perishable=perishable[i], inputted=current_user, owner=student,
+                              hall=current_user.hall, phone=phone_number_obj)
 
             if not package:
                 flash('Error getting package', 'danger')
