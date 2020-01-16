@@ -18,16 +18,16 @@ def load_user(id):
 
 class Employee(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    start_date = db.Column(db.DateTime, default=datetime.now)
-    end_date = db.Column(db.DateTime)
-    active = db.Column(db.Boolean, default=True)
-    reset_password = db.Column(db.Boolean, default=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
     first_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String(100), nullable=False)
-    password = db.Column(db.String(60), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    start_date = db.Column(db.DateTime, default=datetime.now)
+    active = db.Column(db.Boolean, default=True)
+    end_date = db.Column(db.DateTime)
+    reset_password = db.Column(db.Boolean, default=True)
     access = db.Column(db.String, nullable=False, default="DR")
     hall_id = db.Column(db.Integer, db.ForeignKey('hall.id'))
+    password = db.Column(db.String(60), nullable=False)
     logins = db.relationship('Login', backref='employee')
     sent_mail = db.relationship('SentMail', backref='employee')
     inputted_packages = db.relationship(
@@ -60,10 +60,10 @@ class Employee(db.Model, UserMixin):
 
 class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    student_id = db.Column(db.String(9), unique=True, nullable=False)
     first_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String(100), nullable=False)
+    student_id = db.Column(db.String(20), unique=True, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
     room_number = db.Column(db.String(6), nullable=False)
     subscribed = db.Column(db.Boolean, default=True)
     start_date = db.Column(db.DateTime, default=datetime.now)
@@ -153,9 +153,15 @@ class Utils(db.Model):
         return f"Utils('{self.semester}', '{self.employment_code}')"
 
 
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    date_done = db.Column(db.DateTime)
+    status = db.Column(db.String)
+    message = db.Column(db.String)
+
+
 assigned = db.Table('assigned',
                     db.Column('student_id', db.Integer,
-                              db.ForeignKey('student.student_id')),
-                    db.Column('phone_id', db.Integer,
-                              db.ForeignKey('phone.id'))
-                    )
+                              db.ForeignKey('student.id')),
+                    db.Column('phone_id', db.Integer, db.ForeignKey('phone.id')))

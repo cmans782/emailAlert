@@ -522,8 +522,8 @@ $(document).ready(function() {
 function download_csv() {
 	var csv = error_columns + '\n';
 	error_values.forEach(function(row) {
-			csv += row.join(',');
-			csv += "\n";
+		csv += row.join(',');
+		csv += "\n";
     });
  
     var hiddenElement = document.createElement('a');

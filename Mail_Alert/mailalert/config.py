@@ -19,11 +19,14 @@ class Config:
 
     ALLOWED_EXTENSIONS = {'csv'}
 
+    # Celery
+    CELERY_BROKER_URL = config.get('CELERY_BROKER_URL')
+    CELERY_BACKEND = config.get('CELERY_BACKEND')
+
     MAIL_SERVER = 'email-smtp.us-east-1.amazonaws.com'
-    # MAIL_SERVER = 'smtp.office365.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
     MAIL_USERNAME = config.get('MAIL_USERNAME')
     MAIL_PASSWORD = config.get('MAIL_PASSWORD')
     # suppress emails from being sent
-    TESTING = True
+    # TESTING = True

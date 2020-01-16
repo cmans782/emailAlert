@@ -12,3 +12,4 @@ Random-Word==1.0.4
 gunicorn==19.9.0
 jira==2.0.0
 random-password-generator==2.1.0
+celery==4.4.0

@@ -5,10 +5,12 @@ from flask import render_template, current_app
 
 class EmployeeView(ModelView):
 
-    form_columns = ['start_date', 'active', 'email', 'first_name',
+    form_columns = ['start_date', 'active', 'reset_password', 'email', 'first_name',
                     'last_name', 'password', 'access', 'hall']
 
     column_searchable_list = ('first_name', 'last_name', 'email')
+
+    column_default_sort = ('start_date', True)
 
     form_choices = {
         'access': [
@@ -36,6 +38,8 @@ class StudentView(ModelView):
 
     column_searchable_list = ('first_name', 'last_name', 'email',
                               'room_number', 'student_id',)
+
+    column_default_sort = ('start_date', True)
 
     def is_accessible(self):
         return current_user.is_authenticated and current_user.allowed('Building Director')
@@ -72,6 +76,8 @@ class PackageView(ModelView):
 
     column_searchable_list = ('description', 'delivery_date', 'picked_up_date')
 
+    column_default_sort = ('delivery_date', True)
+
     def is_accessible(self):
         return current_user.is_authenticated and current_user.allowed('Building Director')
 
@@ -87,6 +93,8 @@ class SentMailView(ModelView):
 
     form_columns = ['sent_date', 'employee', 'student']
 
+    column_default_sort = ('sent_date', True)
+
     def is_accessible(self):
         return current_user.is_authenticated and current_user.allowed('Building Director')
 
@@ -101,6 +109,8 @@ class SentMailView(ModelView):
 class LoginView(ModelView):
 
     form_columns = ['login_date', 'logout_date', 'employee']
+
+    column_default_sort = ('login_date', True)
 
     def is_accessible(self):
         return current_user.is_authenticated and current_user.allowed('Building Director')
@@ -131,6 +141,25 @@ class PhoneView(ModelView):
 class UtilsView(ModelView):
 
     form_columns = ['semester', 'employment_code', 'active']
+
+    column_default_sort = ('semester', True)
+
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.is_admin()
+
+    def inaccessible_callback(self, name):
+        # check if the user is logged in
+        if not current_user.is_authenticated:
+            return current_app.login_manager.unauthorized()
+        # return if user is logged in but not authorized
+        return render_template('errors/403.html')
+
+
+class CeleryView(ModelView):
+
+    form_columns = ['name', 'date_done', 'status', 'message']
+
+    column_default_sort = ('date_done', True)
 
     def is_accessible(self):
         return current_user.is_authenticated and current_user.is_admin()

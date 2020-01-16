@@ -21,21 +21,21 @@
 </head>
 <body>
   <main role="main" class="container">
-      <div class="row">
-        <div class="mx-auto" style="width:500px;">
-          {% with messages = get_flashed_messages(with_categories=true) %}
+    <div class="row">
+      <div class="mx-auto" style="width:500px;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
-          {% for category, message in messages %}
-          <div class="alert alert-{{ category }} text-center">
-            {{ message }}
-          </div>
-          {% endfor %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} text-center">
+                {{ message }}
+              </div>
+            {% endfor %}
           {% endif %}
-          {% endwith %}
-          {% block content %}{% endblock %}
-        </div>
+        {% endwith %}
+        {% block content %}{% endblock %}
       </div>
-    </main>
+    </div>
+  </main>
   <!-- Optional JavaScript -->
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

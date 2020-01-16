@@ -11,7 +11,6 @@ from mailalert.models import SentMail, Student, Hall
 from mailalert.main.utils import clean_student_data, validate_student_data, \
     update_student_data, error_columns, allowed_file, is_active
 
-
 main = Blueprint('main', __name__)
 
 
@@ -76,7 +75,7 @@ def upload_csv():
     """
     columns = ['USERNAME', 'FIRST NAME', 'LAST NAME',
                'BUILDING', 'ROOM', 'ID NUMBER',
-               'PHONE NUMBER', 'ARD', 'CA', 'DR']
+               'PHONE NUMBER', 'ARD', 'ALIAS', 'DR']
 
     # check if the post request has the file part
     if 'file' not in request.files:
@@ -135,8 +134,8 @@ def upload_csv():
             return jsonify({'error': f'csv format error: {str(err)}'})
         except AssertionError as err:
             return jsonify({'error': f'Number of columns error: {str(err)}'})
-        except:
-            return jsonify({'error': 'An unexpected error occurred'})
+        except Exception as err:
+            return jsonify({'error': f'An unexpected error occurred: {str(err)}'})
     else:
         return jsonify({'error': 'That file type is not supported'})
 
@@ -160,4 +159,5 @@ def feedback():
                           priority={'name': form.priority.data}, issuetype={'name': form.issueType.data})
 
         flash(f'Your feedback has been sent to the development team!', 'success')
+        return redirect(url_for('main.feedback'))
     return render_template('feedback.html', title='Feedback', form=form)
