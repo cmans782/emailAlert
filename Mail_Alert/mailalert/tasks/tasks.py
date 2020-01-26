@@ -32,7 +32,7 @@ def update_students():
     err_msg = ''
 
     try:
-        r = requests.get('http://3.86.235.138:5000/students')
+        r = requests.get('http://18.233.97.148:5000/students')
         r.raise_for_status()
         students = r.json()  # convert response to a dict
 
@@ -86,7 +86,7 @@ def update_students():
         status = 'FAILED'
 
     finally:
-        time = datetime.now()
+        time = datetime.utcnow()
         task = Task(name='Roster Upload', status=status,
                     message=err_msg, date_done=time)
         db.session.add(task)

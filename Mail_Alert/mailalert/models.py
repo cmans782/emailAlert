@@ -21,7 +21,7 @@ class Employee(db.Model, UserMixin):
     first_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    start_date = db.Column(db.DateTime, default=datetime.now)
+    start_date = db.Column(db.DateTime, default=datetime.utcnow)
     active = db.Column(db.Boolean, default=True)
     end_date = db.Column(db.DateTime)
     reset_password = db.Column(db.Boolean, default=True)
@@ -66,7 +66,7 @@ class Student(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     room_number = db.Column(db.String(6), nullable=False)
     subscribed = db.Column(db.Boolean, default=True)
-    start_date = db.Column(db.DateTime, default=datetime.now)
+    start_date = db.Column(db.DateTime, default=datetime.utcnow)
     active = db.Column(db.Boolean, default=True)
     end_date = db.Column(db.DateTime)
     hall_id = db.Column(db.Integer, db.ForeignKey('hall.id'))
@@ -99,8 +99,7 @@ class Package(db.Model):
     package_number = db.Column(db.Integer)
     status = db.Column(db.String(10), nullable=False, default="Active")
     description = db.Column(db.String(250), nullable=False)
-    delivery_date = db.Column(
-        db.DateTime, nullable=False, default=datetime.now)
+    delivery_date = db.Column(db.DateTime, default=datetime.utcnow)
     picked_up_date = db.Column(db.DateTime)
     perishable = db.Column(db.Boolean, default=False, nullable=False)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
@@ -116,7 +115,7 @@ class Package(db.Model):
 
 class SentMail(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    sent_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    sent_date = db.Column(db.DateTime, default=datetime.utcnow)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
     employee_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
 
@@ -126,7 +125,7 @@ class SentMail(db.Model):
 
 class Login(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    login_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    login_date = db.Column(db.DateTime, default=datetime.utcnow)
     logout_date = db.Column(db.DateTime)
     employee_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
 

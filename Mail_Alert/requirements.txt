@@ -14,3 +14,4 @@ jira==2.0.0
 random-password-generator==2.1.0
 celery==4.4.0
 psycopg2-binary==2.8.4
+Flask-DebugToolbar==0.10.1

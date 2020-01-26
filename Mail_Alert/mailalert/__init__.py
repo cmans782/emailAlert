@@ -7,6 +7,7 @@ from mailalert.config import Config
 from flask_wtf.csrf import CSRFProtect
 from flask_admin import Admin
 from celery import Celery
+from flask_debugtoolbar import DebugToolbarExtension
 from mailalert.admin_views import EmployeeView, StudentView, HallView, \
     PackageView, SentMailView, LoginView, PhoneView, UtilsView, CeleryView
 
@@ -20,6 +21,7 @@ login_manager = LoginManager()
 login_manager.login_view = 'employees.login'
 login_manager.login_message_category = 'info'
 mail = Mail()
+toolbar = DebugToolbarExtension()
 celery = Celery(__name__, broker=Config.CELERY_BROKER_URL,
                 backend=Config.CELERY_BACKEND)
 
@@ -33,6 +35,7 @@ def create_app(config_class=Config):
     login_manager.init_app(app)
     mail.init_app(app)
     csrf.init_app(app)
+    toolbar.init_app(app)
     celery.conf.update(app.config)
 
     # Admin Panel
@@ -51,9 +54,11 @@ def create_app(config_class=Config):
     from mailalert.packages.routes import packages
     from mailalert.main.routes import main
     from mailalert.errors.handlers import errors
+    from mailalert import filters
     app.register_blueprint(employees)  # register instances with our app
     app.register_blueprint(packages)
     app.register_blueprint(main)
     app.register_blueprint(errors)
+    app.register_blueprint(filters.blueprint)
 
     return app

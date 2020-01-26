@@ -1,6 +1,14 @@
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user
 from flask import render_template, current_app
+from mailalert.filters import admin_datetime_filter
+from flask_admin.model import typefmt
+from datetime import date
+
+MY_DEFAULT_FORMATTERS = dict(typefmt.BASE_FORMATTERS)
+MY_DEFAULT_FORMATTERS.update({
+    date: admin_datetime_filter
+})
 
 
 class EmployeeView(ModelView):
@@ -11,6 +19,9 @@ class EmployeeView(ModelView):
     column_searchable_list = ('first_name', 'last_name', 'email')
 
     column_default_sort = ('start_date', True)
+
+    # format time from utc to local time
+    column_type_formatters = MY_DEFAULT_FORMATTERS
 
     form_choices = {
         'access': [
@@ -41,6 +52,9 @@ class StudentView(ModelView):
 
     column_default_sort = ('start_date', True)
 
+    # format time from utc to local time
+    column_type_formatters = MY_DEFAULT_FORMATTERS
+
     def is_accessible(self):
         return current_user.is_authenticated and current_user.allowed('Building Director')
 
@@ -57,6 +71,9 @@ class HallView(ModelView):
     form_columns = ['name', 'building_code', 'active', 'end_date']
 
     column_searchable_list = ('name', 'building_code', 'active', 'end_date')
+
+    # format time from utc to local time
+    column_type_formatters = MY_DEFAULT_FORMATTERS
 
     # def is_accessible(self):
     #     return current_user.is_authenticated and current_user.is_admin()
@@ -78,6 +95,9 @@ class PackageView(ModelView):
 
     column_default_sort = ('delivery_date', True)
 
+    # format time from utc to local time
+    column_type_formatters = MY_DEFAULT_FORMATTERS
+
     def is_accessible(self):
         return current_user.is_authenticated and current_user.allowed('Building Director')
 
@@ -95,6 +115,9 @@ class SentMailView(ModelView):
 
     column_default_sort = ('sent_date', True)
 
+    # format time from utc to local time
+    column_type_formatters = MY_DEFAULT_FORMATTERS
+
     def is_accessible(self):
         return current_user.is_authenticated and current_user.allowed('Building Director')
 
@@ -111,6 +134,9 @@ class LoginView(ModelView):
     form_columns = ['login_date', 'logout_date', 'employee']
 
     column_default_sort = ('login_date', True)
+
+    # format time from utc to local time
+    column_type_formatters = MY_DEFAULT_FORMATTERS
 
     def is_accessible(self):
         return current_user.is_authenticated and current_user.allowed('Building Director')
@@ -160,6 +186,9 @@ class CeleryView(ModelView):
     form_columns = ['name', 'date_done', 'status', 'message']
 
     column_default_sort = ('date_done', True)
+
+    # format time from utc to local time
+    column_type_formatters = MY_DEFAULT_FORMATTERS
 
     def is_accessible(self):
         return current_user.is_authenticated and current_user.is_admin()

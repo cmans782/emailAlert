@@ -258,12 +258,12 @@ def update_student_data(df, error_df):
 
             # check if the employee was removed from building director position
             elif employee_obj.active == True and employee_obj.access == 'Building Director' and student[7] != employment_code:
-                employee_obj.end_date = datetime.now()  # record employees end date
+                employee_obj.end_date = datetime.utcnow()  # record employees end date
                 employee_obj.active = False
                 removed_employee_count += 1
             # check if employee was removed from DR position
             if employee_obj.active == True and employee_obj.access == 'DR' and not valid_DR:
-                employee_obj.end_date = datetime.now()  # record employees end date
+                employee_obj.end_date = datetime.utcnow()  # record employees end date
                 employee_obj.active = False
                 removed_employee_count += 1
             # check if the employee goes by a different name
@@ -323,17 +323,17 @@ def is_active(df):
         # if the student is no longer in the csv file, deactivate them
         if student.active == True and not student.student_id in student_id_list:
             student.active = False
-            student.end_date = datetime.now()
+            student.end_date = datetime.utcnow()
             deactivate_count += 1
             # if the student is also an employee, then deactive them as well
             employee = Employee.query.filter_by(email=student.email).first()
             if employee:
-                employee.end_date = datetime.now()  # record employees end date
+                employee.end_date = datetime.utcnow()  # record employees end date
                 employee.active = False
         # check if the student was deactivated but is now active
         elif student.active == False and student.student_id in student_id_list:
             student.active = True
-            student.start_date = datetime.now()
+            student.start_date = datetime.utcnow()
             student.end_date = None
     db.session.commit()
     return deactivate_count

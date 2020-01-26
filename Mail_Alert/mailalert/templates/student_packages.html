@@ -79,8 +79,8 @@
                                 <tr data-status="{{ package.status }}">
                             {% endif %}
                                 <td>{{ package.id }}</td>
-                                <td>{{ package.delivery_date.strftime('%m-%d-%Y') }}</td>
-                                <td>{{ package.delivery_date.strftime('%-I:%M') }}&nbsp;{{ package.delivery_date.strftime('%p') }}</td>
+                                <td>{{ package.delivery_date | datetimefilter("%m-%d-%Y") }}</td>
+                                <td>{{ package.delivery_date | datetimefilter("%-I:%M %p") }}</td>
                                 <td>{{ package.inputted.first_name }}&nbsp;{{ package.inputted.last_name }}</td>
                                 <td>{{ package.description }}</td>
                                 <td>
@@ -99,12 +99,12 @@
                                 <tr style="display:none;" data-status="{{ package.status }}">
                             {% endif %}
                             <td>{{ package.id }}</td> 
-                            <td>{{ package.delivery_date.strftime("%m-%d-%Y") }}</td> 
-                            <td>{{ package.delivery_date.strftime("%-I:%M") }}&nbsp;{{ package.delivery_date.strftime('%p') }}</td>
+                            <td>{{ package.delivery_date | datetimefilter("%m-%d-%Y") }}</td>
+                            <td>{{ package.delivery_date | datetimefilter("%-I:%M %p") }}</td>
                             <td>{{ package.inputted.first_name }}&nbsp;{{ package.inputted.last_name }}</td>                            
                             <td>{{ package.description }}</td> 
-                            <td>{{ package.picked_up_date.strftime("%m-%d-%Y") }}</td> 
-                            <td>{{ package.picked_up_date.strftime("%-I:%M") }}&nbsp;{{ package.picked_up_date.strftime("%p") }}</td> 
+                            <td>{{ package.picked_up_date | datetimefilter("%m-%d-%Y") }}</td>
+                            <td>{{ package.picked_up_date | datetimefilter("%-I:%M %p") }}</td>
                             <td>{{ package.removed.first_name }}&nbsp;{{ package.removed.last_name }}</td>
                         </tr> 
                         {% endfor %}

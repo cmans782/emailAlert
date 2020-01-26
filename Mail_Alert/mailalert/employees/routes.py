@@ -101,7 +101,7 @@ def remove_hall():
             return jsonify({'error': f'{hall.name} cannot be removed if an employee works in that hall'})
 
         hall.active = False
-        hall.end_date = datetime.now()
+        hall.end_date = datetime.utcnow()
 
         db.session.commit()
         return jsonify({'success': 'success'})
@@ -169,7 +169,7 @@ def _activate_employee():
             employee.active = True
             employee.end_date = None
             employee.reset_password = True
-            employee.start_date = datetime.now()
+            employee.start_date = datetime.utcnow()
             password = generate_random_string()
             employee.password = password
             send_reset_password_email(employee, password)
@@ -194,7 +194,7 @@ def deactivate_employee():
         for employee_id in employee_id_list:
             # get the employee object using its id
             employee = Employee.query.get(employee_id)
-            employee.end_date = datetime.now()  # record employees end date
+            employee.end_date = datetime.utcnow()  # record employees end date
             employee.active = False
             flash(f'{employee.first_name}\'s account has been deactivated', 'success')
         db.session.commit()
@@ -243,7 +243,7 @@ def login():
             # set their session to permanent once logged in
             session.permanent = True
             # log when user logs in
-            login = Login(login_date=datetime.now(), employee=current_user)
+            login = Login(login_date=datetime.utcnow(), employee=current_user)
             db.session.add(login)
             db.session.commit()
             next_page = request.args.get('next')
@@ -262,7 +262,7 @@ def logout():
         redirect to login route
     """
     # get the last login date by the current user and log logout date and time
-    current_user.logins[-1].logout_date = datetime.now()
+    current_user.logins[-1].logout_date = datetime.utcnow()
     db.session.commit()
     logout_user()
     return redirect(url_for('employees.login'))
@@ -347,7 +347,7 @@ def reset_password():
             db.session.commit()
             flash('Your password has been changed!', 'success')
             login_user(employee)
-            login = Login(login_date=datetime.now(), employee=current_user)
+            login = Login(login_date=datetime.utcnow(), employee=current_user)
             db.session.add(login)
             db.session.commit()
             return redirect(url_for('packages.home'))

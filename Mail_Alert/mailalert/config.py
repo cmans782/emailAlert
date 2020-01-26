@@ -1,6 +1,7 @@
 from datetime import timedelta
 import json
 
+
 with open('/etc/MailAlert_config.json') as config_file:
     # json.load turns the config file into a python dictionary
     config = json.load(config_file)
@@ -19,6 +20,11 @@ class Config:
 
     ALLOWED_EXTENSIONS = {'csv'}
 
+    # SQLALCHEMY_ECHO = True
+
+    TIMEZONE = 'US/Eastern'
+    DEBUG_TB_ENABLED = True
+    DEBUG_TB_INTERCEPT_REDIRECTS = False
     # Celery
     CELERY_BROKER_URL = config.get('CELERY_BROKER_URL')
     CELERY_BACKEND = config.get('CELERY_BACKEND')
@@ -29,4 +35,4 @@ class Config:
     MAIL_USERNAME = config.get('MAIL_USERNAME')
     MAIL_PASSWORD = config.get('MAIL_PASSWORD')
     # suppress emails from being sent
-    # TESTING = True
+    TESTING = True

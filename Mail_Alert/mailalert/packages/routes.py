@@ -4,10 +4,12 @@ from mailalert.packages.forms import NewPackageForm, PackagePickUpForm, Resubscr
 from mailalert.main.forms import StudentSearchForm
 from mailalert.packages.utils import send_new_package_email, string_to_bool, parse_name, get_package_num
 from mailalert.models import Package, Student, Phone, SentMail
+from mailalert.config import Config
 from mailalert import db
 from datetime import datetime
 import json
 import re
+
 
 packages = Blueprint('packages', __name__)
 
@@ -112,7 +114,7 @@ def _pickup_package():
             if package.owner.student_id != confirm_student_id:
                 return jsonify({'error': 'The ID entered does not match this student'})
             package.status = 'Picked Up'
-            package.picked_up_date = datetime.now()
+            package.picked_up_date = datetime.utcnow()
             package.removed = current_user  # record the user that removed the package
         db.session.commit()
         flash('Package was successfully picked up', 'success')
@@ -306,6 +308,7 @@ def suggestions():
         name = search_bar
 
     if name:
+        name = name.title()
         # if the user only typed in a first or a last name
         if len(name.split()) == 1:
             # get all the students that contain name in their first or last name
