@@ -16,7 +16,6 @@
 
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
-
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
 
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,7 +52,18 @@
   
 </head>
 {% if current_user.is_authenticated %}
-<body>
+<style>
+  .body {
+    display: flex;
+    min-height: 130vh;
+    flex-direction: column;
+  }
+
+  .main {
+    flex: 1;
+  }
+</style>
+<body class = "body">
   <header class="site-header">
     <nav class="navbar navbar-expand-lg fixed-top">
       <!-- Mail Alert Logo -->
@@ -76,9 +86,9 @@
               <a class="nav-link" href="{{ url_for('employees.management') }}">Management<span class="sr-only">(current)</span></a>
             </li>
           {% endif %}
-          <li class="nav-item">
+          <!--<li class="nav-item">
             <a class="nav-link" href="{{ url_for('main.feedback') }}">Feedback<span class="sr-only">(current)</span></a>
-          </li>
+          </li>-->
         </ul>
 
         <ul class="navbar-nav mx-auto">
@@ -118,7 +128,9 @@
       </div>
     </nav>
   </header>
+  <div class = "main">
   <main role="main" class="container">
+    <div class="content">
     <div class="row">
       <div class="col-md-12">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -133,7 +145,65 @@
         {% block content %}{% endblock %}
       </div>
     </div>
+    </div>
   </main>
+  </div>
+<footer class ="footer">
+    <div style="background-color:#DCDCDC;">
+    <!-- Footer Links -->
+    <div class="container text-center text-md-left mt-5">
+  
+      <!-- Grid row -->
+      <div class="row mt-3">
+  
+        <!-- Grid column -->
+        <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
+  
+          <!-- Content -->
+          <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px;">
+          <a class="navbar-brand" href="/">
+            <img src="{{ url_for('static', filename='logo-dark.png') }}" alt="Mail Alert" border="0" width="220px" height="100px">
+          </a>
+  
+        </div>
+        <!-- Grid column -->
+  
+        <!-- Grid column -->
+        <div class="col-md-3 col-lg-4 col-xl-4 mx-auto mb-4"> 
+           <!-- Links -->
+           <h6 class="text-uppercase font-weight-bold">Useful links</h6>
+           <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px;">             
+            <p>
+              <a href="#!" style= "color: black;">Site Sources</a><span style="padding-left:56px"></span>
+              <a href="#!" style= "color: black;">Info Page</a>
+            </p>
+            <p>
+             <a href="#!" style= "color: black;">Terms of Use</a><span style="padding-left:52px"></span>
+             <a href="#!" style= "color: black;">Contact Us</a> 
+           </p>
+           <p>
+             <a href="#!" style= "color: black;">Privacy Policy</a>
+           </p>
+           
+        </div>
+        <!-- Grid column -->
+        <div class="col-md-6 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
+  
+          <!-- Links -->
+          <h6 class="text-uppercase font-weight-bold">Site Issues</h6>
+          <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 100px;">
+          <p><a href="#!" style= "color: black;">Help</a></p>
+          <p><a href="{{ url_for('main.feedback') }}" style= "color: black;">Feedback</a></p>
+  
+        </div>
+        <!-- Grid column -->
+  
+      </div>
+      <!-- Grid row -->
+  
+    </div>
+  </div>
+</footer>
 </body>
 {% endif %}
 
