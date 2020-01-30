@@ -277,3 +277,38 @@ a.article-title:hover {
 	top: 75px;
 	right: 15px;
 }
+
+/* Footer styling */
+.body {
+	display: flex;
+	min-height: 130vh;
+	flex-direction: column;
+  }
+  
+  .main {
+	flex: 1;
+  }
+  a.color{
+	color: rgba(34, 34, 34, 0.993);
+	font-size: 15px;
+  }
+  a:hover{
+	color: #E03533;
+	text-decoration: none;
+  }
+  .footerPicPadding{
+	padding-top: 25px;
+	padding-left: 50px;
+  }
+  h5.titles{
+	padding-top: 35px;
+	padding-bottom: 0px;
+	color:black;
+	text-transform: uppercase;
+	text-align: left;
+	text-decoration: underline;
+  }
+  .links{
+	padding-bottom: 10px;
+	padding-top: 15px;
+  }

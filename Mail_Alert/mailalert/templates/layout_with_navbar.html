@@ -52,18 +52,7 @@
   
 </head>
 {% if current_user.is_authenticated %}
-<style>
-  .body {
-    display: flex;
-    min-height: 130vh;
-    flex-direction: column;
-  }
-
-  .main {
-    flex: 1;
-  }
-</style>
-<body class = "body">
+<body class = body>
   <header class="site-header">
     <nav class="navbar navbar-expand-lg fixed-top">
       <!-- Mail Alert Logo -->
@@ -128,7 +117,7 @@
       </div>
     </nav>
   </header>
-  <div class = "main">
+  <div class = main>
   <main role="main" class="container">
     <div class="content">
     <div class="row">
@@ -160,47 +149,49 @@
         <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
   
           <!-- Content -->
-          <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px;">
-          <a class="navbar-brand" href="/">
-            <img src="{{ url_for('static', filename='logo-dark.png') }}" alt="Mail Alert" border="0" width="220px" height="100px">
-          </a>
-  
+          <div class="footerPicPadding">
+            <a class="navbar-brand" href="/">
+              <img src="{{ url_for('static', filename='redenv.png') }}" alt="Mail Alert" border="0" width="145px" height="145px">
+            </a>
+          </div>
+          <div class="footer-copyright text-left py-3">© 2020 Copyright:
+            <a class= "color" href="https://getmailalert.com"> getmailalert.com</a>
+          </div>
         </div>
         <!-- Grid column -->
   
         <!-- Grid column -->
         <div class="col-md-3 col-lg-4 col-xl-4 mx-auto mb-4"> 
            <!-- Links -->
-           <h6 class="text-uppercase font-weight-bold">Useful links</h6>
-           <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px;">             
-            <p>
-              <a href="#!" style= "color: black;">Site Sources</a><span style="padding-left:56px"></span>
-              <a href="#!" style= "color: black;">Info Page</a>
-            </p>
-            <p>
-             <a href="#!" style= "color: black;">Terms of Use</a><span style="padding-left:52px"></span>
-             <a href="#!" style= "color: black;">Contact Us</a> 
-           </p>
-           <p>
-             <a href="#!" style= "color: black;">Privacy Policy</a>
-           </p>
-           
+          <h5 class="titles">Useful links</h5>
+           <div class = "links">        
+              <p>
+                <a class="color" href="#!">Site Sources</a><span style="padding-left:56px"></span>
+                <a class="color" href="#!">Info Page</a>
+              </p>
+              <p>
+                <a class="color" href="#!">Terms of Use</a><span style="padding-left:52px"></span>
+                <a class="color" href="#!">Contact Us</a> 
+              </p>
+              <p>
+                <a class="color" href="#!">Privacy Policy</a>
+              </p>
+            </div>
         </div>
         <!-- Grid column -->
         <div class="col-md-6 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
   
           <!-- Links -->
-          <h6 class="text-uppercase font-weight-bold">Site Issues</h6>
-          <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 100px;">
-          <p><a href="#!" style= "color: black;">Help</a></p>
-          <p><a href="{{ url_for('main.feedback') }}" style= "color: black;">Feedback</a></p>
-  
+          <h5 class="titles">Site Resources</h5>
+          <div class="links">
+            <p><a class="color" href="#!">Help</a></p>
+            <p><a class="color" href="{{ url_for('main.feedback') }}">Feedback</a></p>
+          </div>
         </div>
         <!-- Grid column -->
   
       </div>
       <!-- Grid row -->
-  
     </div>
   </div>
 </footer>
