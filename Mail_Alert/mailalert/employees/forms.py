@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Email, ValidationError
-from mailalert.models import Employee
+from mailalert.models import Employee, Utils
 
 
 class LoginForm(FlaskForm):
@@ -13,6 +13,12 @@ class LoginForm(FlaskForm):
 class NewHallForm(FlaskForm):
     hall = StringField('Hall', validators=[DataRequired()])
     building_code = StringField('Building Code', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+    
+    
+class NewSemesterForm(FlaskForm):
+    semester = StringField('Semester', validators=[DataRequired()])
+    employment_code = StringField('Employment Code', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 

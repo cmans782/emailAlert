@@ -1,8 +1,8 @@
 from flask import render_template, url_for, flash, redirect, request, Blueprint, jsonify, session
 from flask_login import login_user, current_user, logout_user, login_required
 from mailalert import db, bcrypt
-from mailalert.models import Employee, Hall, Login, Student
-from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, NewPasswordForm, NewHallForm
+from mailalert.models import Employee, Hall, Login, Student, Utils
+from mailalert.employees.forms import ManagementForm, LoginForm, RequestResetForm, ResetPasswordForm, NewPasswordForm, NewSemesterForm, NewHallForm
 from mailalert.employees.utils import send_reset_email, send_reset_password_email, generate_random_string
 from mailalert.main.utils import requires_access_level
 from sqlalchemy import func
@@ -30,11 +30,14 @@ def management():
         management.html 
     """
     form = ManagementForm()
+    new_semester_form = NewSemesterForm()
     new_hall_form = NewHallForm()
     # get all active halls and add them to the list of choices
     # for the halls dropdown when adding a new employee
     halls = Hall.query.filter_by(active=True)
     form.hall.choices = [(hall.id, hall.name) for hall in halls]
+    
+    current_roster_code = Utils.query.filter_by(active=True).first()
 
     # if the user is a Building director and they are adding
     # a new employee, the employee will always be a DR by default
@@ -66,6 +69,18 @@ def management():
             building_code = new_hall_form.building_code.data
             hall = Hall(name=hall, building_code=building_code.upper())
             db.session.add(hall)
+            db.session.commit()  
+    elif new_semester_form.submit.data:
+        new_semester = new_semester_form.semester.data
+        new_employment_code = new_semester_form.employment_code.data
+        current_code = Utils.query.filter_by(employment_code=new_employment_code).first()
+        if current_code:
+            flash('This code is already in use', 'danger')
+        else:
+            activeUser = Utils.query.filter_by(active=True).first()
+            activeUser.active = False
+            newSemester = Utils(semester=new_semester, employment_code=new_employment_code)
+            db.session.add(newSemester)
             db.session.commit()
 
     # only add certain employees to employees list based on the current users access
@@ -76,7 +91,7 @@ def management():
     else:
         # user is admin so get all the employees
         employees = Employee.query.all()
-    return render_template('management.html', title='Management', form=form, employees=employees, halls=halls, new_hall_form=new_hall_form)
+    return render_template('management.html', title='Management', form=form, employees=employees, halls=halls, new_hall_form=new_hall_form, new_semester_form=new_semester_form, current_roster_code=current_roster_code)
 
 
 @employees.route("/management/remove_hall", methods=['POST'])

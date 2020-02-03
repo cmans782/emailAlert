@@ -2,7 +2,7 @@ from flask import url_for
 from flask_mail import Message
 from mailalert import mail, bcrypt, db
 from sqlalchemy import event
-from mailalert.models import Employee
+from mailalert.models import Employee, Utils
 from password_generator import PasswordGenerator
 
 

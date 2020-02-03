@@ -7,7 +7,7 @@ from mailalert import db
 from flask import render_template, Blueprint, request, flash, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from mailalert.main.forms import ComposeEmailForm, CreateMessageForm, NewIssueForm
-from mailalert.models import SentMail, Student, Hall
+from mailalert.models import SentMail, Student, Hall, Utils
 from mailalert.main.utils import clean_student_data, validate_student_data, \
     update_student_data, error_columns, allowed_file, is_active
 
