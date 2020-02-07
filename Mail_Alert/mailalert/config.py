@@ -29,10 +29,19 @@ class Config:
     CELERY_BROKER_URL = config.get('CELERY_BROKER_URL')
     CELERY_BACKEND = config.get('CELERY_BACKEND')
 
-    MAIL_SERVER = 'email-smtp.us-east-1.amazonaws.com'
+    # Original Version
+    # MAIL_SERVER = 'email-smtp.us-east-1.amazonaws.com'
+    # MAIL_PORT = 587
+    # MAIL_USE_TLS = True
+    # MAIL_USERNAME = config.get('MAIL_USERNAME')
+    # MAIL_PASSWORD = config.get('MAIL_PASSWORD')
+    
+    # Link to PackageAlerts@getmailalert.com
+    MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
     MAIL_USERNAME = config.get('MAIL_USERNAME')
     MAIL_PASSWORD = config.get('MAIL_PASSWORD')
+    
     # suppress emails from being sent
     TESTING = True
