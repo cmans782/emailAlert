@@ -45,7 +45,7 @@
                         <span class="checkmark"></span>
                     </label>
                 </td>
-                <td style="width: 200px">
+                <td style="width: 210px">
                     {{ form.phone_number(class="form-control form-control-md", style="display:none") }}
                     <div name='phone-error' class="invalid-feedback" style='display:none;'>
                         <span name='phone-error'></span>
@@ -141,7 +141,7 @@ $(document).ready(function() {
             </label> \
         </td>'; 
     cols += 
-        '<td style="width: 200px"> \
+        '<td style="width: 210px"> \
             {{ form.phone_number(class="form-control form-control-md", style="display:none") }} \
             <div name="phone-error" class="invalid-feedback" style="display:none;"> \
                 <span name="phone-error"></span> \
@@ -290,8 +290,11 @@ $(document).ready(function() {
         e.preventDefault(); // block the traditional submission of the form.
     });
 
-    // validate phone number entered
-    $(document).on('focusout','[name="phone_number"]', function(e) {
+    function phone_number_validator(e){
+        if(e.which != '13' && e.which != '0'){
+            return false;
+        }
+        
         var url = "{{ url_for('packages._validate') }}"; // send the form data here.
         $.ajax({
             type: 'POST',
@@ -316,6 +319,9 @@ $(document).ready(function() {
                     phone_error -= 1;
                 };
                 $('#error-modal').modal('show');
+                // focus on confirm button after 300 ms of modal show otherwise is wont focus
+                setTimeout(()=> {$('[name="confirm"]').focus();}, 300);
+
                 new_number_obj = $(this);
                 current_number_obj = $(this).next().next();
                 name = $(this).parent().prev().prev().prev().prev().children('input').val()
@@ -333,7 +339,11 @@ $(document).ready(function() {
             }
         });
         e.preventDefault(); // block the traditional submission of the form.
-    });
+    }
+
+    // run phone number validate when phone number input losses focus or if enter is clicked
+    $(document).on('focusout', '[name="phone_number"]', phone_number_validator);
+    $(document).on('keypress', '[name="phone_number"]', phone_number_validator);        
 
     // if conflicting number is confirmed, send the new number to be saved 
     $('[name="confirm"]').on('click', function(e){
