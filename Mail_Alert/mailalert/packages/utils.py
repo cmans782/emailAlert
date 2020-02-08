@@ -17,7 +17,7 @@ def send_new_package_email(student, num_packages):
         None
     """
     msg = Message('Kutztown Package Update',
-                  sender='KutztownMail@gmail.com',
+                  sender='PackageAlerts@GetMailAlert.com',
                   recipients=[student.email])
 
     # gbvw picks up their mail in roth
