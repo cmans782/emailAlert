@@ -36,7 +36,7 @@ def management():
     # for the halls dropdown when adding a new employee
     halls = Hall.query.filter_by(active=True)
     form.hall.choices = [(hall.id, hall.name) for hall in halls]
-    
+
     current_roster_code = Utils.query.filter_by(active=True).first()
 
     # if the user is a Building director and they are adding
@@ -69,19 +69,18 @@ def management():
             building_code = new_hall_form.building_code.data
             hall = Hall(name=hall, building_code=building_code.upper())
             db.session.add(hall)
-            db.session.commit()  
+            db.session.commit()
     elif new_semester_form.submit.data:
         new_semester = new_semester_form.semester.data
         new_employment_code = new_semester_form.employment_code.data
-        current_code = Utils.query.filter_by(employment_code=new_employment_code).first()
-        if current_code:
-            flash('This code is already in use', 'danger')
-        else:
-            activeUser = Utils.query.filter_by(active=True).first()
-            activeUser.active = False
-            newSemester = Utils(semester=new_semester, employment_code=new_employment_code)
-            db.session.add(newSemester)
-            db.session.commit()
+        newSemester = Utils(semester=new_semester,
+                            employment_code=new_employment_code)
+        active_code = Utils.query.filter_by(active=True).first()
+        active_code.active = False
+        db.session.add(newSemester)
+        db.session.commit()
+        flash('The semester has been changed', 'success')
+        return redirect(url_for('employees.management'))
 
     # only add certain employees to employees list based on the current users access
     # if the user is not an admin, only get employees that are DR's
@@ -91,7 +90,9 @@ def management():
     else:
         # user is admin so get all the employees
         employees = Employee.query.all()
-    return render_template('management.html', title='Management', form=form, employees=employees, halls=halls, new_hall_form=new_hall_form, new_semester_form=new_semester_form, current_roster_code=current_roster_code)
+    return render_template('management.html', title='Management', form=form, employees=employees,
+                           halls=halls, new_hall_form=new_hall_form, new_semester_form=new_semester_form,
+                           current_roster_code=current_roster_code)
 
 
 @employees.route("/management/remove_hall", methods=['POST'])

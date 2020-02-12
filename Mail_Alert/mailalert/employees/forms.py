@@ -14,12 +14,15 @@ class NewHallForm(FlaskForm):
     hall = StringField('Hall', validators=[DataRequired()])
     building_code = StringField('Building Code', validators=[DataRequired()])
     submit = SubmitField('Submit')
-    
- 
+
+
 class NewSemesterForm(FlaskForm):
     semester = SelectField('Semester', choices=[
-                            ('Fall 2020', 'Fall 2020'), ('Spring 2020', 'Spring 2020'), ('Summer 2020', 'Summer 2020')])
-    employment_code = StringField('Employment Code', validators=[DataRequired()])
+        ('Spring 2020', 'Spring 2020'), ('Summer 2020',
+                                         'Summer 2020'), ('Fall 2020', 'Fall 2020'),
+        ('Spring 2021', 'Spring 2021'), ('Summer 2021', 'Summer 2021'), ('Fall 2021', 'Fall 2021'), ])
+    employment_code = StringField(
+        'New Employment Code', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 

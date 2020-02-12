@@ -152,6 +152,10 @@ a.article-title:hover {
 	padding: 30px;
 }
 
+.management p {
+	margin: 0 5px 2px 15px;
+}
+
 .halls {
 	padding: 30px;
 }
@@ -283,32 +287,32 @@ a.article-title:hover {
 	display: flex;
 	min-height: 130vh;
 	flex-direction: column;
-  }
-  
-  .main {
+}
+
+.main {
 	flex: 1;
-  }
-  a.color{
+}
+a.color {
 	color: rgba(34, 34, 34, 0.993);
 	font-size: 15px;
-  }
-  a:hover{
-	color: #E03533;
+}
+a:hover {
+	color: #e03533;
 	text-decoration: none;
-  }
-  .footerPicPadding{
+}
+.footerPicPadding {
 	padding-top: 25px;
 	padding-left: 50px;
-  }
-  h5.titles{
+}
+h5.titles {
 	padding-top: 35px;
 	padding-bottom: 0px;
-	color:black;
+	color: black;
 	text-transform: uppercase;
 	text-align: left;
 	text-decoration: underline;
-  }
-  .links{
+}
+.links {
 	padding-bottom: 10px;
 	padding-top: 15px;
-  }
+}
