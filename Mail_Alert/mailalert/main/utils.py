@@ -11,8 +11,8 @@ import pandas as pd
 
 
 error_columns = ['USERNAME', 'FIRST NAME', 'LAST NAME',
-                 'BUILDING', 'ROOM', 'ID NUMBER',
-                 'PHONE NUMBER', 'ERROR']
+                 'BUILDING', 'ROOM', 'ID NUMBER', 'PHONE NUMBER',
+                 'ARD', 'ALIAS', 'DR', 'ERROR']
 building_dict = {}
 
 
@@ -184,7 +184,9 @@ def update_student_data(df, error_df):
 
     for student in students_list:
         email = student[0] + '@live.kutztown.edu'
-        working_hall = ''
+        existing_employee_hall = None
+        new_employee_hall = None
+        error = False
         student_obj = Student.query.filter_by(email=email).first()
         employee_obj = Employee.query.filter_by(email=email).first()
         hall_obj = Hall.query.filter_by(
@@ -215,9 +217,7 @@ def update_student_data(df, error_df):
                 student_id=student[5]).first()
             # if a student already has this id add it to the error_df
             if student_id_exists:
-                del student[9]
-                del student[8]
-                student[7] = 'DUPLICATE ID NUMBER'
+                student.append('DUPLICATE ID NUMBER')
                 temp_df = pd.DataFrame([student], columns=error_columns)
                 error_df = pd.concat([error_df, temp_df], sort=True)
                 error_df.reset_index(drop=True, inplace=True)
@@ -241,10 +241,13 @@ def update_student_data(df, error_df):
 
         # check if the student is an existing employee
         if employee_obj:
-            valid_DR = validate_DR(student[9], employment_code)
+            if len(student[9].strip()):
+                existing_employee_hall, _ = validate_Employee(
+                    student[9], employment_code)
+
             # check if the employee has the current employment code
-            if student[7] == employment_code or valid_DR:
-                # give the student the correct access
+            if student[7] == employment_code or existing_employee_hall:
+                # give the employee the correct access
                 employee_obj.access = 'Building Director' if student[7] == employment_code else 'DR'
                 # check if the employee was deactivated but is now activated
                 if employee_obj.active == False:
@@ -262,7 +265,7 @@ def update_student_data(df, error_df):
                 employee_obj.active = False
                 removed_employee_count += 1
             # check if employee was removed from DR position
-            if employee_obj.active == True and employee_obj.access == 'DR' and not valid_DR:
+            if employee_obj.active == True and employee_obj.access == 'DR' and not existing_employee_hall:
                 employee_obj.end_date = datetime.utcnow()  # record employees end date
                 employee_obj.active = False
                 removed_employee_count += 1
@@ -276,17 +279,26 @@ def update_student_data(df, error_df):
         # check if the student is a new Building Director
         elif student[7] == employment_code:
             access = 'Building Director'
-            working_hall = building_dict.get(student[3])
+            new_employee_hall = building_dict.get(student[3])
 
         # check if the student is a new DR
-        elif student[9]:
-            working_hall = validate_DR(student[9], employment_code)
+        elif len(student[9].strip()):
+            new_employee_hall, error = validate_Employee(
+                student[9], employment_code)
             access = 'DR'
 
-        # working hall will only have a value if the student is either
+        # check if there was an error with the employment code
+        if error:
+            student.append('INVALID EMPLOYMENT CODE')
+            temp_df = pd.DataFrame([student], columns=error_columns)
+            error_df = pd.concat([error_df, temp_df], sort=True)
+            error_df.reset_index(drop=True, inplace=True)
+            continue
+
+        # new_employee_hall will only have a value if the employee is either
         # a DR or Building director with a correct hall
-        if working_hall:
-            hall_obj = Hall.query.filter_by(name=working_hall).first()
+        if new_employee_hall:
+            hall_obj = Hall.query.filter_by(name=new_employee_hall).first()
             password = generate_random_string()
             new_employee = Employee(email=email, first_name=student[1],
                                     last_name=student[2], access=access,
@@ -325,8 +337,9 @@ def is_active(df):
             student.active = False
             student.end_date = datetime.utcnow()
             deactivate_count += 1
-            # if the student is also an employee, then deactive them as well
-            employee = Employee.query.filter_by(email=student.email).first()
+            # if the student is also a DR, deactive them as well
+            employee = Employee.query.filter_by(
+                email=student.email, access='DR').first()
             if employee:
                 employee.end_date = datetime.utcnow()  # record employees end date
                 employee.active = False
@@ -339,7 +352,7 @@ def is_active(df):
     return deactivate_count
 
 
-def validate_DR(student_code, employment_code):
+def validate_Employee(student_code, employment_code):
     """
     Make sure the DR is valid. first make sure they
     have the employment code, then see if they have
@@ -354,10 +367,10 @@ def validate_DR(student_code, employment_code):
     """
     # check if the employment code is in student code
     if employment_code not in student_code:
-        return None
+        return None, True
     # iterate through all the keys in the building_dict
     # to see if the buildiing code is in the student code
     for key, _ in building_dict.items():
         if key in student_code.upper():
-            return building_dict.get(key)
-    return None
+            return building_dict.get(key), False
+    return None, True
