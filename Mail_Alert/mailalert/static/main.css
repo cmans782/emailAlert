@@ -14,6 +14,10 @@ h6 {
 	color: #444444;
 }
 
+.container {
+	max-width: 1200px;
+}
+
 .bg-steel {
 	background-color: #5f788a;
 }
@@ -191,8 +195,25 @@ a.article-title:hover {
 	margin-bottom: 20px;
 }
 
-.add-package {
-	background-color: #c4c4c4;
+.new-package-grey {
+	background-color: #dcdcdc;
+}
+
+.package-number {
+	background-color: #dcdcdc;
+	text-align: center;
+}
+
+.delete-icon {
+	height: 16px;
+	width: 16px;
+	padding: 5px 0;
+	filter: invert(24%) sepia(38%) saturate(5388%) hue-rotate(339deg) brightness(80%) contrast(96%);
+}
+
+.delete-icon:hover {
+	transform: scale(1.2);
+	cursor: pointer;
 }
 
 /* custom checkbox */
@@ -224,7 +245,7 @@ a.article-title:hover {
 .checkmark {
 	position: absolute;
 	top: 5px;
-	left: 20px;
+	left: 50px;
 	height: 25px;
 	width: 25px;
 	background-color: #c4c4c4;

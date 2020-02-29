@@ -109,8 +109,7 @@ class Package(db.Model):
     employee_remove_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
 
     def __repr__(self):
-        return f"Package('{self.package_number}', '{self.status}', '{self.description}', \
-                         '{self.delivery_date}', '{self.picked_up_date}', '{self.perishable}')"
+        return f"Package('{self.package_number}', '{self.status}', '{self.description}', '{self.delivery_date}', '{self.picked_up_date}', '{self.perishable}')"
 
 
 class SentMail(db.Model):

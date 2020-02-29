@@ -78,7 +78,7 @@
                             {% else %}
                                 <tr data-status="{{ package.status }}">
                             {% endif %}
-                                <td>{{ package.id }}</td>
+                                <td>{{ package.package_number }}</td>
                                 <td>{{ package.delivery_date | datetimefilter("%m-%d-%Y") }}</td>
                                 <td>{{ package.delivery_date | datetimefilter("%-I:%M %p") }}</td>
                                 <td>{{ package.inputted.first_name }}&nbsp;{{ package.inputted.last_name }}</td>
@@ -98,7 +98,7 @@
                             {% else %}
                                 <tr style="display:none;" data-status="{{ package.status }}">
                             {% endif %}
-                            <td>{{ package.id }}</td> 
+                            <td>{{ package.package_number }}</td> 
                             <td>{{ package.delivery_date | datetimefilter("%m-%d-%Y") }}</td>
                             <td>{{ package.delivery_date | datetimefilter("%-I:%M %p") }}</td>
                             <td>{{ package.inputted.first_name }}&nbsp;{{ package.inputted.last_name }}</td>                            

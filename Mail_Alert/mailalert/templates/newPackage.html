@@ -2,31 +2,35 @@
 {%block content %}
 <form action="" method="POST" id='newpackageform'>
     {{ form.hidden_tag() }}
-    <table id="packageTable" class="table order-list table-borderless">
-        <thead>
+    <table id="packageTable" class="table order-list table-borderless" style="table-layout: fixed;">
+        <thead style="text-align: center;">
             <tr>
-                <td>Name</td>
-                <td>Room</td>
-                <td>Description</td>
-                <td>Perishable</td>
-                <td name="phone-label" style='display:none'>Phone</td>
+                <td style="width: 45px"></td> <!-- delete row icon --> 
+                <td style="width: 70px"></td> <!-- package number -->
+                <td style="width: 250px">Name</td>
+                <td style="width: 150px">Room</td>
+                <td style="width: 300px">Package Description</td>
+                <td style="width: 150px">Perishable</td>
+                <td style="width: 210px; display:none" name="phone-label">Phone</td>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td style="width: 250px;">
+                <td></td> <!-- dont show delete icon on first row -->
+                <td><div class="form-control package-number">{{ package_number }}</div></td>
+                <td>
                     {{ form.name(class="form-control form-control-md col-12", autocomplete="off") }}
                     <div name='name-error' class="invalid-feedback" style='display:none'>
                         <span name='name-error'></span>
                     </div>
                 </td>
-                <td style="width: 150px">
+                <td>
                     {{ form.room_number(class="form-control form-control-md", autocomplete="off") }}
                     <div name='room-error' class="invalid-feedback" style='display:none;'>
                         <span name='room-error'></span>
                     </div>
                 </td>
-                <td style="width: 300px">
+                <td>
                     {% if form.description.errors %}
                     {{ form.description(class="form-control form-control-md is-invalid") }}
                     <div class="invalid-feedback">
@@ -45,7 +49,7 @@
                         <span class="checkmark"></span>
                     </label>
                 </td>
-                <td style="width: 210px">
+                <td>
                     {{ form.phone_number(class="form-control form-control-md", style="display:none") }}
                     <div name='phone-error' class="invalid-feedback" style='display:none;'>
                         <span name='phone-error'></span>
@@ -56,8 +60,9 @@
         </tbody>
         <tfoot>
             <tr>
+                <td></td> <!-- empty for delete row icon --> 
                 <td colspan="4" style="text-align: left;">
-                    <input type="button" class="btn btn-lg btn-block add-package" id="addrow" value="Add Package" />
+                    <input type="button" class="btn btn-md btn-block new-package-grey" id="addrow" value="Add Package" />
                 </td>
                 <td>
                     <button style="padding:6px 35px" id="submit" type="submit" class="btn btn-success">Submit</button>
@@ -65,7 +70,6 @@
                         <span>Fix errors before submitting</span>
                     </div>
                 </td>
-                <td></td>
             </tr>
         </tfoot>
     </table>
@@ -105,22 +109,30 @@ $(document).ready(function() {
     var name;
     var num_rows = 0;
     var cols = '';
+    cols += 
+        '<td> \
+            <div class="delete-icon ibtnDel"> \
+                <img src="{{ url_for("static", filename="times-solid.svg") }}" alt="delete"> \
+            </div> \
+        </td>';
+    cols += 
+        '<td><div name="package_number" class="form-control new-package-grey"></div></td>';
     cols +=
-        '<td style="width: 250px;" id="nameField"> \
+        '<td id="nameField"> \
             {{ form.name(class="form-control form-control-md", autocomplete="off") }} \
             <div name="name-error" class="invalid-feedback" style="display:none;"> \
                 <span name="name-error"></span> \
             </div> \
         </td>';
     cols +=
-        '<td style="width: 150px;"> \
+        '<td> \
             {{ form.room_number(class="form-control form-control-md", autocomplete="off") }} \
             <div name="room-error" class="invalid-feedback" style="display:none;"> \
                 <span name="room-error"></span> \
             </div> \
         </td>';
     cols +=
-        '<td style="width: 300px;"> \
+        '<td> \
             {% if form.description.errors %} \
                 {{ form.description(class="form-control form-control-md is-invalid") }} \
                 <div class="invalid-feedback"> \
@@ -133,7 +145,7 @@ $(document).ready(function() {
             {% endif %} \
         </td>';
     cols +=
-        '<td style="width: 20px; text-align: center"> \
+        '<td> \
             <label class="checkbox-container"> \
                 <input type="checkbox" name="perishable" value="True"> \
                 <input type="hidden" name="perishable" value="False"> \
@@ -141,7 +153,7 @@ $(document).ready(function() {
             </label> \
         </td>'; 
     cols += 
-        '<td style="width: 210px"> \
+        '<td> \
             {{ form.phone_number(class="form-control form-control-md", style="display:none") }} \
             <div name="phone-error" class="invalid-feedback" style="display:none;"> \
                 <span name="phone-error"></span> \
@@ -149,35 +161,47 @@ $(document).ready(function() {
             <input type="hidden" name="current-number"> \
         </td>'; 
 
-    cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger"  value="Delete"></td>';
-    cols += '<td></td>';
-
     $('#addrow').on('keyup', function(event) {
         // if tab key is pressed
         if (event.which == 9) {
             newRow();
         }
     });
+
     $('#addrow').on('click', function() {
         newRow();
     });
+
     function newRow() {
         num_rows += 1;
         var newRow = $("<tr>");
         newRow.append(cols);
         $("table.order-list").append(newRow);
-        
         var empTable = document.getElementById("packageTable");
         var trArray = empTable.rows;
         var lastTrElem = trArray[trArray.length - 2];
         var lastTdElem = lastTrElem.firstChild;
         var inputElem = lastTdElem.firstElementChild;
         inputElem.focus();
+        getPackageNum();
+    }
 
+    // package_number is the next package that will be added to the db
+    // for every row, add one to package number
+    // these are what the package numbers will be when added to db
+    function getPackageNum(){
+        var package_number = parseInt("{{ package_number }}");
+        $('[name="package_number"]').each(function(){
+            package_number += 1;
+            $(this).text(package_number);
+        });
     }
     
     $('table.order-list').on('click', '.ibtnDel', function(event) {
         $(this).closest('tr').remove();
+        // re-evaluate package numbers when a row is deleted
+        getPackageNum();
+
         // when the delete button is pressed check if any of the fields had errors
         // if it did decrement the counter
         // phone_number

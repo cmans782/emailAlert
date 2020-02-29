@@ -92,6 +92,8 @@ def validate_student_data(df, error_df):
 
     # validate building
     result = df['BUILDING'].str.contains('|'.join(building_dict.keys()))
+    # index_list contains invalid rows
+    # a building is invalid if it is not in the building_dict
     index_list = df[result == False].index.tolist()
     if index_list:
         error_df = pd.concat([error_df, df.iloc[index_list]], sort=True)
@@ -102,6 +104,8 @@ def validate_student_data(df, error_df):
         error_df.reset_index(drop=True, inplace=True)
 
     # validate room
+    # a valid room contains 1-3 digits and 0-2 letters denoting the bed
+    # eg. 102 B
     result = df['ROOM'].str.contains(r'^[0-9]{1,3}[A-Z]{0,2}$', regex=True)
     index_list = df[result == False].index.tolist()
     if index_list:
@@ -113,6 +117,7 @@ def validate_student_data(df, error_df):
         error_df.reset_index(drop=True, inplace=True)
 
     # validate id number
+    # a valid ID number contains 6-9 digits only
     result = df['ID NUMBER'].str.contains(r'^[0-9]{6,9}$', regex=True)
     index_list = df[result == False].index.tolist()
     if index_list:
@@ -127,6 +132,7 @@ def validate_student_data(df, error_df):
     df['ID NUMBER'] = df['ID NUMBER'].apply(lambda x: str(int(x)).zfill(9))
 
     # validate phone number. allow empty numbers
+    # valid if left empty or has 10-11 digits
     result = df['PHONE NUMBER'].str.contains(
         r'^[0-9]{0}$|^[0-9]{10,11}$', regex=True)
     index_list = df[result == False].index.tolist()
@@ -242,6 +248,7 @@ def update_student_data(df, error_df):
         # check if the student is an existing employee
         if employee_obj:
             if len(student[9].strip()):
+                # validat employee code
                 existing_employee_hall, _ = validate_Employee(
                     student[9], employment_code)
 
@@ -329,6 +336,7 @@ def is_active(df):
         deactivate_count - number of students deactivated
     """
     deactivate_count = 0
+    # students in csv being uploaded
     student_id_list = df['ID NUMBER'].values.tolist()
     current_students = Student.query.all()
     for student in current_students:

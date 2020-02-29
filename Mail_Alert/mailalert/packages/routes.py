@@ -205,7 +205,13 @@ def newPackage():
 
         flash('Packages sucessfully added!', 'success')
         return redirect(url_for("packages.home"))
-    return render_template('newPackage.html', title='New_Package', form=form)
+    # get the most recent package
+    package = Package.query.filter_by(hall=current_user.hall).order_by(
+        Package.package_number.desc()).first()
+    # we want the most recent package number + 1 so that the user will see
+    # what the next package number will be when adding packages
+    package_number = package.package_number + 1
+    return render_template('newPackage.html', title='New_Package', form=form, package_number=package_number)
 
 
 @packages.route("/newPackage/validate", methods=['POST'])
