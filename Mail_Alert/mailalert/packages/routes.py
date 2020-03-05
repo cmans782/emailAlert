@@ -142,7 +142,7 @@ def newPackage():
         room_number = request.form.getlist('room_number')
         description = request.form.getlist('description')
         perishable = request.form.getlist('perishable')
-        phone_number_list = request.form.getlist('phone_number')
+        phone_number_list = request.form.getlist('current-number')
         phone_number_obj = None
         # convert perishables from string values to boolean
         perishable = [string_to_bool(x) for x in perishable]

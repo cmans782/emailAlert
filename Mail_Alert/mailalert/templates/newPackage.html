@@ -5,18 +5,17 @@
     <table id="packageTable" class="table order-list table-borderless" style="table-layout: fixed;">
         <thead style="text-align: center;">
             <tr>
-                <td style="width: 45px"></td> <!-- delete row icon --> 
                 <td style="width: 70px"></td> <!-- package number -->
                 <td style="width: 250px">Name</td>
                 <td style="width: 150px">Room</td>
                 <td style="width: 300px">Package Description</td>
                 <td style="width: 150px">Perishable</td>
-                <td style="width: 210px; display:none" name="phone-label">Phone</td>
+                <td style="width: 210px;" name="phone-label">Phone</td>
+                <td style="width: 45px"></td> <!-- delete row icon --> 
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td></td> <!-- dont show delete icon on first row -->
                 <td><div class="form-control package-number">{{ package_number }}</div></td>
                 <td>
                     {{ form.name(class="form-control form-control-md col-12", autocomplete="off") }}
@@ -50,18 +49,19 @@
                     </label>
                 </td>
                 <td>
-                    {{ form.phone_number(class="form-control form-control-md", style="display:none") }}
+                    {{ form.phone_number(class="form-control form-control-md", disabled=True) }}
                     <div name='phone-error' class="invalid-feedback" style='display:none;'>
                         <span name='phone-error'></span>
                     </div>
                     <input type="hidden" name="current-number">
                 </td>
+                <td></td> <!-- dont show delete icon on first row -->
             </tr>
         </tbody>
         <tfoot>
             <tr>
-                <td></td> <!-- empty for delete row icon --> 
-                <td colspan="4" style="text-align: left;">
+                <td></td>
+                <td colspan="3" style="text-align: left;">
                     <input type="button" class="btn btn-md btn-block new-package-grey" id="addrow" value="Add Package" />
                 </td>
                 <td>
@@ -70,6 +70,7 @@
                         <span>Fix errors before submitting</span>
                     </div>
                 </td>
+                <td></td> <!-- empty for delete row icon --> 
             </tr>
         </tfoot>
     </table>
@@ -109,14 +110,9 @@ $(document).ready(function() {
     var name;
     var num_rows = 0;
     var cols = '';
+    
     cols += 
-        '<td> \
-            <div class="delete-icon ibtnDel"> \
-                <img src="{{ url_for("static", filename="times-solid.svg") }}" alt="delete"> \
-            </div> \
-        </td>';
-    cols += 
-        '<td><div name="package_number" class="form-control new-package-grey"></div></td>';
+        '<td><div name="package_number" class="form-control package-number"></div></td>';
     cols +=
         '<td id="nameField"> \
             {{ form.name(class="form-control form-control-md", autocomplete="off") }} \
@@ -154,12 +150,18 @@ $(document).ready(function() {
         </td>'; 
     cols += 
         '<td> \
-            {{ form.phone_number(class="form-control form-control-md", style="display:none") }} \
+            {{ form.phone_number(class="form-control form-control-md", disabled=True) }} \
             <div name="phone-error" class="invalid-feedback" style="display:none;"> \
                 <span name="phone-error"></span> \
             </div> \
             <input type="hidden" name="current-number"> \
         </td>'; 
+    cols += 
+        '<td> \
+            <div class="delete-icon ibtnDel"> \
+                <img src="{{ url_for("static", filename="times-solid.svg") }}" alt="delete"> \
+            </div> \
+        </td>';
 
     $('#addrow').on('keyup', function(event) {
         // if tab key is pressed
@@ -216,33 +218,27 @@ $(document).ready(function() {
         }
         num_rows -= 1;
     });
-    // when a perishable is checked display the phone number header and input field
+
+    // enable/disable phone number input and make required based on if perishable is checked
     $(document).on('click', ':checkbox', function() {
         if ($(this).is(':checked')) {
+            // remove hidden perishable input if checked
             $(this).next('input').remove();
-            $(this).parent().parent().next().children('input').show()
-            $('[name="phone-label"]').show();
+            $(this).parent().parent().next().children('input').prop("disabled", false);
             $(this).parent().parent().next().children('input').prop('required',true);
+            var phone_number = $(this).parent().parent().next().children().last('input').val();
+            $(this).parent().parent().next().children('input').val(phone_number);
             $("[name='phone_number']").inputmask({"mask": "(999) 999-9999"});
+
         } else {
             $(this).parent().parent().next().children('input').prop('required',false);
+            $(this).parent().parent().next().children('input').prop("disabled", true);
+            // make phone number input appear empty when package is not a perishable
+            $(this).parent().parent().next().children('input:first').val('');
+            // add hidden perishable input if unchecked
             $("<input type='hidden' name='perishable' value='False'>").insertAfter(this);
-            $(this).parent().parent().next().children('input').hide()
-            checkChecked();
         }
     });
-
-    function checkChecked() {
-        var anyBoxesChecked = false;
-        $('input[type="checkbox"]').each(function() {
-            if ($(this).is(":checked")) {
-                anyBoxesChecked = true;
-            }
-        });
-        if (anyBoxesChecked == false) {
-            $('[name="phone-label"]').hide();
-        } 
-    };
 
     // validate that student name entered exists
     $(document).on('focusout','[name="name"]', function(e) {
@@ -270,16 +266,17 @@ $(document).ready(function() {
 
                 $(this).val(data.name);
                 $(this).parent().next().children('input').val(data.room_number);
-                $(this).parent().next().next().next().next().children('input').val(data.phone_number);
+                $(this).parent().next().next().next().next().children().last('input').val(data.phone_number);
             // if there was never an error
             } else {
                 $(this).val(data.name);
                 $(this).parent().next().children('input').val(data.room_number);
-                $(this).parent().next().next().next().next().children('input').val(data.phone_number);
+                $(this).parent().next().next().next().next().children().last('input').val(data.phone_number);
             }
         });
         e.preventDefault(); // block the traditional submission of the form.
     });
+
     // validate room number entered
     $(document).on('focusout','[name="room_number"]', function(e) {
         var url = "{{ url_for('packages._validate') }}"; // send the form data here.
@@ -305,10 +302,10 @@ $(document).ready(function() {
                 room_error -= 1;
                 $(this).removeClass('is-invalid');
                 $(this).next().hide();
-                $(this).parent().next().next().next().children('input').val(data.phone_number)
+                $(this).parent().next().next().next().children().last('input').val(data.phone_number)
             // if there was never an error 
             } else {
-                $(this).parent().next().next().next().children('input').val(data.phone_number)
+                $(this).parent().next().next().next().children().last('input').val(data.phone_number)
             }
         });
         e.preventDefault(); // block the traditional submission of the form.
@@ -345,7 +342,6 @@ $(document).ready(function() {
                 $('#error-modal').modal('show');
                 // focus on confirm button after 300 ms of modal show otherwise is wont focus
                 setTimeout(()=> {$('[name="confirm"]').focus();}, 300);
-
                 new_number_obj = $(this);
                 current_number_obj = $(this).next().next();
                 name = $(this).parent().prev().prev().prev().prev().children('input').val()
@@ -385,7 +381,6 @@ $(document).ready(function() {
         });
         e.preventDefault(); // block the traditional submission of the form.
     });
-
 
     // if conflicting phone number modal is closed, replace the number entered (new_number_obj)
     // with the number saved in the database (current_number)
@@ -491,7 +486,11 @@ $(document).ready(function() {
         });
     });
 
+    // focus on name input on page load
+    // MUST BE AT BOTTOM OF SCRIPT
     $('[name="name"]').focus();
+    // reset all fields on page load
+    $('form').each(function() { this.reset() });
 });
 </script>
 {% endblock %}

@@ -202,6 +202,8 @@ a.article-title:hover {
 .package-number {
 	background-color: #dcdcdc;
 	text-align: center;
+	padding-left: 0;
+	padding-right: 0;
 }
 
 .delete-icon {
