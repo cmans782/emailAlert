@@ -13,4 +13,4 @@ celery.conf.beat_schedule = {
     }
 }
 
-celery.conf.timezone = 'UTC'
+celery.conf.timezone = 'US/Eastern'
