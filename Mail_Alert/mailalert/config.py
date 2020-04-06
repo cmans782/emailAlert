@@ -23,7 +23,7 @@ class Config:
     # SQLALCHEMY_ECHO = True
 
     TIMEZONE = 'US/Eastern'
-    DEBUG_TB_ENABLED = True
+    # DEBUG_TB_ENABLED = True
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     # Celery
     CELERY_BROKER_URL = config.get('CELERY_BROKER_URL')

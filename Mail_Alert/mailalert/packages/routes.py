@@ -210,7 +210,8 @@ def newPackage():
         Package.package_number.desc()).first()
     # we want the most recent package number + 1 so that the user will see
     # what the next package number will be when adding packages
-    package_number = package.package_number + 1
+    package_number = package.package_number + 1 if package else 1
+
     return render_template('newPackage.html', title='New_Package', form=form, package_number=package_number)
 
 

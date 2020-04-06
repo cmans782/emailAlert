@@ -318,7 +318,7 @@ def reset_token(token):
         GET - 
             render reset_token.html
         POST - 
-            if expired token redirect to reset_request route
+            if expired token, redirect to reset_request route
             if password reset was successful redirect to 
             login route 
     """
